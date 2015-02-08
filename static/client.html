@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <script type="text/JavaScript" src="jquery-1.11.2.min.js"></script>
+        <script type="text/JavaScript" src="jquery-ui-1.11.2.custom/jquery-ui.js"></script>
+        <script type="text/JavaScript" src="client.js"></script>
+        <link rel="stylesheet" type="text/css" href="screen.css"></script>
+    </head>
+    <body>
+      <div class="spacer" id="left">
+        <div class="spacer">
+            <button id="private">PRIVATE</button>
+            <button id="public">MULTIPLAYER</button>
+            <div id="b0"></div>
+        </div>
+        <div id="a0"></div>
+        <div id="a2"></div>
+        <div id="a4"></div>
+        <div id="a3">
+            <button id="rollA", type="submit" >ROLL</button>
+            <button type="submit" id="newDisplay" >REFRESH</button>
+        </div>
+        <div id="a1"></div>
+        <div class="spacer">       
+            <button id="scoreF" type="submit" >SCORE</button>      
+            <button id="impossibleJ" type="submit" >IMPOSSIBLE</button>
+            <div id="info1"></div>
+            <br><br>
+            <div id="info2"></div>
+        </div>
+        <div class="spacer">
+            <button id="solutions" type="submit">SOLUTIONS</button>
+            <button class="erase">ERASE</button>
+            <div id="show"></div>
+            
+        </div>
+        <div class="spacer">
+            <button class="erase">ERASE</button>
+        </div>
+      </div>
+      <div class="spacer" id="right"><h1><span></span></h1>
+
+
+        <div id="main">
+            <div id="warnings">
+            </div>
+            <div id="join-section">
+                <h2>Join</h2>
+                <form id="join-form" action="">
+                    <label for="user" style="background: #B1C771; color: #000;"></label>
+                    <input id="user" type="text" size="12" style="background: #B1C771"/>
+                    <input id="send" type="submit" value="Join" style="background: #B1C771"/>
+                </form>
+            </div>
+            <div id="users-section" style="display: none">
+                <h2>Players</h2>
+                <ul id="users">
+                </ul>
+            </div>
+            <div id="chat-section" style="display: none">
+                <h2>Chat</h2>
+                <div id="messages">
+                </div>
+                <br />
+                <form id="message-form" action="">
+                    <input id="text" type="text" size="40" style="background: #B1C771"/>
+                    <input id="send" type="submit" value="Send" style="background: #B1C771"/>
+                </form>
+            </div>
+        </div>
+        <div class="spacer" id="experiment">       
+            <button id="solutions2" type="submit" >CALCULATE</button>  
+
+            <input type="text" id="x0"  checked class="rad"> 
+      
+            <input type="text" id="x1" class="rad"  > 
+      
+            <input type="text" id="x2" class="rad" > 
+     
+            <input type="text" id="x3" class="rad" > 
+
+            <div class="spacer">
+                <button class="erase2">ERASE</button>
+                <div id="show2"></div>
+            </div>
+        </div>
+        <div class="spacer">
+            <button class="erase2">ERASE</button>
+        </div>
+      </div>
+    </body>
+</html>
