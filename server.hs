@@ -17,6 +17,7 @@ import Data.FileEmbed (embedDir)
 import Fm hiding (main)
 import Data.List (intersperse)
 import Control.Exception.Base (mask_)
+import Data.List.Split (splitOn)
 
 go :: Text
 go = T.pack "GO"
@@ -26,17 +27,17 @@ type Score = Int
 type Client = (Name, Score, WS.Connection)
 type ServerState = [Client] 
 
-fx :: [String] -> String
-fx [_,b,_,_] = b
-fx _ = "EE#$42"
+fx :: [String] -> Text
+fx [_,b,_,_] = T.pack b
+fx _ = T.pack "EE#$42"
 
-fz :: [String] -> String
-fz [_,_,c,_] = c
-fz _ = "EE#$42"
+fz :: [String] -> Text
+fz [_,_,c,_] = T.pack c
+fz _ = T.pack "EE#$42"
 
-fw :: [String] -> String
-fw [_,_,_,d] = d
-fw _ = "EE#$42"
+fw :: [String] -> Text
+fw [_,_,_,d] = T.pack d
+fw _ = T.pack "EE#$42"
 
 fstatus :: [String] -> String
 fstatus [_,b,_,_,_,_,_,_] = b
@@ -152,40 +153,40 @@ application state pending = do
 talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
 talk conn state (user, _, _) = forever $ do
     msg <- WS.receiveData conn 
-    let source = T.pack ("," ++ fx (Prelude.map T.unpack (T.split (==',') msg))) 
-    let sender = T.pack ("," ++ fz (Prelude.map T.unpack (T.split (==',') msg))) 
-    let extra = T.pack ("," ++ fw (Prelude.map T.unpack (T.split (==',') msg))) 
-    let rollText = T.pack (froll (Prelude.map T.unpack (T.split (==',') msg))) 
-    print $ "rollText is: " `mappend` rollText
-    let rollStatus = T.pack ("," ++ fstatus (Prelude.map T.unpack (T.split (==',') msg)))
-    let rollSender = T.pack ("," ++ fsender (Prelude.map T.unpack (T.split (==',') msg)))
-    print $ source `mappend` sender `mappend` rollText 
-    if "CA#$42" `T.isPrefixOf` msg
-            then do 
-                x <- liftIO $ roll 6 6 12 20
-                let z = map round x 
-                print $ T.pack "In CA#$42; here is source, sender, and the roll: " `mappend` source `mappend` sender `mappend` T.pack "," `mappend` T.pack (show z) 
-                liftIO $ readMVar state >>= broadcast ("CA#$42" `mappend` source `mappend` sender `mappend` "," `mappend` T.pack (show z))                 
-                return ()
+    print msg 
+    let msgArray = splitOn "," (T.unpack msg)
+    let source = fx msgArray 
+    let sender = fz msgArray 
+    let extra = fw msgArray
+    let source2 = T.pack (fstatus msgArray)
+    let sender2 = T.pack (fsender msgArray)
+    let extra2 = froll msgArray
+    print $ "source, sender, extra " `mappend` source  `mappend` ", " `mappend` sender  `mappend` ", " `mappend` extra
+    if "CA#$42" `T.isPrefixOf` msg 
+        then 
+            do 
+                st <- readMVar state 
+                z <- rText
+                broadcast ("CA#$42," `mappend` source `mappend` "," `mappend` sender `mappend` "," `mappend` z) st
 
     else if "CZ#$42" `T.isPrefixOf` msg
             then do 
                 print "______________In CZ#$42"
-                let roll = rollText
+                let roll = T.pack extra2
                 y <- liftIO $ truck $ tru roll
                 let yzz = T.pack y 
                 st <- readMVar state
-                broadcast ("CZ#$42" `mappend` rollStatus `mappend` rollSender `mappend` T.pack "," `mappend` yzz) st        
+                broadcast ("CZ#$42," `mappend` source2 `mappend` "," `mappend` sender2 `mappend` "," `mappend` yzz) st        
 
     else if "CW#$42" `T.isPrefixOf` msg
             then do 
                 print "______________In CW#$42"
-                let roll = rollText
-                print $ T.pack "roll is: " `mappend` roll
+                let roll = T.pack extra2
+                print $ "roll is: " `mappend` roll
                 y <- liftIO $ truck $ tru roll
                 let zz = T.pack y 
                 st <- readMVar state
-                broadcast ("CW#$42" `mappend` rollStatus `mappend` rollSender `mappend` T.pack "," `mappend` zz) st  
+                broadcast ("CW#$42," `mappend` source2 `mappend` "," `mappend` sender2 `mappend` "," `mappend` zz) st  
 
     else if "CB#$42" `T.isPrefixOf` msg
     	then 
@@ -206,67 +207,62 @@ talk conn state (user, _, _) = forever $ do
 
     else if "CG#$42" `T.isPrefixOf` msg
         then 
-            mask_ $ do 
-                let winner = T.drop 6 msg 
+            mask_ $ do  
                 old <- takeMVar state
-                let new = upScore winner old
+                let new = upScore sender old
                 putMVar state new 
                 st2 <- readMVar state
                 broadcast msg st2
                 broadcast ("CB#$42" `mappend` (T.concat (intersperse ("<br>") (map tr st2)))) st2 
-                print ("The winner is " `mappend` winner)
+                print ("A winner in CG#$42 " `mappend` sender)
                 print msg     
 
     else if "CI#$42" `T.isPrefixOf` msg
         then 
-            mask_ $ do 
-                let winner = T.drop 6 msg 
+            mask_ $ do  
                 old <- takeMVar state
-                let new = downScore winner old
+                let new = downScore sender old
                 putMVar state new 
                 st2 <- readMVar state
                 broadcast (msg) st2
                 broadcast ("CB#$42" `mappend` (T.concat (intersperse ("<br>") (map tr st2)))) st2 
-                print ("The loser is " `mappend` winner)
+                print ("The loser is " `mappend` sender)
                 print "CI$#42"    
 
     else if "CL#$42" `T.isPrefixOf` msg
         then 
             mask_ $ do 
-                let loser = T.drop 6 msg 
                 old <- takeMVar state
-                let new = downScore loser old
+                let new = downScore sender old
                 putMVar state new 
                 st2 <- readMVar state
                 broadcast (msg) st2
                 broadcast ("CB#$42" `mappend` (T.concat (intersperse ("<br>") (map tr st2)))) st2 
-                print ("The loser is " `mappend` loser)
+                print ("The loser is " `mappend` sender)
                 print "CL$#42"    
 
     else if "CM#$42" `T.isPrefixOf` msg
         then 
-            mask_ $ do 
-                let winner = T.drop 6 msg 
+            mask_ $ do  
                 old <- takeMVar state
-                let new = upScore winner old
+                let new = upScore sender old
                 putMVar state new 
                 st2 <- readMVar state
                 broadcast (msg) st2
                 broadcast ("CB#$42" `mappend` (T.concat (intersperse ("<br>") (map tr st2)))) st2 
-                print ("The winner is " `mappend` winner)
+                print ("The winner is " `mappend` sender)
                 print "CM$#42"     
 
     else if "CN#$42" `T.isPrefixOf` msg
         then 
             mask_ $ do 
-                let loser = T.drop 6 msg 
                 old <- takeMVar state
-                let new = downScore2 loser old
+                let new = downScore2 extra old
                 putMVar state new 
                 st2 <- readMVar state
                 broadcast (msg) st2
                 broadcast ("CB#$42" `mappend` (T.concat (intersperse ("<br>") (map tr st2)))) st2 
-                print ("The impossible loser is " `mappend` loser)
+                print ("The impossible loser is " `mappend` extra)
                 print "CN$#42"    
     else 
         do 

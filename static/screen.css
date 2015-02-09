@@ -3,6 +3,11 @@ body {
     background-color: black;
 }
 
+span {
+    color: #ff0000; 
+    font-size: 24px;
+}
+
 #show {
     color: #F8E839;
     width: 100$;
@@ -15,6 +20,11 @@ body {
     width: 100$;
     float: left;
     font-size: 24px;
+    padding-left: 80px;
+}
+
+#experiment {
+    width: 70%;
 }
 
 #left {
@@ -43,6 +53,15 @@ body {
     padding-top: 10px;
     margin: 15px;
     }
+
+.erase2 {
+    float: left;
+}
+
+#solutions2 {
+    float: right;
+}
+
 
 #a0 {
     font-size: 35px;

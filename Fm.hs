@@ -19,6 +19,15 @@ start ax bx cx dx = do
     d <- rM dx
     return [a,b,c,d,42]
 
+rollFunc :: [String] -> T.Text
+rollFunc [a,b,c,d,e] = T.pack (a ++ "," ++ b ++ "," ++ c ++ "," ++ d ++ "," ++ "42")
+
+
+rollT ax bx cx dx = do 
+    x <- start ax bx cx dx
+    let y = (map show x)
+    return $ rollFunc y
+
 roll :: Int -> Int -> Int -> Int -> IO [Double]
 roll ax bx cx dx = do 
     x <- start ax bx cx dx
@@ -157,10 +166,14 @@ truck x = do
 arg :: [Double]
 arg = [1,1,1,1,42]
 
-main = do 
-    x <- roll 6 6 12 20
-    truck $ tru $ T.pack "2,4,6,8,42"
+rText :: IO T.Text
+rText = do 
+    x <- roll 6 6 12 20 
+    let y = map round x
+    let z = map show y
+    return $ rollFunc z
 
+main = rText
 
 {-}
     "Using the first number left of the result obtained from the second and third numbers." ++
