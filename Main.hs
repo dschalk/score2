@@ -189,7 +189,7 @@ talk conn state (user, _, _) = forever $ do
                 broadcast ("CW#$42," `mappend` source2 `mappend` "," `mappend` sender2 `mappend` "," `mappend` zz) st  
 
     else if "CB#$42" `T.isPrefixOf` msg
-    	then 
+        then 
             do 
                 st <- readMVar state 
                 broadcast ("CB#$42" `mappend` (T.concat (intersperse ("<br>") (map tr st)))) st 

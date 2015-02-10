@@ -6,7 +6,7 @@ import System.Random
 import qualified Data.Text as T
 
 toDouble :: Int -> Double
-toDouble x = (read (show x)) :: Double
+toDouble x = read (show x) :: Double
 
 rM :: Int -> IO Int
 rM x = getStdRandom (System.Random.randomR ((1,x) :: (Int,Int)))
@@ -25,7 +25,7 @@ rollFunc [a,b,c,d,e] = T.pack (a ++ "," ++ b ++ "," ++ c ++ "," ++ d ++ "," ++ "
 
 rollT ax bx cx dx = do 
     x <- start ax bx cx dx
-    let y = (map show x)
+    let y = map show x
     return $ rollFunc y
 
 roll :: Int -> Int -> Int -> Int -> IO [Double]
@@ -40,7 +40,7 @@ computation a b c  | b == "+"   = (+) a c
                    | b == "Concatenate"  = cat a c
 
 fRound :: Double -> Int
-fRound x = round x
+fRound = round
 
 notWhole :: Double -> Bool
 notWhole x = fromIntegral (round x) /= x
@@ -50,7 +50,7 @@ cat l m   | m < 0  = 3.1
           | l == 0  = 3.1
           | notWhole l  = 3.1
           | notWhole m  = 3.1
-          | otherwise  = read ((show $ round l) ++ (show $ round m)) :: Double
+          | otherwise  = read ((show $ round l) ++ show (round m)) :: Double
 
 g :: (Double -> Double -> Double) -> String
 g x         | x 3 2 == 5 = " + "
@@ -160,7 +160,7 @@ truck :: [Double] -> IO String
 truck x = do 
     let y = map round x
     let z = show (y !! 0) ++ " " ++ show (y !! 1) ++ " " ++ show (y !! 2) ++ " " ++  show (y !! 3) ++ "<br><br>"
-    let a = (" " ++ z ++ (cars x) ++ "<br>") :: String 
+    let a = (" " ++ z ++ cars x ++ "<br>") :: String 
     return a
 
 arg :: [Double]
