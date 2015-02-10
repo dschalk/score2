@@ -50,7 +50,7 @@ cat l m   | m < 0  = 3.1
           | l == 0  = 3.1
           | notWhole l  = 3.1
           | notWhole m  = 3.1
-          | otherwise  = read ((show $ round l) ++ show (round m)) :: Double
+          | otherwise  = read show (round l) ++ show (round m)) :: Double
 
 g :: (Double -> Double -> Double) -> String
 g x         | x 3 2 == 5 = " + "
