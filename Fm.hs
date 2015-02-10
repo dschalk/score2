@@ -50,7 +50,7 @@ cat l m   | m < 0  = 3.1
           | l == 0  = 3.1
           | notWhole l  = 3.1
           | notWhole m  = 3.1
-          | otherwise  = read show (round l) ++ show (round m)) :: Double
+          | otherwise  = read (show (round l) ++ show (round m)) :: Double
 
 g :: (Double -> Double -> Double) -> String
 g x         | x 3 2 == 5 = " + "
@@ -149,12 +149,12 @@ ca [a, b, c, d, e] = (map h (calc a b c d)) ++ map h2 (calc2 a b c d) ++ map h3 
     map h5 (calc5 a b c d) ++ map h6 (calc6 a b c d) ++ map h7 (calc7 a b c d)
 ca _ = ["What?"]
 
-cars :: [Double] -> [Char]
+cars :: [Double] -> String
 cars [a,b,c,d,e] = concat $ ca [a,b,c,d,e]
 cars _ = []
 
 tru :: T.Text -> [Double]
-tru x = map read (map T.unpack (T.split (==',') x))
+tru x = map (read . T.unpack) (T.split (== ',') x)
 
 truck :: [Double] -> IO String
 truck x = do 
