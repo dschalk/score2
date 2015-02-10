@@ -11,55 +11,103 @@ var users = [];
 var ar = [];
 var bool = [];
 var createFunctions;
-var d = -1;
 var createDom;
 var createOperators;
 var createDropboxes;
 var createDrop1;
 var createDrop2;
-var timeSet;
-var DS_T = -1;  
-var player;
-var scoreClicker = "a@F$Uy&score";
-var impossibleClicker = "a@F$Uy&impossible";
-var setPlayer;
-var setScoreClicker;
-var setImpossibleClicker;
-var privateClicker;
+var timer;  
 var tog = 0;
-var rollText = "1,1,1,1,42"
-var setRollText;
-var yar;
 var refreshDropboxes;
-var timeSet;
-var resetd;
 var populate;
 var refresh
 
-setInterval (function () {
-    if (DS_T < 0) {
-        return;
-    }
-    else if ( DS_T === 0 ) {
-        $("#a0").html("");
-        timeSet(-1);
-        console.log("**************************************************")
-        console.log("player: " + player + " scoreClicker: " + 
-            scoreClicker + " impossibleClicker: " + impossibleClicker);
-        if (player === scoreClicker) {
-            ws.send("CL#$42," + privateClicker + "," + player + "," + "horse");
-            console.log("Sending CL#$42")
-        }    
-        if ( player === impossibleClicker) {
-            ws.send("CM#$42,"+ privateClicker + "," + player + "," + "mule");
-            console.log("Sending CM#$42")
+timer = { 
+    t: -1,
+    setTime: function (x) {
+        timer.t = x;
+    },
+    getTime: function () {return timer.t},
+    run: function () { setInterval (function () {
+            console.log("In setInterval. timer.t = " + timer.t);
+            if (timer.t < 0) {
+                return;
+            }
+            else if ( timer.t === 0 ) {
+                var privateClicker = players.getPrivateClicker();
+                var player = players.getPlayer();
+                var impossibleClicker = players.getImpossibleClicker();
+                var scoreClicker = players.getScoreClicker();
+                $("#a0").html("");
+                timer.t = -1;
+                console.log("**************************************************")
+                console.log("player: " + player + " scoreClicker: " + 
+                    scoreClicker + " impossibleClicker: " + impossibleClicker);
+                if (player === scoreClicker) {
+                    ws.send("CL#$42," + privateClicker + "," + player + "," + "horse");
+                    console.log("Sending CL#$42")
+                }    
+                if ( player === impossibleClicker) {
+                    ws.send("CM#$42,"+ privateClicker + "," + player + "," + "mule");
+                    console.log("Sending CM#$42")
+                }
+            }
+            else if (timer.t > 0) {
+                $("#a0").html(timer.t);
+                timer.t = timer.t - 1;
+            }
+        }, 1000);
+    }()
+}
+
+pl = function (){
+    var player;
+    var scoreClicker = "a@F$Uy&score";
+    var impossibleClicker = "a@F$Uy&impossible";
+    var privateClicker = "a@F$Uy&private";
+    var rollText = "1,1,1,1,42";
+    var d = -1; 
+    o = {
+        setPlayer: function(x) {
+            player = x
+        },
+        getPlayer: function() {
+            return player;
+        },
+        setScoreClicker: function(x) {
+            scoreClicker = x
+        },
+        getScoreClicker: function() {
+            return scoreClicker;
+        },
+        setImpossibleClicker: function(x) {
+            impossibleClicker = x
+        },
+        getImpossibleClicker: function() {
+            return impossibleClicker;
+        },
+        setPrivateClicker: function(x) {
+            privateClicker = x
+        },
+        getPrivateClicker: function() {
+            return privateClicker;
+        },
+        setRollText: function(x) {
+            rollText = x
+        },
+        getRollText: function() {
+            return rollText;
+        },
+        setD: function(x) {
+            d = x
+        },
+        getD: function() {
+            return d;
         }
     }
-    else if (DS_T > 0) {
-        $("#a0").html(DS_T);
-        DS_T = DS_T - 1;
-    }
-}, 1000);
+    return o;
+};
+players = pl();
 
 function refreshUsers() {
     $('#users').html('');
@@ -69,10 +117,10 @@ function refreshUsers() {
 }
 
 function refresh() {
-    d = -1;
-    DS_T = -1;
-    setScoreClicker("a@F$Uy&score");
-    setImpossibleClicker("a@F$Uy&impossible");
+    players.setD(-1);
+    timer.setTime(-1);
+    players.setScoreClicker("a@F$Uy&score");
+    players.setImpossibleClicker("a@F$Uy&impossible");
     ar = [];
     bool = [];
     $("#a2").html("");
@@ -97,23 +145,28 @@ function refresh() {
 }
 
 function onMessage(event) {
+    var impossibleClicker = players.getImpossibleClicker();
+    var player = players.getPlayer();
+    var scoreClicker = players.getScoreClicker();
+    var privateClicker = players.getPrivateClicker();
     console.log(event.data);
     gameArray = event.data.split(",");
     var d2 = event.data.substring(0,6);
     var source = gameArray[1];  // Value of sender's privateClicker
     var sender = gameArray[2];
     var extra = gameArray[3];
+    console.log("impossibleClicker, player, scoreClicker, privateClicker, source, sender, extra: " + impossibleClicker + ", " + 
+        player + ", " + scoreClicker + ", " + privateClicker + ", " + source + ", " + sender + ", " + extra)
     var p = $(document.createElement('p')).text(event.data); 
-    if (player === source || privateClicker === "a@F$Uy&private" &&  source === "a@F$Uy&private") {
+    if (player === sender || privateClicker !== "a@F$Uy&private" &&  source !== "a@F$Uy&private") {
         switch (d2) {
             case "CA#$42":               // Set up the next round of play.
-                resetd();
+                players.setD(-1);
                 refresh(); 
                 $("#impossibleJ").show();
                 $("#scoreF").show();
                 $("#info1").html("");
                 $(".erase").show();
-                $(".erase2").show();
                 $("#show").show();
                 $("#show2").show();
                 $("#solutions").show();
@@ -123,7 +176,7 @@ function onMessage(event) {
                 var cuu = gameArray[5]
                 var duu = gameArray[6]
                 rollText = auu + "," + buu + "," + cuu + "," + duu + "," + 42;
-                setRollText(rollText);
+                players.setRollText(rollText);
                 console.log("Here is rollText: " + rollText); 
                 populate(auu,buu,cuu,duu);
                 $("#a4").html(auu + " &nbsp; " + buu + " &nbsp; " + cuu + " &nbsp; " + duu);
@@ -145,8 +198,7 @@ function onMessage(event) {
                 $("#rollA").hide();
                 $("#newDisplay").show();
                 $("#scoreF").hide();
-                timeSet(31);
-                DS_T = 31;
+                timer.setTime(31);
                 if (sender !== scoreClicker) {
                     $("#a1").html("<h3> <br><br><br>" + scoreClicker + " must make the number '20' before time runs out.</h3>");
                     $("#newDisplay").hide();
@@ -155,7 +207,7 @@ function onMessage(event) {
             break;
 
             case "CG#$42":
-                DS_T = -1;
+                timer.setTime(-1);
                 $("#a0").html("");
                 $("#a2").append("<br>One point for " + sender);
                 $("#a1").prepend("<span style='font-size:75px; background:#000; color:#f00;'>Score!</span>");
@@ -174,11 +226,9 @@ function onMessage(event) {
 
             case "CJ#$42":
                 $("#impossibleJ").hide();
-                impossibleClicker = sender;
-                setImpossibleClicker(sender);
+                players.setImpossibleClicker(sender);
                 $("#a2").prepend("<br>" + sender + " clicked 'IMPOSSIBLE'");
-                DS_T = 61;
-                timeSet(61);
+                timer.setTime(61);
             break;
 
             case "CL#$42":
@@ -195,8 +245,7 @@ function onMessage(event) {
             break;
 
             case "CN#$42":
-                DS_T = -1;
-                timeSet(-1);
+                timer.setTime(-1);
                 $("#a2").append("<br>deduct two points from " + impossibleClicker + 
                     "'s score. <br>A solution was found before 60 seconds had passed.");
                 $("#newDisplay").show();
@@ -377,33 +426,46 @@ $(document).ready(function () {
     .button()
     .click(function(){ 
         bool = [];
-        d = -1;
-        ws.send("CA#$42," + privateClicker + "," + player + "," + "cow");
+        players.setD(-1);
+        ws.send("CA#$42," + players.getPrivateClicker() + "," + players.getPlayer() + "," + "cow");
     })
 
     $("#solutions")
     .button()
     .click(function(){ 
-        console.log("This is rollText from solutions: " + rollText)
-        console.log("From solutions: CZ#$42," + privateClicker + "," + player + "," + rollText);
-        console.log("This is rollText from solutions 2: " + rollText)
-        ws.send("CZ#$42," + privateClicker + "," + player + "," + rollText);
+        ws.send("CZ#$42," + players.getPrivateClicker() + "," + players.getPlayer() + "," + rollText);
     });
 
     $("#solutions2")
     .button()
     .click(function(){ 
         var a = $("#x0").val();
+        if (isNaN(a) || a === "") {
+            alert(a + " is not a number.");
+            return;
+        }
         var b = $("#x1").val();
+        if (isNaN(b) || b === "") {
+            alert(b + " is not a number.");
+            return;
+        }
         var c = $("#x2").val();
+        if (isNaN(c) || c === "") {
+            alert(c + " is not a number.");
+            return;
+        }
         var d = $("#x3").val();
+        if (isNaN(d) || d === "") {
+            alert(d + " is not a number.");
+            return;
+        }
         var e = a + "," + b + "," + c + "," + d + "," + "42"
         console.log("Here is e from solutions2: " + e)
         $("#x0").val("");
         $("#x1").val("");
         $("#x2").val("");
         $("#x3").val("");
-        ws.send("CW#$42," + privateClicker + "," + player + "," + e);
+        ws.send("CW#$42," + players.getPrivateClicker() + "," + players.getPlayer()  + "," + e);
         $('.erase2').show();
     });
 
@@ -411,26 +473,24 @@ $(document).ready(function () {
     .button()
     .click(function(){ 
         $("#scoreF").hide();
-        scoreClicker = player;
-        setScoreClicker(player);
+        players.setScoreClicker(players.getPlayer());
         $("#impossibleJ").hide();
-        ws.send("CF#$42," + privateClicker + "," + player);
+        ws.send("CF#$42," + players.getPrivateClicker() + "," + players.getPlayer() + "," + "mouse");
     });
 
     $("#impossibleJ")
     .button()
     .click(function(){ 
-        impossibleClicker = player;
-        setImpossibleClicker(player);
-        console.log("From impossible button. impossibleClicker is: " + impossibleClicker)
-        ws.send("CJ#$42," + privateClicker + "," + player);
+        players.setImpossibleClicker(players.getPlayer());
+        console.log("From impossible button. impossibleClicker is: " + players.getImpossibleClicker())
+        ws.send("CJ#$42," + players.getPrivateClicker() + "," + players.getPlayer() + "," + "turkey");
     })
 
     $("#newDisplay")
     .button()
     .click(function(){ 
-        d = -1;
-        DS_T = -1;
+        players.setD(-1);
+        timer.setTime(-1);
         setScoreClicker("a@F$Uy&score");
         setImpossibleClicker("a@F$Uy&impossible");
         ar = [];
@@ -470,43 +530,25 @@ $(document).ready(function () {
         $("#2").html("Num"); 
     }
 
-    timeSet = function(t) {
-        DS_T = t;
-    }
-
-    setPlayer = function(x) {
-        player = x;
-    };
-
-    setRollText = function(x) {
-        rollText = x;
-    };
-
     $("#private")
     .button()
     .click(function(){ 
         $("#public").show();
         $("#private").hide();
-        console.log("privateClicker player " + privateClicker + " " + player);
-        privateClicker = player;
+        players.setPrivateClicker("a@F$Uy&private");
         $("#b0").html("Solitaire mode. Your actions do not affect other players.")
     });
 
     $("#public")
     .button()
     .click(function(){ 
-        privateClicker = "a@F$Uy&private";
+        players.setPrivateClicker(players.getPlayer());
         $("#private").show();
         $("#public").hide();
-        console.log("privateClicker player " + privateClicker + " " + player);
         $("#b0").html("Now in multiplayer mode. Be careful." + 
             " Clicking 'ROLL' inserts the roll numbers in all" + 
             " participating browsers.");
     });
-
-    resetd = function() {
-        d = -1;
-    }
 
     setPrivate = function(x) {
         privateClicker = x;
@@ -531,8 +573,7 @@ $(document).ready(function () {
     $('#join-form').submit(function () {
         $('#warnings').html('');
         var user = $('#user').val();
-        setPlayer(user);
-        player = user;
+        players.setPlayer(user);
         ws = createWebSocket('/');
         ws.onopen = function() {
             ws.send("CC#$42" + user);
@@ -540,9 +581,8 @@ $(document).ready(function () {
         ws.onmessage = function(event) {
             console.log(event.data);
             if(event.data.substring(0,6) == "CC#$42") {
-                d = -1;
-                setPrivate(player);
-                console.log("player is: " + player)
+                players.setD(-1);
+                console.log("player is: " + players.getPlayer())
                 createDom();
                 createOperators();
                 createDropboxes();            
@@ -585,9 +625,16 @@ $(document).ready(function () {
  });
 
 var calc = function (ax,b,cx,bb) {
+    var d = players.getD();
+    var DS_T = timer.getTime();
+    var impossibleClicker = players.getImpossibleClicker();
+    var player = players.getPlayer();
+    var scoreClicker = players.getScoreClicker();
+    var privateClicker = players.getPrivateClicker();
     console.log("IN calc FUNCTION . . . player: " + player + " scoreClicker: " + 
         scoreClicker + " impossibleClicker: " + impossibleClicker);
     d = d + 1;
+    players.setD(d);
     ar = [];
     bool = [];
     var res;
@@ -623,7 +670,6 @@ var calc = function (ax,b,cx,bb) {
         }
         else {
             $("#a4").append("<br>" + a + " " + b + " " + c + " = " + res + "<br>" );
-            $("#rollA").hide();
             $("#newDisplay").show();
         }
     }
@@ -644,8 +690,7 @@ var calc = function (ax,b,cx,bb) {
                     "color:#f00;'>20, but no increase in " + player + "'s score</span>");
                 $("#newDisplay").show();
             }
-            DS_T = -1;
-            timeSet(-1);
+            timer.setTime(-1);
             $("#operators").html("");
             $("#dropBoxes").html("");
         }
@@ -656,7 +701,6 @@ var calc = function (ax,b,cx,bb) {
         }
         else {
             $("#a4").append(a + " " + b + " " + c + " = " + res + "<br>" );
-            $("#rollA").hide();
             $("#newDisplay").show();
         }
     }
@@ -677,19 +721,16 @@ var calc = function (ax,b,cx,bb) {
                     player + "'s score</span>");
                 $("#newDisplay").show();
             }
-            DS_T = -1;
-            timeSet(-1);
+            timer.setTime(-1);
             $("#operators").html("");
             $("#dropBoxes").html("");
         }
         $("#result3").show();
         $("#result3").html(res);      
-        if ((player === scoreClicker) && DS_T > 0) {
+        if (res !== 20 && (player === scoreClicker) && DS_T > 0) {
             ws.send("CE#$42," + privateClicker + "," + player + "," +  a + " " + b + " " + c + " = " + res + "<br>");
-        }
-        else {
+            timer.setTime(0);
             $("#a4").append(a + " " + b + " " + c + " = " + res + "<br>" );
-            $("#rollA").hide();
             $("#newDisplay").show();
         }
     }
