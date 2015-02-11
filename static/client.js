@@ -218,6 +218,9 @@ function onMessage(event) {
 
             break;
 
+            case "CB#$42":
+                $("#users").html(event.data.substring(6));    // Refresh browser with server state.
+            break;
 
             case "CI#$42":
                 $("#a2").append("<br>deduct one point from " + event.data.substring(6) + "The time ran out.");

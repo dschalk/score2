@@ -112,7 +112,7 @@ main = do
     putStrLn "http://localhost:3000/client.html"
     state <- newMVar newServerState
     Warp.runSettings Warp.defaultSettings
-      { Warp.settingsPort = 3000,
+      { 
         Warp.settingsTimeout = 3600
       } $ WaiWS.websocketsOr WS.defaultConnectionOptions (application state) staticApp
 staticApp :: Network.Wai.Application
