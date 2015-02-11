@@ -152,6 +152,8 @@ function onMessage(event) {
     console.log(event.data);
     gameArray = event.data.split(",");
     var d2 = event.data.substring(0,6);
+    var d3 = event.data.substring(2,6);
+    console.log("XXXXXXXXXXXXXXXXXXXXXXX___this is d3: " + d3);
     var source = gameArray[1];  // Value of sender's privateClicker
     var sender = gameArray[2];
     var extra = gameArray[3];
@@ -181,7 +183,11 @@ function onMessage(event) {
                 populate(auu,buu,cuu,duu);
                 $("#a4").html(auu + " &nbsp; " + buu + " &nbsp; " + cuu + " &nbsp; " + duu);
             break;
-           
+
+            case "CB#$42":
+                $("#users").html(event.data.substring(6));    // Refresh browser with server state.
+            break;
+
             case "CC#$42":       // Prevent new player login data from displaying as a chat message.
                 return;
             break;       
@@ -211,15 +217,11 @@ function onMessage(event) {
                 $("#a0").html("");
                 $("#a2").append("<br>One point for " + sender);
                 $("#a1").prepend("<span style='font-size:75px; background:#000; color:#f00;'>Score!</span>");
-                $("#newDisplay").show();          
+                $("#newDisplay").show(); 
             break;
 
             case "CH#$42":
 
-            break;
-
-            case "CB#$42":
-                $("#users").html(event.data.substring(6));    // Refresh browser with server state.
             break;
 
             case "CI#$42":
@@ -254,7 +256,7 @@ function onMessage(event) {
                 $("#newDisplay").show();
             break;
 
-             case "CW#$42":
+            case "CW#$42":
                 $("#show2").prepend(extra);
                 $("#show2").append("<br>Brought to you by " + player)
             break;           
@@ -268,7 +270,7 @@ function onMessage(event) {
 
             break;                   
 
-            default:
+            default: 
                 console.log(event.data);
                 $('#messages').append(p);
                 $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
@@ -277,57 +279,26 @@ function onMessage(event) {
                     var idx = users.indexOf(user);
                     users = users.slice(0, idx).concat(users.slice(idx + 1));
                     refreshUsers();
-                }      
+                }     
             break;
         }
     }
 
-    else {
-        switch (d2) {
-            case "CB#$42":
-                $("#users").html(event.data.substring(6));    // Refresh browser with server state.
-            break;
-
-            case "EE#$42":
-
-            break;
-
-            case "CW#$42":
-
-            break;
-
-            case "CZ#$42":
-
-            break;
-
-            case "CE#$42":
-
-            break;
-
-            case "CF#$42":
-
-            break;
-
-            case "CG#$42":
-
-            break;
-
-            case "CA#$42":
-
-            break;
-
-            default:
-                $('#messages').append(p);
-                $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
-                if(event.data.match(/^[^:]* disconnected/)) {
-                    var user = event.data.replace(/ .*/, '');
-                    var idx = users.indexOf(user);
-                    users = users.slice(0, idx).concat(users.slice(idx + 1));
-                    refreshUsers();
-                }
-            break
-        }         
+    else if (d2 === "CB#$42") { 
+        $("#users").html(event.data.substring(6));
     }
+
+    else if (d3 !== "#$42") {
+        console.log(event.data);
+        $('#messages').append(p);
+        $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
+        if(event.data.match(/^[^:]* disconnected/)) {
+            var user = event.data.replace(/ .*/, '');
+            var idx = users.indexOf(user);
+            users = users.slice(0, idx).concat(users.slice(idx + 1));
+            refreshUsers();
+        }     
+    } 
 };
 
 $(document).ready(function () {
@@ -680,21 +651,16 @@ var calc = function (ax,b,cx,bb) {
     if (d === 0) {
         $("#result1").show();
         $("#result1").html(res);
-        if ((player === scoreClicker) && DS_T > 0) {
-            ws.send("CE#$42," + privateClicker + "," + player + "," + "<br>" + a + " " + b + " " + c + " = " + res + "<br>");
-        }
-        else {
-            $("#a4").append("<br>" + a + " " + b + " " + c + " = " + res + "<br>" );
-            $("#newDisplay").show();
-        }
+        ws.send("CE#$42," + privateClicker + "," + player + "," + "<br>" + a + " " + b + " " + c + " = " + res + "<br>");
+        $("#newDisplay").show();
     }
 
-    if (d === 1) {
+    if (d === 1) { 
+        ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
         if (res === 20 && bb)   {   
             console.log("scoreClicker : " + scoreClicker + " DS_T: " + DS_T)
             if ((player === scoreClicker) && DS_T > 0) {
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
-                ws.send("CE#$42," + privateClicker + "," + player + "," + "<br>" + a + " " + b + " " + c + " = " + res + "<br>");
                 if (impossibleClicker !== "a@F$Uy&impossible") {
                     ws.send("CN#$42," + privateClicker + "," + player + "," + impossibleClicker);
                 }
@@ -711,21 +677,15 @@ var calc = function (ax,b,cx,bb) {
         }
         $("#result2").show();
         $("#result2").html(res);      
-        if ((player === scoreClicker) && DS_T > 0) {
-            ws.send("CE#$42," + privateClicker + "," + player + "," + "<br>" + a + " " + b + " " + c + " = " + res + "<br>");
-        }
-        else {
-            $("#a4").append(a + " " + b + " " + c + " = " + res + "<br>" );
-            $("#newDisplay").show();
-        }
+        $("#newDisplay").show();
     }
 
-    if (d === 2) {
+    if (d === 2) { 
+        ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
         if (res === 20) {     
             console.log("scoreClicker : " + scoreClicker + " DS_T: " + DS_T)
             if ((player === scoreClicker) && DS_T > 0) {
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
-                ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
                 if (impossibleClicker !== "a@F$Uy&impossible") {
                     ws.send("CN#$42," + privateClicker + "," + player + "," + impossibleClicker);
                 }
@@ -743,13 +703,9 @@ var calc = function (ax,b,cx,bb) {
         $("#result3").show();
         $("#result3").html(res);      
         if (res !== 20 && (player === scoreClicker) && DS_T > 0) {
-            ws.send("CE#$42," + privateClicker + "," + player + "," +  a + " " + b + " " + c + " = " + res + "<br>");
             timer.setTime(0);
-            $("#a4").append(a + " " + b + " " + c + " = " + res + "<br>" );
             $("#newDisplay").show();
         }
     }
 };
-
-
 
