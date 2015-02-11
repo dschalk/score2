@@ -290,21 +290,33 @@ function onMessage(event) {
 
             case "EE#$42":
 
-            break;          
+            break;
 
             case "CW#$42":
 
-            break;       
+            break;
 
             case "CZ#$42":
 
-            break;       
+            break;
+
+            case "CE#$42":
+
+            break;
+
+            case "CF#$42":
+
+            break;
+
+            case "CG#$42":
+
+            break;
 
             case "CA#$42":
 
-            break;  
+            break;
 
-            default:  
+            default:
                 $('#messages').append(p);
                 $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
                 if(event.data.match(/^[^:]* disconnected/)) {
