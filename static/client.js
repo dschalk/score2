@@ -17,7 +17,6 @@ var createDropboxes;
 var createDrop1;
 var createDrop2;
 var timer;  
-var tog = 0;
 var refreshDropboxes;
 var populate;
 var refresh
