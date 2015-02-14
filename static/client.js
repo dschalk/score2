@@ -16,7 +16,8 @@ var createOperators;
 var createDropboxes;
 var createDrop1;
 var createDrop2;
-var timer;
+var timer;  
+var tog = 0;
 var refreshDropboxes;
 var populate;
 var refresh
@@ -127,6 +128,7 @@ function refresh() {
     .setImpossibleClicker("a@F$Uy&impossible");
     ar = [];
     bool = [];
+    $("#a0").html("");
     $("#a2").html("");
     $("#a4").html("");
     createDom();
@@ -175,7 +177,8 @@ function onMessage(event) {
                 $("#show").show();
                 $("#show2").show();
                 $("#solutions").show();
-                $("#solutions2").show();
+                $("#iutions2").show();
+                $("#a0").html("");
                 var auu = gameArray[3]
                 var buu = gameArray[4]
                 var cuu = gameArray[5]
@@ -540,6 +543,11 @@ $(document).ready(function () {
             " participating browsers.");
     });
 
+    setPrivate = function(x) {
+        privateClicker = x;
+        $("#b0").html("Solitaire mode. Your actions do not affect other players.")
+    };
+
     $('#join-form').submit(function () {
         $('#warnings').html('');
         var user = $('#user').val();
@@ -630,6 +638,8 @@ var calc = function (ax,b,cx,bb) {
         res = resx;
     }
     
+    var roundRes = Math.round(resx);
+
     console.log("Here's res: " + res);
 
     if (d === 0) {
@@ -641,7 +651,7 @@ var calc = function (ax,b,cx,bb) {
 
     if (d === 1) { 
         ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
-        if (res === 20 && bb)   {   
+        if (roundRes === 20 && bb)   {   
             console.log("scoreClicker : " + scoreClicker + " DS_T: " + DS_T)
             if ((player === scoreClicker) && DS_T > 0) {
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
@@ -666,7 +676,7 @@ var calc = function (ax,b,cx,bb) {
 
     if (d === 2) { 
         ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
-        if (res === 20) {     
+        if (roundRes === 20) {     
             console.log("scoreClicker : " + scoreClicker + " DS_T: " + DS_T)
             if ((player === scoreClicker) && DS_T > 0) {
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
