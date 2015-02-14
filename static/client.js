@@ -155,16 +155,12 @@ function onMessage(event) {
     var player = players.getPlayer();
     var scoreClicker = players.getScoreClicker();
     var privateClicker = players.getPrivateClicker();
-    console.log(event.data);
-    gameArray = event.data.split(",");
+    var gameArray = event.data.split(",");
     var d2 = event.data.substring(0,6);
     var d3 = event.data.substring(2,6);
-    console.log("XXXXXXXXXXXXXXXXXXXXXXX___this is d3: " + d3);
     var source = gameArray[1];  // Value of sender's privateClicker
     var sender = gameArray[2];
     var extra = gameArray[3];
-    console.log("impossibleClicker, player, scoreClicker, privateClicker, source, sender, extra: " + impossibleClicker + ", " + 
-        player + ", " + scoreClicker + ", " + privateClicker + ", " + source + ", " + sender + ", " + extra)
     var p = $(document.createElement('p')).text(event.data); 
     if (player === sender || privateClicker !== "a@F$Uy&private" &&  source !== "a@F$Uy&private") {
         switch (d2) {
