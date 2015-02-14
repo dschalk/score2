@@ -49,7 +49,7 @@ function onMessage(event) {
     var player = players.getPlayer();
     var scoreClicker = players.getScoreClicker();
     var privateClicker = players.getPrivateClicker();
-    gameArray = event.data.split(",");
+    var gameArray = event.data.split(",");
     var d2 = event.data.substring(0,6);
     var d3 = event.data.substring(2,6);
     var source = gameArray[1];  // Value of sender's privateClicker
