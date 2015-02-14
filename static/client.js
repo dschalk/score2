@@ -16,8 +16,7 @@ var createOperators;
 var createDropboxes;
 var createDrop1;
 var createDrop2;
-var timer;  
-var tog = 0;
+var timer;
 var refreshDropboxes;
 var populate;
 var refresh
@@ -176,7 +175,7 @@ function onMessage(event) {
                 $("#show").show();
                 $("#show2").show();
                 $("#solutions").show();
-                $("#iutions2").show();
+                $("#solutions2").show();
                 var auu = gameArray[3]
                 var buu = gameArray[4]
                 var cuu = gameArray[5]
@@ -540,11 +539,6 @@ $(document).ready(function () {
             " Clicking 'ROLL' inserts the roll numbers in all" + 
             " participating browsers.");
     });
-
-    setPrivate = function(x) {
-        privateClicker = x;
-        $("#b0").html("Solitaire mode. Your actions do not affect other players.")
-    };
 
     $('#join-form').submit(function () {
         $('#warnings').html('');
