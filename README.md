@@ -91,7 +91,7 @@ function onMessage(event) {
 ```
 Messages with the "CB#$42" pefix go to the socoreboard div with id "user", and messages prefixed by "CC#$42", the new player prefix, are discarded to prevent cluttering the chat message section.
 
-The meanings and uses of the variables at the start of function onmessage will be explained later. For now, I will explain only the code which screens who gets into the the switch routine, namely:
+The meanings and uses of the variables at the start of function "onmessage" will be explained later. For now, I will explain only the code which screens who gets into the the switch routine, namely:
 
 ```javascript
 if (player === sender || privateClicker !== "a@F$Uy&private" &&  source !== "a@F$Uy&private")
