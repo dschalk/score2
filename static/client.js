@@ -17,6 +17,7 @@ var createDropboxes;
 var createDrop1;
 var createDrop2;
 var timer;  
+var tog = 0;
 var refreshDropboxes;
 var populate;
 var refresh
@@ -66,45 +67,50 @@ pl = function (){
     var privateClicker = "a@F$Uy&private";
     var rollText = "1,1,1,1,42";
     var d = -1; 
-    o = {
+    return {
         setPlayer: function(x) {
-            player = x
+            player = x;
+            return this;
         },
         getPlayer: function() {
             return player;
         },
         setScoreClicker: function(x) {
-            scoreClicker = x
+            scoreClicker = x;
+            return this;
         },
         getScoreClicker: function() {
             return scoreClicker;
         },
         setImpossibleClicker: function(x) {
-            impossibleClicker = x
+            impossibleClicker = x;
+            return this;
         },
         getImpossibleClicker: function() {
             return impossibleClicker;
         },
         setPrivateClicker: function(x) {
-            privateClicker = x
+            privateClicker = x;
+            return this;
         },
         getPrivateClicker: function() {
             return privateClicker;
         },
         setRollText: function(x) {
-            rollText = x
+            rollText = x;
+            return this;
         },
         getRollText: function() {
             return rollText;
         },
         setD: function(x) {
-            d = x
+            d = x;
+            return this;
         },
         getD: function() {
             return d;
         }
     }
-    return o;
 };
 players = pl();
 
@@ -116,10 +122,10 @@ function refreshUsers() {
 }
 
 function refresh() {
-    players.setD(-1);
     timer.setTime(-1);
-    players.setScoreClicker("a@F$Uy&score");
-    players.setImpossibleClicker("a@F$Uy&impossible");
+    players.setD(-1)
+    .setScoreClicker("a@F$Uy&score") 
+    .setImpossibleClicker("a@F$Uy&impossible");
     ar = [];
     bool = [];
     $("#a2").html("");
@@ -162,7 +168,6 @@ function onMessage(event) {
     if (player === sender || privateClicker !== "a@F$Uy&private" &&  source !== "a@F$Uy&private") {
         switch (d2) {
             case "CA#$42":               // Set up the next round of play.
-                players.setD(-1);
                 refresh(); 
                 $("#impossibleJ").show();
                 $("#scoreF").show();
@@ -177,7 +182,8 @@ function onMessage(event) {
                 var cuu = gameArray[5]
                 var duu = gameArray[6]
                 rollText = auu + "," + buu + "," + cuu + "," + duu + "," + 42;
-                players.setRollText(rollText);
+                players.setRollText(rollText) 
+                .setD(-1);
                 console.log("Here is rollText: " + rollText); 
                 populate(auu,buu,cuu,duu);
                 $("#a4").html(auu + " &nbsp; " + buu + " &nbsp; " + cuu + " &nbsp; " + duu);
@@ -474,10 +480,10 @@ $(document).ready(function () {
     $("#newDisplay")
     .button()
     .click(function(){ 
-        players.setD(-1);
         timer.setTime(-1);
-        setScoreClicker("a@F$Uy&score");
-        setImpossibleClicker("a@F$Uy&impossible");
+        players.setD(-1) 
+        .setScoreClicker("a@F$Uy&score")
+        .setImpossibleClicker("a@F$Uy&impossible");
         ar = [];
         bool = [];
         $("#a2").html("");
@@ -538,21 +544,6 @@ $(document).ready(function () {
     setPrivate = function(x) {
         privateClicker = x;
         $("#b0").html("Solitaire mode. Your actions do not affect other players.")
-    };
-
-    setPublic = function() {
-        privateClicker = "a@F$Uy&private";
-        $("#b0").html("Now in multiplayer mode. Be careful." + 
-            "Clicking 'ROLL' inserts the roll numbers in all" + 
-            "participating browsers.");
-    };
-
-    setScoreClicker = function(x) {
-        scoreClicker = x;
-    };
-
-    setImpossibleClicker = function(x) {
-        impossibleClicker = x;
     };
 
     $('#join-form').submit(function () {
