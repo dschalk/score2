@@ -6,7 +6,7 @@ import System.Random
 import qualified Data.Text as T
 
 toDouble :: Int -> Double
-toDouble x = read (show x) :: Double
+toDouble x = (read (show x)) :: Double
 
 rM :: Int -> IO Int
 rM x = getStdRandom (System.Random.randomR ((1,x) :: (Int,Int)))
@@ -25,7 +25,7 @@ rollFunc [a,b,c,d,e] = T.pack (a ++ "," ++ b ++ "," ++ c ++ "," ++ d ++ "," ++ "
 
 rollT ax bx cx dx = do 
     x <- start ax bx cx dx
-    let y = map show x
+    let y = (map show x)
     return $ rollFunc y
 
 roll :: Int -> Int -> Int -> Int -> IO [Double]
@@ -40,7 +40,7 @@ computation a b c  | b == "+"   = (+) a c
                    | b == "Concatenate"  = cat a c
 
 fRound :: Double -> Int
-fRound = round
+fRound x = round x
 
 notWhole :: Double -> Bool
 notWhole x = fromIntegral (round x) /= x
@@ -50,7 +50,7 @@ cat l m   | m < 0  = 3.1
           | l == 0  = 3.1
           | notWhole l  = 3.1
           | notWhole m  = 3.1
-          | otherwise  = read (show (round l) ++ show (round m)) :: Double
+          | otherwise  = read ((show $ round l) ++ (show $ round m)) :: Double
 
 g :: (Double -> Double -> Double) -> String
 g x         | x 3 2 == 5 = " + "
@@ -141,26 +141,45 @@ h6 (a',b',c',d',e',f',g') = g' ++ d' ++ "((" ++ a' ++ b' ++
 h7 (a',b',c',d',e',f',g') = g' ++ d' ++ "(" ++ e' ++ f' ++
   "(" ++ a' ++ b' ++ c' ++ ")) = 20<br> "
 
--- pim x  | null x  = " -- There are no solutions in this category"
---        | otherwise  = ""
+pim x  | null x  = [" -- There are no solutions in this category"]
+       | otherwise  = [" "]
 
 ca :: [Double] -> [String]
-ca [a, b, c, d, e] = (map h (calc a b c d)) ++ map h2 (calc2 a b c d) ++ map h3 (calc3 a b c d) ++ map h4 (calc4 a b c d)  ++
-    map h5 (calc5 a b c d) ++ map h6 (calc6 a b c d) ++ map h7 (calc7 a b c d)
+ca [a, b, c, d, e] = ["Using the result of the first two numbers left of the third.<br>"] ++
+    map h2 (calc2 a b c d) ++
+    pim (calc a b c d) ++ 
+    ["<br><br>Using the first number left of the result obtained from the second and third numbers.<br>"] ++ 
+    map h2 (calc2 a b c d) ++ 
+    pim (calc2 a b c d) ++ 
+    ["<br><br>Using the first two numbers and then the remaining two numbers - then using those results.<br>"] ++ 
+    map h3 (calc3 a b c d) ++ 
+    pim (calc3 a b c d) ++ 
+    ["<br><br>Using the result from the first two numbers left of the third - then that result left of fourth number.<br>"] ++ 
+    map h4 (calc4 a b c d) ++ 
+    pim (calc4 a b c d) ++ 
+    ["<br><br>Using the third number left of the result obtained from the first two - then that result left of the fourth number.<br>"] ++ 
+    map h5 (calc5 a b c d) ++ 
+    pim (calc5 a b c d) ++ 
+    ["<br><br>Using the fourth number to the left of the result from using the first two numbers' result left of the third.<br>"] ++ 
+    map h6 (calc6 a b c d) ++ 
+    pim (calc6 a b c d) ++ 
+    ["<br><br>Using the fourth number to the left of the result from using the third number left of the result from the first two.<br>"] ++ 
+    map h7 (calc7 a b c d) ++ 
+    pim (calc7 a b c d) 
 ca _ = ["What?"]
 
-cars :: [Double] -> String
+cars :: [Double] -> [Char]
 cars [a,b,c,d,e] = concat $ ca [a,b,c,d,e]
 cars _ = []
 
 tru :: T.Text -> [Double]
-tru x = map (read . T.unpack) (T.split (== ',') x)
+tru x = map read (map T.unpack (T.split (==',') x))
 
 truck :: [Double] -> IO String
 truck x = do 
     let y = map round x
     let z = show (y !! 0) ++ " " ++ show (y !! 1) ++ " " ++ show (y !! 2) ++ " " ++  show (y !! 3) ++ "<br><br>"
-    let a = (" " ++ z ++ cars x ++ "<br>") :: String 
+    let a = (" " ++ z ++ (cars x) ++ "<br>") :: String 
     return a
 
 arg :: [Double]
@@ -174,32 +193,6 @@ rText = do
     return $ rollFunc z
 
 main = rText
-
-{-}
-    "Using the first number left of the result obtained from the second and third numbers." ++
-    map h2 (calc2 a b c d) ++
-    pim (calc2 a b c d) ++
-
-    "Using the first two numbers and then the remaining two numbers, then using those results."++
-    map h3 (calc3 a b c d) ++
-    pim (calc3 a b c d) ++
-
-    "Using the result from the first two numbers left of the third, then that result left of fourth number." ++
-    map h4 (calc4 a b c d) ++
-    pim (calc4 a b c d) ++
-
-    "Using the third number left of the result obtained from the first two, then that result left of the fourth number." ++
-    map h5 (calc5 a b c d) ++
-    pim (calc5 a b c d) ++
-
-    "Using the fourth number to the left of the result from using the first two numbers' result left of the third." ++
-    map h6 (calc6 a b c d) ++
-    pim (calc6 a b c d)     ++
-
-    "Using the fourth number to the left of the result from using the third number left of the result from the first two." ++
-    map h7 (calc7 a b c d) ++
-    pim (calc7 a b c d) 
--}
 
 
 
