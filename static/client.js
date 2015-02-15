@@ -222,7 +222,7 @@ function onMessage(event) {
             break;
 
             case "CI#$42":
-                $("#a2").append("<br>deduct one point from " + event.data.substring(6) + "The time ran out.");
+                $("#a2").append("<br>deduct one point from " + sender + "The time ran out.");
                 $("#newDisplay").show();
             break;
 
@@ -239,7 +239,7 @@ function onMessage(event) {
             break;
 
             case "CM#$42":
-                $("#a2").append("<br>One point for " + event.data.substring(6));
+                $("#a2").append("<br>One point for " + sender);
                 $("#a1").prepend("<span style='font-size:75px; background:#000; color:#f00;'>Score!</span>");
                 $("#a2").prepend("<br>Time's up and nobody found a solution");
                 $("#newDisplay").show();
