@@ -146,7 +146,7 @@ pim x  | null x  = [" -- There are no solutions in this category"]
 
 ca :: [Double] -> [String]
 ca [a, b, c, d, e] = ["Using the result of the first two numbers left of the third.<br>"] ++
-    map h2 (calc2 a b c d) ++
+    map h (calc a b c d) ++
     pim (calc a b c d) ++ 
     ["<br><br>Using the first number left of the result obtained from the second and third numbers.<br>"] ++ 
     map h2 (calc2 a b c d) ++ 
