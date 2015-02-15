@@ -112,7 +112,7 @@ main = do
     putStrLn "http://localhost:3000/client.html"
     state <- newMVar newServerState
     Warp.runSettings Warp.defaultSettings
-      { 
+      {
         Warp.settingsTimeout = 3600
       } $ WaiWS.websocketsOr WS.defaultConnectionOptions (application state) staticApp
 staticApp :: Network.Wai.Application
@@ -152,7 +152,7 @@ application state pending = do
                   broadcast ("CB#$42" `mappend` T.concat (intersperse (T.pack "<br>") (map tr s''))) s''                 
 talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
 talk conn state (user, _, _) = forever $ do
-    msg <- WS.receiveData conn 
+    msg <- WS.receiveData conn
     print msg 
     let msgArray = splitOn "," (T.unpack msg)
     let source = fx msgArray 
