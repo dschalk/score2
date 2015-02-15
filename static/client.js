@@ -654,7 +654,7 @@ var calc = function (ax,b,cx,bb) {
             $("#dropBoxes").html("");
         }
         $("#result3").show();
-        $("#result3").html(res);      
+        $("#result3").html(res);
         if (res !== 20 && (player === scoreClicker) && DS_T > 0) {
             timer.setTime(0);
             $("#newDisplay").show();
