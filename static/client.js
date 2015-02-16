@@ -523,7 +523,10 @@ $(document).ready(function () {
         $('#warnings').html('');
         var user = $('#user').val();
         players.setPlayer(user);
-        ws = createWebSocket('/');
+        ws = io.connect("/",{
+            "connect timeout": 360000,
+            "reconnect": false
+        });
         ws.onopen = function() {
             ws.send("CC#$42" + user);
         };
