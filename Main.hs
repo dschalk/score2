@@ -135,7 +135,7 @@ application state pending = do
             | otherwise -> flip finally disconnect $ do
                 liftIO $ modifyMVar_ state $ \s -> do
                     let s' = addClient client s  
-                    WS.sendTextData conn $ "CC#$42" `mappend` T.intercalate ", " (map tr s')
+                    WS.sendTextData conn $ T.pack "CC#$42"
                     print $ "CC#$42" `mappend` T.intercalate ", " (map tr s')
                     broadcast (getName client `mappend` " joined") s'
                     broadcast ("CB#$42" `mappend` T.concat(intersperse (T.pack "<br>") (map tr s'))) s'

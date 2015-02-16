@@ -528,7 +528,7 @@ $(document).ready(function () {
             ws.send("CC#$42" + user);
         };
         ws.onmessage = function(event) {
-            if(event.data.substring(0,6) == "CC#$42") {
+            if(event.data === "CC#$42") {
                 players.setD(-1);
                 createDom();
                 createOperators();
