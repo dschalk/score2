@@ -145,25 +145,25 @@ pim x  | null x  = [" -- There are no solutions in this category"]
        | otherwise  = [" "]
 
 ca :: [Double] -> [String]
-ca [a, b, c, d, e] = ["Using the result of the first two numbers left of the third.<br>"] ++
+ca [a, b, c, d, e] = ["Using the result from two numbers left of a third.<br>"] ++
     map h (calc a b c d) ++
     pim (calc a b c d) ++ 
-    ["<br><br>Using the first number left of the result obtained from the second and third numbers.<br>"] ++ 
+    ["<br><br>Using a number left of the result obtained from two other numbers.<br>"] ++ 
     map h2 (calc2 a b c d) ++ 
     pim (calc2 a b c d) ++ 
-    ["<br><br>Using the first two numbers and then the remaining two numbers - then using those results.<br>"] ++ 
+    ["<br><br>Using two numbers and then the remaining two numbers - then using those results.<br>"] ++ 
     map h3 (calc3 a b c d) ++ 
     pim (calc3 a b c d) ++ 
-    ["<br><br>Using the result from the first two numbers left of the third - then that result left of fourth number.<br>"] ++ 
+    ["<br><br>Using the result from two numbers left of a third - then that result left of the remaining number.<br>"] ++ 
     map h4 (calc4 a b c d) ++ 
     pim (calc4 a b c d) ++ 
     ["<br><br>Using the third number left of the result obtained from the first two - then that result left of the fourth number.<br>"] ++ 
     map h5 (calc5 a b c d) ++ 
     pim (calc5 a b c d) ++ 
-    ["<br><br>Using the fourth number to the left of the result from using the first two numbers' result left of the third.<br>"] ++ 
+    ["<br><br>Using the the remaining number to the left of the result of using the result of two numbers' left of another.<br>"] ++ 
     map h6 (calc6 a b c d) ++ 
     pim (calc6 a b c d) ++ 
-    ["<br><br>Using the fourth number to the left of the result from using the third number left of the result from the first two.<br>"] ++ 
+    ["<br><br>Using the remaining number to the left of the result from using the a number left of the result from two others.<br>"] ++ 
     map h7 (calc7 a b c d) ++ 
     pim (calc7 a b c d) 
 ca _ = ["What?"]
