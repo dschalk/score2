@@ -39,21 +39,27 @@ fw :: [String] -> Text
 fw [_,_,_,d] = T.pack d
 fw _ = T.pack "EE#$42"
 
-fstatus :: [String] -> String
-fstatus [_,b,_,_,_,_,_,_] = b
-fstatus _ = "EE#$42"
+fstatus :: [String] -> Text
+fstatus [_,b,_,_,_,_,_,_] = T.pack b
+fstatus _ = T.pack "EE#$42"
 
-fsender :: [String] -> String
-fsender [_,_,c,_,_,_,_,_] = c
-fsender _ = "EE#$42"
+fsender :: [String] -> Text
+fsender [_,_,c,_,_,_,_,_] = T.pack c
+fsender _ = T.pack "EE#$42"
 
-froll :: [String] -> String
-froll [_,_,_,a,b,c,d,e] = a ++ "," ++ b ++ "," ++ c ++ "," ++ d ++ "," ++ e
-froll _ = "EE#$42"
+froll :: [String] -> Text
+froll [_,_,_,a,b,c,d,e] = T.pack $ a ++ "," ++ b ++ "," ++ c ++ "," ++ d ++ "," ++ e
+froll _ = T.pack "EE#$42"
 
-getName :: (t, t1, t2) -> t
+getName :: Client -> Name
 getName (a,_,_) = a
+
+
+getScore :: Client -> Score
 getScore (_,b,_) = b
+
+
+getConn :: Client -> WS.Connection
 getConn (_,_,c) = c
 
 tr :: (Text, Int, WS.Connection) -> Text
@@ -149,17 +155,17 @@ application state pending = do
                      let s' = removeClient client s in return (s', s')
                   broadcast (getName client `mappend` " disconnected") s
                   s'' <- readMVar state
-                  broadcast ("CB#$42" `mappend` T.concat (intersperse (T.pack "<br>") (map tr s''))) s''                 
+                  broadcast ("CB#$42" `mappend` T.concat (intersperse (T.pack "<br>") (map tr s''))) s''
 talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
 talk conn state (user, _, _) = forever $ do
     msg <- WS.receiveData conn
     print msg 
     let msgArray = splitOn "," (T.unpack msg)
-    let source = fx msgArray 
-    let sender = fz msgArray 
+    let source = fx msgArray
+    let sender = fz msgArray
     let extra = fw msgArray
-    let source2 = T.pack (fstatus msgArray)
-    let sender2 = T.pack (fsender msgArray)
+    let source2 = fstatus msgArray
+    let sender2 = fsender msgArray
     let extra2 = froll msgArray
     print $ "source, sender, extra " `mappend` source  `mappend` ", " `mappend` sender  `mappend` ", " `mappend` extra
     if "CA#$42" `T.isPrefixOf` msg 
@@ -171,19 +177,16 @@ talk conn state (user, _, _) = forever $ do
 
     else if "CZ#$42" `T.isPrefixOf` msg
             then do 
-                print "______________In CZ#$42"
-                let roll = T.pack extra2
-                y <- liftIO $ truck $ tru roll
+                let ro = extra2
+                y <- liftIO $ truck $ tru ro
                 let yzz = T.pack y 
                 st <- readMVar state
                 broadcast ("CZ#$42," `mappend` source2 `mappend` "," `mappend` sender2 `mappend` "," `mappend` yzz) st        
 
     else if "CW#$42" `T.isPrefixOf` msg
             then do 
-                print "______________In CW#$42"
-                let roll = T.pack extra2
-                print $ "roll is: " `mappend` roll
-                y <- liftIO $ truck $ tru roll
+                let ro = extra2
+                y <- liftIO $ truck $ tru ro
                 let zz = T.pack y 
                 st <- readMVar state
                 broadcast ("CW#$42," `mappend` source2 `mappend` "," `mappend` sender2 `mappend` "," `mappend` zz) st  
@@ -193,7 +196,6 @@ talk conn state (user, _, _) = forever $ do
             do 
                 st <- readMVar state 
                 broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st))) st 
-                print ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st)))
 
     else if "CC#$42" `T.isPrefixOf` msg || "CE#$42" `T.isPrefixOf` msg || "CF#$42" `T.isPrefixOf` msg || 
         "CH#$42" `T.isPrefixOf` msg || "CJ#$42" `T.isPrefixOf` msg || "CK#$42" `T.isPrefixOf` msg || 
@@ -203,7 +205,6 @@ talk conn state (user, _, _) = forever $ do
             do 
                 st <- readMVar state 
                 broadcast msg st
-                print "CC#$42 or CE#$42 or CF#$42 or CH#$42 or CJ#42 or CK$#42 or CO#$42 or CP#42 or CQ$#42 or CY#$42"   
 
     else if "CG#$42" `T.isPrefixOf` msg
         then 
@@ -214,8 +215,6 @@ talk conn state (user, _, _) = forever $ do
                 st2 <- readMVar state
                 broadcast msg st2
                 broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
-                print ("A winner in CG#$42 " `mappend` sender)
-                print msg     
 
     else if "CI#$42" `T.isPrefixOf` msg
         then 
@@ -226,8 +225,6 @@ talk conn state (user, _, _) = forever $ do
                 st2 <- readMVar state
                 broadcast msg st2
                 broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
-                print ("The loser is " `mappend` sender)
-                print "CI$#42"    
 
     else if "CL#$42" `T.isPrefixOf` msg
         then 
@@ -238,8 +235,6 @@ talk conn state (user, _, _) = forever $ do
                 st2 <- readMVar state
                 broadcast msg st2
                 broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
-                print ("The loser is " `mappend` sender)
-                print "CL$#42"    
 
     else if "CM#$42" `T.isPrefixOf` msg
         then 
@@ -250,8 +245,6 @@ talk conn state (user, _, _) = forever $ do
                 st2 <- readMVar state
                 broadcast msg st2
                 broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
-                print ("The winner is " `mappend` sender)
-                print "CM$#42"     
 
     else if "CN#$42" `T.isPrefixOf` msg
         then 
@@ -262,8 +255,6 @@ talk conn state (user, _, _) = forever $ do
                 st2 <- readMVar state
                 broadcast msg st2
                 broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
-                print ("The impossible loser is " `mappend` extra)
-                print "CN$#42"    
     else 
         do 
             liftIO $ readMVar state >>= broadcast (user `mappend` ": " `mappend` msg) 
