@@ -62,7 +62,7 @@ getScore (_,b,_) = b
 getConn :: Client -> WS.Connection
 getConn (_,_,c) = c
 
-tr :: (Text, Int, WS.Connection) -> Text
+tr :: Client -> Text
 tr x = getName x `mappend` T.pack " " `mappend` T.pack (show (getScore x))
 
 getUnderlying :: Client -> (Text, Int, WS.Connection)
@@ -117,10 +117,7 @@ main :: IO ()
 main = do
     putStrLn "http://localhost:3000/client.html"
     state <- newMVar newServerState
-    Warp.runSettings Warp.defaultSettings
-      {
-        Warp.settingsTimeout = 3600
-      } $ WaiWS.websocketsOr WS.defaultConnectionOptions (application state) staticApp
+    Warp.runSettings Warp.defaultSettings $ WaiWS.websocketsOr WS.defaultConnectionOptions (application state) staticApap
 staticApp :: Network.Wai.Application
 staticApp = Static.staticApp $ Static.embeddedSettings $(embedDir "static")
 application :: MVar ServerState -> WS.ServerApp
