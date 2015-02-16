@@ -159,7 +159,6 @@ application state pending = do
 talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
 talk conn state (user, _, _) = forever $ do
     msg <- WS.receiveData conn
-    print msg 
     let msgArray = splitOn "," (T.unpack msg)
     let source = fx msgArray
     let sender = fz msgArray
@@ -167,7 +166,7 @@ talk conn state (user, _, _) = forever $ do
     let source2 = fstatus msgArray
     let sender2 = fsender msgArray
     let extra2 = froll msgArray
-    print $ "source, sender, extra " `mappend` source  `mappend` ", " `mappend` sender  `mappend` ", " `mappend` extra
+    print $ "source, sender, extra, msg " `mappend` source  `mappend` ", " `mappend` sender  `mappend` ", " `mappend` extra `mappend` ", " `mappend` msg
     if "CA#$42" `T.isPrefixOf` msg 
         then 
             do 
@@ -200,7 +199,7 @@ talk conn state (user, _, _) = forever $ do
     else if "CC#$42" `T.isPrefixOf` msg || "CE#$42" `T.isPrefixOf` msg || "CF#$42" `T.isPrefixOf` msg || 
         "CH#$42" `T.isPrefixOf` msg || "CJ#$42" `T.isPrefixOf` msg || "CK#$42" `T.isPrefixOf` msg || 
         "CO#$42" `T.isPrefixOf` msg || "CP#$42" `T.isPrefixOf` msg || "CQ#$42" `T.isPrefixOf` msg || 
-        "CY#$42" `T.isPrefixOf` msg
+        "CY#$42" `T.isPrefixOf` msg || "CR#$42" `T.isPrefixOf` msg
         then 
             do 
                 st <- readMVar state 
@@ -258,4 +257,3 @@ talk conn state (user, _, _) = forever $ do
     else 
         do 
             liftIO $ readMVar state >>= broadcast (user `mappend` ": " `mappend` msg) 
-            print ("Default " `mappend` user `mappend` ": " `mappend` msg)
