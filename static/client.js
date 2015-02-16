@@ -4,6 +4,10 @@ function createWebSocket(path) {
     var uri = 'ws://' + host + ':3000' + path;
     var Socket = WebSocket           // "MozWebSocket" in window ? MozWebSocket : WebSocket;
     return new Socket(uri);
+    connect("/",{
+        "connect timeout": 360000,
+        "reconnect": false
+    });
 }
 
 var ws;
@@ -523,10 +527,7 @@ $(document).ready(function () {
         $('#warnings').html('');
         var user = $('#user').val();
         players.setPlayer(user);
-        ws = io.connect("/",{
-            "connect timeout": 360000,
-            "reconnect": false
-        });
+        ws = createWebSocket('/');
         ws.onopen = function() {
             ws.send("CC#$42" + user);
         };
