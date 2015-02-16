@@ -55,21 +55,21 @@ calc5 a b c d = [ (a',b',c',d') |
                             op1 <- [cat, (+), (-), (*), scoreDiv],
                             op2 <- [cat, (+), (-), (*), scoreDiv],
                             op3 <- [cat, (+), (-), (*), scoreDiv],
-                            op3 (op2 c' (op1 a' b')) d' == 20]
+                            op3 (op2 a' (op1 b' c')) d' == 20]
 
 calc6 a b c d = [ (a',b',c',d') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
                             op1 <- [cat, (+), (-), (*), scoreDiv],
                             op2 <- [cat, (+), (-), (*), scoreDiv],
                             op3 <- [cat, (+), (-), (*), scoreDiv],
-                            op3 d' (op2 (op1 a' b') c') == 20]
+                            op3 a' (op2 (op1 b' c') d') == 20]
 
 calc7 a b c d = [ (a',b',c',d') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
                             op1 <- [cat, (+), (-), (*), scoreDiv],
                             op2 <- [cat, (+), (-), (*), scoreDiv],
                             op3 <- [cat, (+), (-), (*), scoreDiv],
-                            op3 d' (op2 c' (op1 a' b')) == 20]
+                            op3 a' (op2 b' (op1 c' d')) == 20]
 
 impossibles = [ [round a, round b, round c, round d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
                      a <= b, b <= c, c <= d,
