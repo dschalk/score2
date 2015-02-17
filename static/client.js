@@ -239,7 +239,7 @@ function onMessage(event) {
             break;
 
             case "CL#$42":
-                $("#a2").append("<br>deduct one point from " + event.data.substring(6) + "'s score. The time ran out.");
+                $("#a2").append("<br>deduct one point from " + sender + "'s score. The time ran out.");
                 $("#newDisplay").show();
             break;
 
