@@ -608,7 +608,14 @@ var calc = function (ax,b,cx,bb) {
     else {
         res = resx;
     }
-    var roundRes = Math.round(resx);
+
+    var roundRes = function(x) {
+        if ((x - 20) < 0.1 || (20 - x) < 0.1) {
+            x = 20
+        }
+        return 20;
+    }
+
     if (d === 0) {
         $("#result1").show();
         $("#result1").html(res);
@@ -617,7 +624,7 @@ var calc = function (ax,b,cx,bb) {
     }
     if (d === 1) { 
         ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
-        if (roundRes === 20 && bb)   {   
+        if (roundRes(res) === 20 && bb)   {   
             if ((player === scoreClicker) && DS_T > 0) {
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
                 if (impossibleClicker !== "a@F$Uy&impossible") {
@@ -641,7 +648,7 @@ var calc = function (ax,b,cx,bb) {
 
     if (d === 2) { 
         ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
-        if (roundRes === 20) {
+        if (roundRes(res) === 20) {
             if ((player === scoreClicker) && DS_T > 0) {
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
                 if (impossibleClicker !== "a@F$Uy&impossible") {
