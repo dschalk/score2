@@ -110,7 +110,7 @@ pl = function (){
         }
     }
 };
-players = pl();
+
 
 function refreshUsers() {
     $('#users').html('');
