@@ -115,9 +115,9 @@ broadcast message clients = do
 
 main :: IO ()
 main = do
-    putStrLn "http://localhost:3000/client.html"
     state <- newMVar newServerState
-    Warp.runSettings Warp.defaultSettings $ WaiWS.websocketsOr WS.defaultConnectionOptions (application state) staticApap
+    Warp.runSettings Warp.defaultSettings $ WaiWS.websocketsOr WS.defaultConnectionOptions (application state) staticApp
+
 staticApp :: Network.Wai.Application
 staticApp = Static.staticApp $ Static.embeddedSettings $(embedDir "static")
 application :: MVar ServerState -> WS.ServerApp
