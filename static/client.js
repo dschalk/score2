@@ -157,11 +157,12 @@ function onMessage(event) {
     var d2 = event.data.substring(0,6);
     var d3 = event.data.substring(2,6);
     var d4 = event.data.substring(6);
-    var source = gameArray[1];  // Value of sender's privateClicker
+    var sourceStatus = gameArray[1];  // Value of sender's privateClicker
     var sender = gameArray[2];
     var extra = gameArray[3];
     var p = $(document.createElement('p')).text(event.data); 
-    if (player === sender || privateClicker !== "a@F$Uy&private" &&  source !== "a@F$Uy&private") {
+    console.log(event.data);
+    if (player === sender || privateClicker !== "a@F$Uy&private" &&  sourceStatus !== "a@F$Uy&private") {
         switch (d2) {
             case "CA#$42":               // Set up the next round of play.
                 refresh(); 
@@ -257,7 +258,7 @@ function onMessage(event) {
             break;
 
             case "CR#$42": 
-
+                refresh();
             break;
 
             case "CW#$42":
@@ -481,7 +482,7 @@ $(document).ready(function () {
     $("#newDisplay")
     .button()
     .click(function(){ 
-        refresh();
+        ws.send("CR#$42," + players.getPrivateClicker() + "," + players.getPlayer() + "," + "dummy");
     });
 
     populate = function(a,b,c,d) {
