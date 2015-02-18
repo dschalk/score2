@@ -67,55 +67,57 @@ scoreDiv :: (Eq a, Fractional a) => a -> a -> a
 scoreDiv az bz  | bz == 0  = 99999
                 | otherwise = (/) az bz
 
+ops =  [cat, (+), (-), (*), scoreDiv]                 
+
 calc :: Double -> Double -> Double -> Double -> [(String, String, String, String, String)]
 calc a b c d = [(f a', g op1, f b', g op2, f c') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
-                            op1 <- [cat, (+), (-), (*), scoreDiv],
-                            op2 <- [cat, (+), (-), (*), scoreDiv],
+                            op1 <- ops,
+                            op2 <- ops,
                             op2 (op1 a' b') c' == 20]
 
 calc2 :: Double -> Double -> Double -> Double -> [(String, String, String, String, String)]
 calc2 a b c d = [(f a', g op1, f b', g op2, f c') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
-                            op1 <- [cat, (+), (-), (*), scoreDiv],
-                            op2 <- [cat, (+), (-), (*), scoreDiv],
+                            op1 <- ops,
+                            op2 <- ops,
                             op2 a' (op1 b' c') == 20]
 
 calc3 :: Double -> Double -> Double -> Double -> [(String, String, String, String, String, String, String)]
 calc3 a b c d = [(f a', g op1, f b', g op3, f c', g op2, f d') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
-                            op1 <- [cat, (+), (-), (*), scoreDiv],
-                            op2 <- [cat, (+), (-), (*), scoreDiv],
-                            op3 <- [cat, (+), (-), (*), scoreDiv],
+                            op1 <- ops,
+                            op2 <- ops,
+                            op3 <- ops,
                             op3 (op1 a' b') (op2 c' d') == 20]
 
 calc4 :: Double -> Double -> Double -> Double -> [(String, String, String, String, String, String, String)]
 calc4 a b c d = [(f a', g op1, f b', g op3, f c', g op2, f d') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
-                            op1 <- [cat, (+), (-), (*), scoreDiv],
-                            op2 <- [cat, (+), (-), (*), scoreDiv],
-                            op3 <- [cat, (+), (-), (*), scoreDiv],
+                            op1 <- ops,
+                            op2 <- ops,
+                            op3 <- ops,
                             op3 (op2 (op1 a' b') c') d' == 20]
 
 calc5 a b c d = [(f a', g op1, f b', g op3, f c', g op2, f d') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
-                            op1 <- [cat, (+), (-), (*), scoreDiv],
-                            op2 <- [cat, (+), (-), (*), scoreDiv],
-                            op3 <- [cat, (+), (-), (*), scoreDiv],
+                            op1 <- ops,
+                            op2 <- ops,
+                            op3 <- ops,
                             op3 (op2 c' (op1 a' b')) d' == 20]
 
 calc6 a b c d = [(f a', g op1, f b', g op3, f c', g op2, f d') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
-                            op1 <- [cat, (+), (-), (*), scoreDiv],
-                            op2 <- [cat, (+), (-), (*), scoreDiv],
-                            op3 <- [cat, (+), (-), (*), scoreDiv],
+                            op1 <- ops,
+                            op2 <- ops,
+                            op3 <- ops,
                             op3 d' (op2 (op1 a' b') c') == 20]
 
 calc7 a b c d = [(f a', g op1, f b', g op3, f c', g op2, f d') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
-                            op1 <- [cat, (+), (-), (*), scoreDiv],
-                            op2 <- [cat, (+), (-), (*), scoreDiv],
-                            op3 <- [cat, (+), (-), (*), scoreDiv],
+                            op1 <- ops,
+                            op2 <- ops,
+                            op3 <- ops,
                             op3 d' (op2 c' (op1 a' b')) == 20]
 
 h :: (String, String, String, String, String) -> String

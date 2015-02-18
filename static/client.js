@@ -5,7 +5,7 @@ function createWebSocket(path) {
     var Socket = WebSocket           // "MozWebSocket" in window ? MozWebSocket : WebSocket;
     return new Socket(uri);
     connect("/",{
-        "connect timeout": 360000,
+        "connect timeout": 36000,
         "reconnect": false
     });
 }
@@ -610,10 +610,16 @@ var calc = function (ax,b,cx,bb) {
     }
 
     var roundRes = function(x) {
+<<<<<<< HEAD
+        if (Math.abs(20 - x) < 0.1) {
+            return 20;
+        }
+=======
         if ((x - 20) < 0.1 || (20 - x) < 0.1) {
             x = 20
         }
         return 20;
+>>>>>>> a5af0c0975e26e782401e450dfab6778feeede5e
     }
 
     if (d === 0) {
@@ -623,6 +629,7 @@ var calc = function (ax,b,cx,bb) {
         $("#newDisplay").show();
     }
     if (d === 1) { 
+        console.log(roundRes(res));
         ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
         if (roundRes(res) === 20 && bb)   {   
             if ((player === scoreClicker) && DS_T > 0) {
