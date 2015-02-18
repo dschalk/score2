@@ -127,6 +127,8 @@ h3 {
     text-align: center;
     padding-top: 50px;
     color: #9dff00;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .dragNew { 
@@ -139,6 +141,8 @@ h3 {
     text-align: center;
     padding-top: 50px;
     color: #F7323C;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .drag2 { 
@@ -165,6 +169,8 @@ h3 {
     text-align: center;
     padding-top: 40px;
     color: #9dff00;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .drop2 { 
