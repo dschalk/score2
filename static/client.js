@@ -5,7 +5,7 @@ function createWebSocket(path) {
     var Socket = WebSocket           // "MozWebSocket" in window ? MozWebSocket : WebSocket;
     return new Socket(uri);
     connect("/",{
-        "connect timeout": 36000,
+        "connect timeout": 360000,
         "reconnect": false
     });
 }
@@ -58,7 +58,7 @@ timer = {
     }()
 }
 
-players = function (){
+pl = function (){
     var player;
     var scoreClicker = "a@F$Uy&score";
     var impossibleClicker = "a@F$Uy&impossible";
@@ -109,7 +109,8 @@ players = function (){
             return d;
         }
     }
-}();
+};
+players = pl();
 
 function refreshUsers() {
     $('#users').html('');
@@ -654,7 +655,7 @@ var calc = function (ax,b,cx,bb) {
         $("#result3").show();
         $("#result3").html(res);
         if (res !== 20 && (player === scoreClicker) && DS_T > 0) {
-            timer.setTime(0);  // Causes scoreClicker to lose a point and impossibleClicker to gain one.
+            timer.setTime(0);
             $("#newDisplay").show();
         }
     }
