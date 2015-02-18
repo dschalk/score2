@@ -58,7 +58,7 @@ timer = {
     }()
 }
 
-pl = function (){
+players = function (){
     var player;
     var scoreClicker = "a@F$Uy&score";
     var impossibleClicker = "a@F$Uy&impossible";
@@ -109,8 +109,7 @@ pl = function (){
             return d;
         }
     }
-};
-
+}();
 
 function refreshUsers() {
     $('#users').html('');
@@ -610,16 +609,9 @@ var calc = function (ax,b,cx,bb) {
     }
 
     var roundRes = function(x) {
-<<<<<<< HEAD
         if (Math.abs(20 - x) < 0.1) {
             return 20;
         }
-=======
-        if ((x - 20) < 0.1 || (20 - x) < 0.1) {
-            x = 20
-        }
-        return 20;
-
     }
 
     if (d === 0) {
@@ -630,7 +622,7 @@ var calc = function (ax,b,cx,bb) {
     }
     if (d === 1) { 
         console.log(roundRes(res));
-        ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
+        ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + roundRes(res) + "<br>");
         if (roundRes(res) === 20 && bb)   {   
             if ((player === scoreClicker) && DS_T > 0) {
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
@@ -654,7 +646,7 @@ var calc = function (ax,b,cx,bb) {
     }
 
     if (d === 2) { 
-        ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
+        ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + roundRes(res) + "<br>");
         if (roundRes(res) === 20) {
             if ((player === scoreClicker) && DS_T > 0) {
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
@@ -675,7 +667,7 @@ var calc = function (ax,b,cx,bb) {
         $("#result3").show();
         $("#result3").html(res);
         if (res !== 20 && (player === scoreClicker) && DS_T > 0) {
-            timer.setTime(0);
+            timer.setTime(0);  // Causes scoreClicker to lose a point and impossibleClicker to gain one.
             $("#newDisplay").show();
         }
     }
