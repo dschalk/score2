@@ -12,6 +12,5 @@ version: 1
 extra-packages: ''
 ghc-args:
 - -fdefer-type-errors
-- -Wall
 excluded-modules:
 - impossibles.hs

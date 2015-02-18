@@ -21,8 +21,10 @@ start ax bx cx dx = do
 
 rollFunc :: [String] -> T.Text
 rollFunc [a,b,c,d,e] = T.pack (a ++ "," ++ b ++ "," ++ c ++ "," ++ d ++ "," ++ "42")
+rollFunc _ = "Problem in rollFunc"
 
 
+rollT :: Int -> Int -> Int -> Int -> IO T.Text
 rollT ax bx cx dx = do 
     x <- start ax bx cx dx
     let y = (map show x)
@@ -33,6 +35,7 @@ roll ax bx cx dx = do
     x <- start ax bx cx dx
     return $ map toDouble x
 
+computation :: Double -> String -> Double -> Double
 computation a b c  | b == "+"   = (+) a c
                    | b == "-"   = (-) a c
                    | b == "*"   = (*) a c
@@ -67,7 +70,8 @@ scoreDiv :: (Eq a, Fractional a) => a -> a -> a
 scoreDiv az bz  | bz == 0  = 99999
                 | otherwise = (/) az bz
 
-ops =  [cat, (+), (-), (*), scoreDiv]                 
+ops :: [Double -> Double -> Double]
+ops =  [cat, (+), (-), (*), scoreDiv] 
 
 calc :: Double -> Double -> Double -> Double -> [(String, String, String, String, String)]
 calc a b c d = [(f a', g op1, f b', g op2, f c') |
@@ -99,6 +103,11 @@ calc4 a b c d = [(f a', g op1, f b', g op3, f c', g op2, f d') |
                             op3 <- ops,
                             op3 (op2 (op1 a' b') c') d' == 20]
 
+calc5 :: Double
+           -> Double
+           -> Double
+           -> Double
+           -> [(String, String, String, String, String, String, String)]
 calc5 a b c d = [(f a', g op1, f b', g op3, f c', g op2, f d') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
                             op1 <- ops,
@@ -106,6 +115,11 @@ calc5 a b c d = [(f a', g op1, f b', g op3, f c', g op2, f d') |
                             op3 <- ops,
                             op3 (op2 c' (op1 a' b')) d' == 20]
 
+calc6 :: Double
+           -> Double
+           -> Double
+           -> Double
+           -> [(String, String, String, String, String, String, String)]
 calc6 a b c d = [(f a', g op1, f b', g op3, f c', g op2, f d') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
                             op1 <- ops,
@@ -113,6 +127,11 @@ calc6 a b c d = [(f a', g op1, f b', g op3, f c', g op2, f d') |
                             op3 <- ops,
                             op3 d' (op2 (op1 a' b') c') == 20]
 
+calc7 :: Double
+           -> Double
+           -> Double
+           -> Double
+           -> [(String, String, String, String, String, String, String)]
 calc7 a b c d = [(f a', g op1, f b', g op3, f c', g op2, f d') |
                         [a',b',c',d'] <- nub(permutations [a,b,c,d]),
                             op1 <- ops,
@@ -134,15 +153,19 @@ h4 :: (String, String, String, String, String, String, String) -> String
 h4 (a',b',c',d',e',f',g') = "((" ++ a' ++ b' ++ c' ++ ")" ++
     f' ++ e' ++ ")" ++ d' ++ g' ++ ") = 20<br>  "
 
+h5 :: (String, String, String, String, String, String, String) -> String
 h5 (a',b',c',d',e',f',g') = "(" ++ e' ++ f' ++ "(" ++ a' ++
   b' ++ c' ++ "))" ++ d' ++ g' ++ ") = 20<br>  "
 
+h6:: (String, String, String, String, String, String, String) -> String
 h6 (a',b',c',d',e',f',g') = g' ++ d' ++ "((" ++ a' ++ b' ++
   c' ++ ")" ++ f' ++ e' ++ ") = 20<br>  "
 
+h7 :: (String, String, String, String, String, String, String) -> String
 h7 (a',b',c',d',e',f',g') = g' ++ d' ++ "(" ++ e' ++ f' ++
   "(" ++ a' ++ b' ++ c' ++ ")) = 20<br> "
 
+pim ::  [(String, String, String, String, String, String, String)] -> String
 pim x  | null x  = [" -- There are no solutions in this category"]
        | otherwise  = [" "]
 
@@ -194,7 +217,10 @@ rText = do
     let z = map show y
     return $ rollFunc z
 
-main = rText
+main :: IO ()
+main = do 
+    rText 
+    return ()
 
 
 

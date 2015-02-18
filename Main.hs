@@ -211,26 +211,16 @@ talk conn state (user, _, _) = forever $ do
                 st2 <- readMVar state
                 broadcast msg st2
                 broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
-
-    else if "CI#$42" `T.isPrefixOf` msg
-        then 
-            mask_ $ do  
+                
+    else if ("CI#$42" `T.isPrefixOf` msg || "CL#$42" `T.isPrefixOf` msg)
+         then
+             mask_ $do 
                 old <- takeMVar state
                 let new = downScore sender old
-                putMVar state new 
+                putMVar state new
                 st2 <- readMVar state
                 broadcast msg st2
-                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
-
-    else if "CL#$42" `T.isPrefixOf` msg
-        then 
-            mask_ $ do 
-                old <- takeMVar state
-                let new = downScore sender old
-                putMVar state new 
-                st2 <- readMVar state
-                broadcast msg st2
-                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
+                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2)) st2
 
     else if "CM#$42" `T.isPrefixOf` msg
         then 
