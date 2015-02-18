@@ -619,7 +619,7 @@ var calc = function (ax,b,cx,bb) {
             x = 20
         }
         return 20;
->>>>>>> a5af0c0975e26e782401e450dfab6778feeede5e
+
     }
 
     if (d === 0) {
