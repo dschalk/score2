@@ -1,6 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Fm where
-
 import Data.List
 import System.Random
 import qualified Data.Text as T
