@@ -14,4 +14,8 @@ ghc-args:
 - -Wall
 - -fdefer-type-errors
 excluded-modules:
+- allCombinations.hs
+- analysis_A.hs
+- analysis_B.hs
 - impossibles.hs
+- impossibles2.hs
