@@ -46,14 +46,14 @@ fRound :: Double -> Int
 fRound x = round x
 
 notWhole :: Double -> Bool
-notWhole x = fromIntegral (round x) /= x
+notWhole x = (toDouble (fRound x)) /= x
 
 cat :: Double -> Double -> Double
 cat l m   | m < 0  = 3.1
           | l == 0  = 3.1
           | notWhole l  = 3.1
           | notWhole m  = 3.1
-          | otherwise  = read ((show $ round l) ++ (show $ round m)) :: Double
+          | otherwise  = read ((show $ fRound l) ++ (show $ fRound m)) :: Double
 
 g :: (Double -> Double -> Double) -> String
 g x         | x 3 2 == 5 = " + "
@@ -64,7 +64,7 @@ g x         | x 3 2 == 5 = " + "
             | otherwise = " cow "
 
 f :: Double -> String
-f x = show (round x)
+f x = show (fRound x)
 
 scoreDiv :: (Eq a, Fractional a) => a -> a -> a
 scoreDiv az bz  | bz == 0  = 99999
@@ -165,17 +165,24 @@ h7 :: (String, String, String, String, String, String, String) -> String
 h7 (a',b',c',d',e',f',g') = g' ++ d' ++ "(" ++ e' ++ f' ++
   "(" ++ a' ++ b' ++ c' ++ ")) = 20<br> "
 
-pim ::  [(String, String, String, String, String, String, String)] -> String
+pim ::  [(String, String, String, String, String, String, String)] -> [String]
 pim x  | null x  = [" -- There are no solutions in this category"]
        | otherwise  = [" "]
+
+
+pim' ::  [(String, String, String, String, String)] -> [String]
+pim' x  | null x  = [" -- There are no solutions in this category"]
+       | otherwise  = [" "]
+
+
 
 ca :: [Double] -> [String]
 ca [a, b, c, d, e] = ["Using the result from two numbers left of a third.<br>"] ++
     map h (calc a b c d) ++
-    pim (calc a b c d) ++ 
+    pim' (calc a b c d) ++ 
     ["<br><br>Using a number left of the result obtained from two other numbers.<br>"] ++ 
     map h2 (calc2 a b c d) ++ 
-    pim (calc2 a b c d) ++ 
+    pim' (calc2 a b c d) ++ 
     ["<br><br>Using two numbers and then the remaining two numbers - then using those results.<br>"] ++ 
     map h3 (calc3 a b c d) ++ 
     pim (calc3 a b c d) ++ 
@@ -219,7 +226,7 @@ rText = do
 
 main :: IO ()
 main = do 
-    rText 
+    rText >>= print
     return ()
 
 
