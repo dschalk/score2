@@ -58,7 +58,7 @@ timer = {
     }()
 }
 
-pl = function (){
+var players = function one (){
     var player;
     var scoreClicker = "a@F$Uy&score";
     var impossibleClicker = "a@F$Uy&impossible";
@@ -109,17 +109,16 @@ pl = function (){
             return d;
         }
     }
-};
-players = pl();
+}();
 
-function refreshUsers() {
+var refreshUsers = function two() {
     $('#users').html('');
     for(i in users) {
         $('#users').append($(document.createElement('li')).text(users[i]));
     }
 }
 
-function refresh() {
+var refresh = function three() {
     timer.setTime(-1);
     players.setD(-1)
     .setScoreClicker("a@F$Uy&score") 
@@ -146,7 +145,7 @@ function refresh() {
     $("#impossibleJ").hide();
     $("#scoreF").hide();
     $("#newDisplay").hide();
-}
+};
 
 function onMessage(event) {
     var impossibleClicker = players.getImpossibleClicker();
@@ -227,7 +226,7 @@ function onMessage(event) {
             break;
 
             case "CI#$42":
-                $("#a2").append("<br>deduct one point from " + sender + "The time ran out.");
+                $("#a2").append("<br>deduct one point from " + sender + "'s score.");
                 $("#newDisplay").show();
             break;
 
@@ -239,7 +238,7 @@ function onMessage(event) {
             break;
 
             case "CL#$42":
-                $("#a2").append("<br>deduct one point from " + sender + "'s score. The time ran out.");
+                $("#a2").append("<br>deduct one point from " + sender + "'s score.");
                 $("#newDisplay").show();
             break;
 
@@ -576,7 +575,7 @@ $(document).ready(function () {
     });
  });
 
-var calc = function (ax,b,cx,bb) {
+var calc = function four (ax,b,cx,bb) {
     var d = players.getD();
     var DS_T = timer.getTime();
     var impossibleClicker = players.getImpossibleClicker();
@@ -604,8 +603,7 @@ var calc = function (ax,b,cx,bb) {
     }
 
     if (d === 0) {
-        $("#result1").show();
-        $("#result1").html(res);
+        $("#result1").show().html(res);
         ws.send("CE#$42," + privateClicker + "," + player + "," + "<br>" + a + " " + b + " " + c + " = " + res + "<br>");
         $("#newDisplay").show();
     }
@@ -628,8 +626,7 @@ var calc = function (ax,b,cx,bb) {
             $("#operators").html("");
             $("#dropBoxes").html("");
         }
-        $("#result2").show();
-        $("#result2").html(res);
+        $("#result2").show().html(res);
         $("#newDisplay").show();
     }
 
@@ -652,8 +649,7 @@ var calc = function (ax,b,cx,bb) {
             $("#operators").html("");
             $("#dropBoxes").html("");
         }
-        $("#result3").show();
-        $("#result3").html(res);
+        $("#result3").show().html(res);
         if (res !== 20 && (player === scoreClicker) && DS_T > 0) {
             timer.setTime(0);
             $("#newDisplay").show();
