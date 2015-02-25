@@ -62,8 +62,22 @@ span {
     float: right;
 }
 
+.erase {
+    float: left;
+}
+
+#solutions {
+    float: left;
+}
 
 #a0 {
+    font-size: 35px;
+    color: #9dff00;
+    width: 100%;
+    float: left;
+}
+
+#countdown {
     font-size: 35px;
     color: #9dff00;
     width: 100%;
