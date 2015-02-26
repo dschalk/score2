@@ -696,7 +696,7 @@ calc = function (ax,b,cx,bb) {
         $("#result3").show().html(res);
         if (res !== 20 && (player === scoreClicker) && t > 0) {
             $("#stop30").triggerHandler('click');
-            DS_ob.t = 0;
+            DS_ob.scoreFunc();
             $("#newDisplay").show();
         }
     }
