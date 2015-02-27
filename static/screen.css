@@ -202,6 +202,39 @@ h3 {
     color: #68f2ad;
 }
 
+.dropx { 
+    border-width: 2px; 
+    border-style: solid; 
+    border-color: #ff0000;
+    width: 210px; 
+    height: 115px;
+    float: left; 
+    margin: 20px; 
+    background-color:#000;
+    font-size: 60px;
+    text-align: center;
+    padding-top: 40px;
+    color: #9dff00;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.drop2x { 
+    border-width: 2px; 
+    border-style: solid; 
+    border-color: #ff0000;
+    width: 210px; 
+    height: 115px;
+    float: left; 
+    margin: 20px;  
+    background-color:#000;
+    font-size: 60px;
+    text-align: center;
+    padding-top: 40px;
+    color: #68f2ad;
+}
+
+
 #info1 {
     font-size: 32px;
     color: #bdefbf;
