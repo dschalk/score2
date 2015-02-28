@@ -3,30 +3,48 @@
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=640">
 
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen">
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
 
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
     <title>Score2 by dschalk</title>
   </head>
 
   <body>
+    <a id="forkme_banner" href="https://github.com/dschalk/score2">View on GitHub</a>
+    <div class="shell">
 
-    <header>
-      <div class="container">
-        <h1>Score2</h1>
-        <h2>A real time, multi-player game resting on wai-websockets.</h2>
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>Score2</h1>
+            <h2>Haskell websockets up and running.</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
 
-        <section id="downloads">
-          <a href="https://github.com/dschalk/score2/zipball/master" class="btn">Download as .zip</a>
-          <a href="https://github.com/dschalk/score2/tarball/master" class="btn">Download as .tar.gz</a>
-          <a href="https://github.com/dschalk/score2" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
-        </section>
-      </div>
-    </header>
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/dschalk/score2/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/dschalk/score2/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
 
-    <div class="container">
+
+      <span class="banner-fix"></span>
+
+
       <section id="main_content">
         <p><strong>Rules of "Score"</strong></p>
 
@@ -123,6 +141,19 @@ upScore name = <span class="pl-s3">map</span> (incFunc name)</pre></div>
 
 <p>There are two modes of play in #Score#: group play and individual play. When one group player rolls the dice, all group players see the roll, but individual players do not. When an individual player rolls the dice, no other player sees it. "player \=\== sender" lets individual players in, along with one group player but that is of no consequence since the next test covers all group players. "a@F$Uy&amp;private" is the default value for new players. It signifies that they are in individual play mode. If a player clicks "GO MULTIPLAYER", the value of privateClicker becomes the player's login name. So "privateClicker !== 'a@F$Uy&amp;private'" means the player has gone public. "sender !== 'a@F$Uy&amp;private'" means a group player sent the message. All group players should receive all messages sent by other group players, and the second test makes sure this happens.</p>
       </section>
+
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/dschalk">dschalk</a> can be found on <a href="https://github.com/dschalk/score2">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="http://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
+      </footer>
+
     </div>
 
     
