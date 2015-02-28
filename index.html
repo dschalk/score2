@@ -4,30 +4,40 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <title>Score2 by dschalk</title>
-
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
     <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
   </head>
   <body>
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/dschalk/score2">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/dschalk/score2/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/dschalk/score2/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
+
     <div class="wrapper">
-      <header>
-        <h1>Score2</h1>
-        <p>Haskell websockets up and running.</p>
 
-        <p class="view"><a href="https://github.com/dschalk/score2">View the Project on GitHub <small>dschalk/score2</small></a></p>
-
-
-        <ul>
-          <li><a href="https://github.com/dschalk/score2/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/dschalk/score2/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/dschalk/score2">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
       <section>
+        <div id="title">
+          <h1>Score2</h1>
+          <p>Haskell websockets up and running.</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/dschalk">dschalk</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
+
         <p><strong>Rules of "Score"</strong></p>
 
 <p>Four dice are rolled. The default die are two six-sided, one twelve-sided, and one twenty-sided die. The goal is to make the number "20" in two or three steps using addition, subtraction, multiplication, division, and/or concatenation.</p>
@@ -168,12 +178,9 @@ upScore name = <span class="pl-s3">map</span> (incFunc name)</pre></div>
 
 <p>There are two modes of play in #Score#: group play and individual play. When one group player rolls the dice, all group players see the roll, but individual players do not. When an individual player rolls the dice, no other player sees it. "player \=\== sender" lets individual players in, along with one group player but that is of no consequence since the next test covers all group players. "a@F$Uy&amp;private" is the default value for new players. It signifies that they are in individual play mode. If a player clicks "GO MULTIPLAYER", the value of privateClicker becomes the player's login name. So "privateClicker !== 'a@F$Uy&amp;private'" means the player has gone public. "sender !== 'a@F$Uy&amp;private'" means a group player sent the message. All group players should receive all messages sent by other group players, and the second test makes sure this happens.</p>
       </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/dschalk">dschalk</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
-      </footer>
+
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
     
   </body>
 </html>
