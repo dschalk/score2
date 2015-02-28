@@ -52,13 +52,6 @@ DS_ob = {
     }
 }
 
-refreshUsers = function() {
-    $('#users').html('');
-    for(i in users) {
-        $('#users').append($(document.createElement('li')).text(users[i]));
-    }
-}
-
 refresh = function() {
     DS_ob.game = "off";
     DS_ob.d = -1;
@@ -291,12 +284,6 @@ $(document).ready(function () {
                 default: 
                     $('#messages').append(p);
                     $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
-                    if(event.data.match(/^[^:]* disconnected/)) {
-                        var user = event.data.replace(/ .*/, '');
-                        var idx = users.indexOf(user);
-                        users = users.slice(0, idx).concat(users.slice(idx + 1));
-                        refreshUsers();
-                    }
                 break;
             }
         }
@@ -309,12 +296,6 @@ $(document).ready(function () {
         else if (d3 !== "#$42") {
             $('#messages').append(p);
             $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
-            if(event.data.match(/^[^:]* disconnected/)) {
-                var user = event.data.replace(/ .*/, '');
-                var idx = users.indexOf(user);
-                users = users.slice(0, idx).concat(users.slice(idx + 1));
-                refreshUsers();
-            }
         }
     }
 
