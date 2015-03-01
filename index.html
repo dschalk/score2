@@ -203,6 +203,456 @@ broadcast (<span class="pl-s1"><span class="pl-pds">"</span>CB#$42<span class="p
 <p>Other than chat messages and the scoreboard update, each message is sent to the server begining with a six-digit prefix, the status (solitaire or group play) of the sender, and the name of the sender, all separated by commas. The server broadcasts messages with these same three preliminary items intact so, after splitting into 'gameArray', gameArray[0] is the six-character prefix, gameArray[1] is the sender's status, and gameArray[2] is the sender's name. The game status, prefixed by 'CB#$42', is sent without commas so instead of d2 = gamearray[0], we have 'd2 = event.data.substring(0,6)'. The test in the 'if' statement returns 'true' if the sender is the receiver of the prefix, or if the sender and receiver are both involved in group play. 'a@F$Uy&amp;private' is the default status; i.e., private. When a player opts for group play, status is set equal to the player's name. This information is kept in the object 'DS_ob'.</p>
 
 <p><em>To be continued</em></p>
+
+<h2>
+<a id="appendix" class="anchor" href="#appendix" aria-hidden="true"><span class="octicon octicon-link"></span></a>APPENDIX</h2>
+
+<p><strong>IMPOSSIBLES</strong></p>
+
+<p>The essence of the Score calculation algorythm in the module Fm is contained in the "impossibles.hs" file. Fm has much formatting code, which is a distraction when evaluating the algorythm.</p>
+
+<p>impossibles.hs computes all dice combinations which cannot be made into the number "20" in two or three stages. In 1.5 seconds, it finds all 104 such combinations using a list comprehension on the seven list comprehensions which cover all possible computations. The five operations are defined as follows:</p>
+
+<div class="highlight highlight-haskell"><pre>{-# <span class="pl-k">LANGUAGE</span> OverloadedStrings #-}
+
+<span class="pl-k">import</span> <span class="pl-s3">Data.List</span>
+<span class="pl-k">import</span> <span class="pl-s3">System.CPUTime</span>
+
+<span class="pl-en">notWhole</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Bool</span>
+notWhole x = <span class="pl-s3">fromIntegral</span> (<span class="pl-s3">round</span> x) /= x
+
+<span class="pl-en">cat</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span>
+cat l m   | m &lt; <span class="pl-c1">0</span>  = <span class="pl-c1">3.1</span>
+          | l == <span class="pl-c1">0</span>  = <span class="pl-c1">3.1</span>
+          | notWhole l  = <span class="pl-c1">3.1</span>
+          | notWhole m  = <span class="pl-c1">3.1</span>
+          | <span class="pl-s3">otherwise</span>  = <span class="pl-s3">read</span> (<span class="pl-s3">show</span> (<span class="pl-s3">round</span> l) ++ <span class="pl-s3">show</span> (<span class="pl-s3">round</span> m))
+
+<span class="pl-en">f</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">String</span>
+f x = <span class="pl-s3">show</span> (<span class="pl-s3">round</span> x)
+
+<span class="pl-en">scoreDiv</span> <span class="pl-k">::</span> (<span class="pl-st">Eq</span> <span class="pl-vo">a</span>, <span class="pl-st">Fractional</span> <span class="pl-vo">a</span>) <span class="pl-k">=&gt;</span> <span class="pl-vo">a</span> <span class="pl-k">-&gt;</span> <span class="pl-vo">a</span> <span class="pl-k">-&gt;</span> <span class="pl-vo">a</span>
+scoreDiv az bz  | bz == <span class="pl-c1">0</span>  = <span class="pl-c1">99999</span>
+                | <span class="pl-s3">otherwise</span> = (/) az bz
+
+ops =  [cat, (+), (-), (*), scoreDiv]</pre></div>
+
+<p>The seven algorythms necessary to perform every possible computation are:</p>
+
+<div class="highlight highlight-haskell"><pre><span class="pl-en">calc</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> [(<span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>)]
+calc a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op2 (op1 a' b') c' == <span class="pl-c1">20</span>]
+
+<span class="pl-en">calc2</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> [(<span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>)]
+calc2 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op2 a' (op1 b' c') == <span class="pl-c1">20</span>]
+
+<span class="pl-en">calc3</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> [(<span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>)]
+calc3 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op1 a' b') (op2 c' d') == <span class="pl-c1">20</span>]
+
+<span class="pl-en">calc4</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> [(<span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>)]
+calc4 a b c d = [ (a',b',c',d')  |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op2 (op1 a' b') c') d' == <span class="pl-c1">20</span>]
+
+calc5 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op2 a' (op1 b' c')) d' == <span class="pl-c1">20</span>]
+
+calc6 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 a' (op2 (op1 b' c') d') == <span class="pl-c1">20</span>]
+
+calc7 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 a' (op2 b' (op1 c' d')) == <span class="pl-c1">20</span>]</pre></div>
+
+<p>It is easy to see that there are seven ways to order two or three sequential computations on four numbers. They can be represented by </p>
+
+<div class="highlight highlight-javascript"><pre>a bc
+ab c
+ab cd
+(a bc)d
+(ab c)d
+a(b cd)
+a(bc d)</pre></div>
+
+<p>Those are the combinations used in the seven calc functions. The list comprehension works on all permutations of the order of the four numbers in receives, so c ba is covered by a bc. Next, I wanted to find out if all seven algorythms are necessary to find at least one solution, so I wrote this:</p>
+
+<div class="highlight highlight-haskell"><pre>{-# <span class="pl-k">LANGUAGE</span> OverloadedStrings #-}
+
+<span class="pl-k">import</span> <span class="pl-s3">Data.List</span>
+<span class="pl-k">import</span> <span class="pl-s3">System.CPUTime</span>
+
+<span class="pl-en">notWhole</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Bool</span>
+notWhole x = <span class="pl-s3">fromIntegral</span> (<span class="pl-s3">round</span> x) /= x
+
+<span class="pl-en">cat</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span>
+cat l m   | m &lt; <span class="pl-c1">0</span>  = <span class="pl-c1">3.1</span>
+          | l == <span class="pl-c1">0</span>  = <span class="pl-c1">3.1</span>
+          | notWhole l  = <span class="pl-c1">3.1</span>
+          | notWhole m  = <span class="pl-c1">3.1</span>
+          | <span class="pl-s3">otherwise</span>  = <span class="pl-s3">read</span> (<span class="pl-s3">show</span> (<span class="pl-s3">round</span> l) ++ <span class="pl-s3">show</span> (<span class="pl-s3">round</span> m))
+
+<span class="pl-en">f</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">String</span>
+f x = <span class="pl-s3">show</span> (<span class="pl-s3">round</span> x)
+
+<span class="pl-en">scoreDiv</span> <span class="pl-k">::</span> (<span class="pl-st">Eq</span> <span class="pl-vo">a</span>, <span class="pl-st">Fractional</span> <span class="pl-vo">a</span>) <span class="pl-k">=&gt;</span> <span class="pl-vo">a</span> <span class="pl-k">-&gt;</span> <span class="pl-vo">a</span> <span class="pl-k">-&gt;</span> <span class="pl-vo">a</span>
+scoreDiv az bz  | bz == <span class="pl-c1">0</span>  = <span class="pl-c1">99999</span>
+                | <span class="pl-s3">otherwise</span> = (/) az bz
+
+ops =  [cat, (+), (-), (*), scoreDiv] 
+
+<span class="pl-en">calc</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> [(<span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>)]
+calc a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op2 (op1 a' b') c' == <span class="pl-c1">20</span>]
+
+<span class="pl-en">calc2</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> [(<span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>)]
+calc2 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op2 a' (op1 b' c') == <span class="pl-c1">20</span>]
+
+<span class="pl-en">calc3</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> [(<span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>)]
+calc3 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op1 a' b') (op2 c' d') == <span class="pl-c1">20</span>]
+
+<span class="pl-en">calc4</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> [(<span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>)]
+calc4 a b c d = [ (a',b',c',d')  |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op2 (op1 a' b') c') d' == <span class="pl-c1">20</span>]
+
+calc5 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op2 a' (op1 b' c')) d' == <span class="pl-c1">20</span>]
+
+calc6 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 a' (op2 (op1 b' c') d') == <span class="pl-c1">20</span>]
+
+calc7 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d<span class="pl-k">']</span> &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 a' (op2 b' (op1 c' d')) == <span class="pl-c1">20</span>]
+
+
+
+only_calc = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc a b c d), <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d, 
+                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">null</span> $ calc7 a b c d ]
+
+
+only_calc2 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc2 a b c d), <span class="pl-s3">null</span> $ calc3 a b c d, 
+                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">null</span> $ calc7 a b c d ]
+
+only_calc3 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc3 a b c d), 
+                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">null</span> $ calc7 a b c d ]
+
+only_calc4 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d, 
+                     <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc4 a b c d), <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">null</span> $ calc7 a b c d ]
+
+only_calc5 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d, 
+                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc5 a b c d), <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">null</span> $ calc7 a b c d ]
+
+only_calc6 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d, 
+                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc6 a b c d),
+                     <span class="pl-s3">null</span> $ calc7 a b c d ]
+
+only_calc7 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d, 
+                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc7 a b c d <span class="pl-k">)]</span>
+
+main = <span class="pl-k">do</span> 
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc<span class="pl-pds">"</span></span>
+    t1 &lt;- getCPUTime
+    <span class="pl-s3">mapM_</span> <span class="pl-s3">print</span> only_calc
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc2<span class="pl-pds">"</span></span>
+    <span class="pl-s3">mapM_</span> <span class="pl-s3">print</span> only_calc2
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc3<span class="pl-pds">"</span></span>
+    <span class="pl-s3">mapM_</span> <span class="pl-s3">print</span> only_calc3
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc4<span class="pl-pds">"</span></span>
+    <span class="pl-s3">mapM_</span> <span class="pl-s3">print</span> only_calc4
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc5<span class="pl-pds">"</span></span>
+    <span class="pl-s3">mapM_</span> <span class="pl-s3">print</span> only_calc5
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc6<span class="pl-pds">"</span></span>
+    <span class="pl-s3">mapM_</span> <span class="pl-s3">print</span> only_calc6
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc7<span class="pl-pds">"</span></span>
+    <span class="pl-s3">mapM_</span> <span class="pl-s3">print</span> only_calc7
+    t2 &lt;- getCPUTime
+    <span class="pl-k">let</span> t = <span class="pl-s3">fromIntegral</span> (t2-t1) * <span class="pl-c1">1e-12</span>
+    <span class="pl-s3">print</span> t
+    <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span></pre></div>
+
+<p>Here is what I got:</p>
+
+<div class="highlight highlight-javascript"><pre>e@e<span class="pl-k">:~</span>/b0$ ./analysis_A
+<span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc<span class="pl-pds">"</span></span>
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">3.0</span>,<span class="pl-c1">11.0</span>,<span class="pl-c1">15.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">3.0</span>,<span class="pl-c1">11.0</span>,<span class="pl-c1">19.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">9.0</span>,<span class="pl-c1">20.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">10.0</span>,<span class="pl-c1">20.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">11.0</span>,<span class="pl-c1">20.0</span>]
+[<span class="pl-c1">2.0</span>,<span class="pl-c1">2.0</span>,<span class="pl-c1">11.0</span>,<span class="pl-c1">15.0</span>]
+[<span class="pl-c1">2.0</span>,<span class="pl-c1">2.0</span>,<span class="pl-c1">11.0</span>,<span class="pl-c1">17.0</span>]
+[<span class="pl-c1">3.0</span>,<span class="pl-c1">3.0</span>,<span class="pl-c1">3.0</span>,<span class="pl-c1">13.0</span>]
+[<span class="pl-c1">3.0</span>,<span class="pl-c1">3.0</span>,<span class="pl-c1">7.0</span>,<span class="pl-c1">17.0</span>]
+[<span class="pl-c1">3.0</span>,<span class="pl-c1">4.0</span>,<span class="pl-c1">9.0</span>,<span class="pl-c1">16.0</span>]
+[<span class="pl-c1">3.0</span>,<span class="pl-c1">4.0</span>,<span class="pl-c1">11.0</span>,<span class="pl-c1">14.0</span>]
+[<span class="pl-c1">4.0</span>,<span class="pl-c1">4.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">17.0</span>]
+[<span class="pl-c1">5.0</span>,<span class="pl-c1">5.0</span>,<span class="pl-c1">5.0</span>,<span class="pl-c1">11.0</span>]
+[<span class="pl-c1">5.0</span>,<span class="pl-c1">5.0</span>,<span class="pl-c1">5.0</span>,<span class="pl-c1">13.0</span>]
+[<span class="pl-c1">5.0</span>,<span class="pl-c1">5.0</span>,<span class="pl-c1">5.0</span>,<span class="pl-c1">17.0</span>]
+<span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc2<span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc3<span class="pl-pds">"</span></span>
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">1.0</span>,<span class="pl-c1">1.0</span>,<span class="pl-c1">11.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">1.0</span>,<span class="pl-c1">7.0</span>,<span class="pl-c1">17.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">1.0</span>,<span class="pl-c1">12.0</span>,<span class="pl-c1">12.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">6.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">9.0</span>,<span class="pl-c1">9.0</span>]
+[<span class="pl-c1">3.0</span>,<span class="pl-c1">3.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">6.0</span>]
+[<span class="pl-c1">3.0</span>,<span class="pl-c1">4.0</span>,<span class="pl-c1">7.0</span>,<span class="pl-c1">18.0</span>]
+[<span class="pl-c1">3.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">7.0</span>,<span class="pl-c1">14.0</span>]
+[<span class="pl-c1">5.0</span>,<span class="pl-c1">5.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">17.0</span>]
+[<span class="pl-c1">5.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">6.0</span>]
+<span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc4<span class="pl-pds">"</span></span>
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">1.0</span>,<span class="pl-c1">4.0</span>,<span class="pl-c1">11.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">4.0</span>,<span class="pl-c1">9.0</span>,<span class="pl-c1">9.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">4.0</span>,<span class="pl-c1">9.0</span>,<span class="pl-c1">19.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">5.0</span>,<span class="pl-c1">11.0</span>,<span class="pl-c1">11.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">12.0</span>]
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">11.0</span>,<span class="pl-c1">11.0</span>]
+[<span class="pl-c1">3.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">9.0</span>,<span class="pl-c1">12.0</span>]
+[<span class="pl-c1">6.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">7.0</span>,<span class="pl-c1">18.0</span>]
+[<span class="pl-c1">6.0</span>,<span class="pl-c1">6.0</span>,<span class="pl-c1">9.0</span>,<span class="pl-c1">14.0</span>]
+<span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc5<span class="pl-pds">"</span></span>
+[<span class="pl-c1">1.0</span>,<span class="pl-c1">3.0</span>,<span class="pl-c1">8.0</span>,<span class="pl-c1">20.0</span>]
+[<span class="pl-c1">3.0</span>,<span class="pl-c1">3.0</span>,<span class="pl-c1">10.0</span>,<span class="pl-c1">17.0</span>]
+[<span class="pl-c1">3.0</span>,<span class="pl-c1">4.0</span>,<span class="pl-c1">10.0</span>,<span class="pl-c1">16.0</span>]
+<span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc6<span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc7<span class="pl-pds">"</span></span>
+<span class="pl-c1">8.27113</span>
+<span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span></pre></div>
+
+<h6>
+<a id="this-shows-that-there-is-no-solution-that-only-calc2-only-calc6-or-only-calc7-can-find-next-i-checkes-all-combinations-of-these-three" class="anchor" href="#this-shows-that-there-is-no-solution-that-only-calc2-only-calc6-or-only-calc7-can-find-next-i-checkes-all-combinations-of-these-three" aria-hidden="true"><span class="octicon octicon-link"></span></a>This shows that there is no solution that only calc2, only calc6, or only calc7 can find. Next, I checkes all combinations of these three:</h6>
+
+<div class="highlight highlight-javascript"><pre>{<span class="pl-k">-</span># LANGUAGE OverloadedStrings #<span class="pl-k">-</span>}
+
+<span class="pl-k">import</span> Data.List
+<span class="pl-k">import</span> System.CPUTime
+
+notWhole <span class="pl-k">::</span> Double <span class="pl-k">-&gt;</span> Bool
+notWhole x <span class="pl-k">=</span> fromIntegral (round x) <span class="pl-k">/=</span> x
+
+cat <span class="pl-k">::</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> Double
+cat l m   | m <span class="pl-k">&lt;</span> <span class="pl-c1">0</span>  <span class="pl-k">=</span> <span class="pl-c1">3.1</span>
+          | l <span class="pl-k">==</span> <span class="pl-c1">0</span>  <span class="pl-k">=</span> <span class="pl-c1">3.1</span>
+          | notWhole l  <span class="pl-k">=</span> <span class="pl-c1">3.1</span>
+          | notWhole m  <span class="pl-k">=</span> <span class="pl-c1">3.1</span>
+          | otherwise  <span class="pl-k">=</span> read (show (round l) <span class="pl-k">++</span> show (round m))
+
+f <span class="pl-k">::</span> Double <span class="pl-k">-&gt;</span> <span class="pl-s3">String</span>
+f x <span class="pl-k">=</span> show (round x)
+
+scoreDiv <span class="pl-k">::</span> (Eq a, Fractional a) <span class="pl-k">=&gt;</span> a <span class="pl-k">-&gt;</span> a <span class="pl-k">-&gt;</span> a
+scoreDiv az bz  | bz <span class="pl-k">==</span> <span class="pl-c1">0</span>  <span class="pl-k">=</span> <span class="pl-c1">99999</span>
+                | otherwise <span class="pl-k">=</span> (/) az bz
+
+ops <span class="pl-k">=</span>  [cat, (<span class="pl-k">+</span>), (<span class="pl-k">-</span>), (<span class="pl-k">*</span>), scoreDiv] 
+
+calc <span class="pl-k">::</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> [(Double, Double, Double, Double)]
+calc a b c d <span class="pl-k">=</span> [ (a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>) |
+                        [a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>] <span class="pl-k">&lt;-</span> nub(permutations [a,b,c,d]),
+                            op1 <span class="pl-k">&lt;-</span> ops,
+                            op2 <span class="pl-k">&lt;-</span> ops,
+                            op2 (op1 a<span class="pl-s1"><span class="pl-pds">'</span> b<span class="pl-pds">'</span></span>) c<span class="pl-s1"><span class="pl-pds">'</span> == 20]</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">calc2 :: Double -&gt; Double -&gt; Double -&gt; Double -&gt; [(Double, Double, Double, Double)]</span>
+<span class="pl-s1">calc2 a b c d = [ (a<span class="pl-pds">'</span></span>,b<span class="pl-s1"><span class="pl-pds">'</span>,c<span class="pl-pds">'</span></span>,d<span class="pl-s1"><span class="pl-pds">'</span>) |</span>
+<span class="pl-s1">                        [a<span class="pl-pds">'</span></span>,b<span class="pl-s1"><span class="pl-pds">'</span>,c<span class="pl-pds">'</span></span>,d<span class="pl-s1"><span class="pl-pds">'</span>] &lt;- nub(permutations [a,b,c,d]),</span>
+<span class="pl-s1">                            op1 &lt;- ops,</span>
+<span class="pl-s1">                            op2 &lt;- ops,</span>
+<span class="pl-s1">                            op2 a<span class="pl-pds">'</span></span> (op1 b<span class="pl-s1"><span class="pl-pds">'</span> c<span class="pl-pds">'</span></span>) <span class="pl-k">==</span> <span class="pl-c1">20</span>]
+
+calc3 <span class="pl-k">::</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> [(Double, Double, Double, Double)]
+calc3 a b c d <span class="pl-k">=</span> [ (a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>) |
+                        [a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>] <span class="pl-k">&lt;-</span> nub(permutations [a,b,c,d]),
+                            op1 <span class="pl-k">&lt;-</span> ops,
+                            op2 <span class="pl-k">&lt;-</span> ops,
+                            op3 <span class="pl-k">&lt;-</span> ops,
+                            op3 (op1 a<span class="pl-s1"><span class="pl-pds">'</span> b<span class="pl-pds">'</span></span>) (op2 c<span class="pl-s1"><span class="pl-pds">'</span> d<span class="pl-pds">'</span></span>) <span class="pl-k">==</span> <span class="pl-c1">20</span>]
+
+calc4 <span class="pl-k">::</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> [(Double, Double, Double, Double)]
+calc4 a b c d <span class="pl-k">=</span> [ (a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>)  |
+                        [a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>] <span class="pl-k">&lt;-</span> nub(permutations [a,b,c,d]),
+                            op1 <span class="pl-k">&lt;-</span> ops,
+                            op2 <span class="pl-k">&lt;-</span> ops,
+                            op3 <span class="pl-k">&lt;-</span> ops,
+                            op3 (op2 (op1 a<span class="pl-s1"><span class="pl-pds">'</span> b<span class="pl-pds">'</span></span>) c<span class="pl-s1"><span class="pl-pds">'</span>) d<span class="pl-pds">'</span></span> <span class="pl-k">==</span> <span class="pl-c1">20</span>]
+
+calc5 a b c d <span class="pl-k">=</span> [ (a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>) |
+                        [a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>] <span class="pl-k">&lt;-</span> nub(permutations [a,b,c,d]),
+                            op1 <span class="pl-k">&lt;-</span> ops,
+                            op2 <span class="pl-k">&lt;-</span> ops,
+                            op3 <span class="pl-k">&lt;-</span> ops,
+                            op3 (op2 a<span class="pl-s1"><span class="pl-pds">'</span> (op1 b<span class="pl-pds">'</span></span> c<span class="pl-s1"><span class="pl-pds">'</span>)) d<span class="pl-pds">'</span></span> <span class="pl-k">==</span> <span class="pl-c1">20</span>]
+
+calc6 a b c d <span class="pl-k">=</span> [ (a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>) |
+                        [a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>] <span class="pl-k">&lt;-</span> nub(permutations [a,b,c,d]),
+                            op1 <span class="pl-k">&lt;-</span> ops,
+                            op2 <span class="pl-k">&lt;-</span> ops,
+                            op3 <span class="pl-k">&lt;-</span> ops,
+                            op3 a<span class="pl-s1"><span class="pl-pds">'</span> (op2 (op1 b<span class="pl-pds">'</span></span> c<span class="pl-s1"><span class="pl-pds">'</span>) d<span class="pl-pds">'</span></span>) <span class="pl-k">==</span> <span class="pl-c1">20</span>]
+
+calc7 a b c d <span class="pl-k">=</span> [ (a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>) |
+                        [a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>] <span class="pl-k">&lt;-</span> nub(permutations [a,b,c,d]),
+                            op1 <span class="pl-k">&lt;-</span> ops,
+                            op2 <span class="pl-k">&lt;-</span> ops,
+                            op3 <span class="pl-k">&lt;-</span> ops,
+                            op3 a<span class="pl-s1"><span class="pl-pds">'</span> (op2 b<span class="pl-pds">'</span></span> (op1 c<span class="pl-s1"><span class="pl-pds">'</span> d<span class="pl-pds">'</span></span>)) <span class="pl-k">==</span> <span class="pl-c1">20</span>]
+
+
+only_calc2_or_6 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+                     a <span class="pl-k">&lt;=</span> b, b <span class="pl-k">&lt;=</span> c, c <span class="pl-k">&lt;=</span> d,
+                     <span class="pl-c1">null</span> $ calc a b c d, not (<span class="pl-c1">null</span> $ calc2 a b c d), <span class="pl-c1">null</span> $ calc3 a b c d, 
+                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, not (<span class="pl-c1">null</span> $ calc6 a b c d), 
+                     <span class="pl-c1">null</span> $ calc7 a b c d ]
+
+only_calc2_or_7 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+                     a <span class="pl-k">&lt;=</span> b, b <span class="pl-k">&lt;=</span> c, c <span class="pl-k">&lt;=</span> d,
+                     <span class="pl-c1">null</span> $ calc a b c d, not (<span class="pl-c1">null</span> $ calc2 a b c d), <span class="pl-c1">null</span> $ calc3 a b c d, 
+                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, <span class="pl-c1">null</span> $ calc6 a b c d, 
+                     not (<span class="pl-c1">null</span> $ calc7 a b c d) ]
+
+only_calc6_or_7 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+                     a <span class="pl-k">&lt;=</span> b, b <span class="pl-k">&lt;=</span> c, c <span class="pl-k">&lt;=</span> d,
+                     <span class="pl-c1">null</span> $ calc a b c d, <span class="pl-c1">null</span> $ calc2 a b c d, <span class="pl-c1">null</span> $ calc3 a b c d, 
+                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, not (<span class="pl-c1">null</span> $ calc6 a b c d), 
+                     not (<span class="pl-c1">null</span> $ calc7 a b c d )]
+
+
+only_calc2_or_6_or_7 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+                     a <span class="pl-k">&lt;=</span> b, b <span class="pl-k">&lt;=</span> c, c <span class="pl-k">&lt;=</span> d,
+                     <span class="pl-c1">null</span> $ calc a b c d, not (<span class="pl-c1">null</span> $ calc2 a b c d), <span class="pl-c1">null</span> $ calc3 a b c d, 
+                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, not (<span class="pl-c1">null</span> $ calc6 a b c d), 
+                     not (<span class="pl-c1">null</span> $ calc7 a b c d )]
+
+main <span class="pl-k">=</span> <span class="pl-k">do</span> 
+    print <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc2_or_6<span class="pl-pds">"</span></span>
+    t1 <span class="pl-k">&lt;-</span> getCPUTime
+    mapM_ print only_calc2_or_6
+    print <span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+
+    print <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc2_or_7<span class="pl-pds">"</span></span>
+    mapM_ print only_calc2_or_7
+    print <span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+
+    print <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc6_or_7<span class="pl-pds">"</span></span>
+    mapM_ print only_calc6_or_7
+    print <span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+
+    print <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc2_or_6_or_7<span class="pl-pds">"</span></span>
+    mapM_ print only_calc2_or_6_or_7
+    t2 <span class="pl-k">&lt;-</span> getCPUTime
+    <span class="pl-s">let</span> t <span class="pl-k">=</span> fromIntegral (t2<span class="pl-k">-</span>t1) <span class="pl-k">*</span> <span class="pl-c1">1e-12</span>
+    print t
+</pre></div>
+
+<p>And here is what I got:</p>
+
+<div class="highlight highlight-javascript"><pre>    e@e<span class="pl-k">:~</span>/b0$ ./analysis_B
+<span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc2_or_6<span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc2_or_7<span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc6_or_7<span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span> <span class="pl-pds">"</span></span>
+<span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc2_or_6_or_7<span class="pl-pds">"</span></span>
+[<span class="pl-c1">2.0</span>,<span class="pl-c1">5.0</span>,<span class="pl-c1">12.0</span>,<span class="pl-c1">12.0</span>]
+<span class="pl-c1">3.385727</span></pre></div>
+
+<h6>
+<a id="there-are-no-rolls-of-the-dice-that-can-be-found-only-by-some-pair-of-these-functions-and-251212-is-the-only-roll-that-can-be-found-by-all-three-but-none-of-the-algorythms-calc-calc3-calc4-and-calc5-which-uniquely-solve-some-rolls-those-four-along-with-any-one-of-calc2-calc6-or-calc7-are-sufficient-to-find-at-least-one-solution-if-a-roll-is-solvable-a-corrolary-is-that-if-calc-calc2-calc3-calc4-and-calc5-cant-find-a-solution-calc6-and-calc7-wont-either-i-tested-this-by-removing-calc6-and-calc7-from-impossibleshs-and-renaming-it-impossibles2hs-like-impossibleshs-it-found-the-104-impossible-rolls-only-in-133-instead-of-150-seconds" class="anchor" href="#there-are-no-rolls-of-the-dice-that-can-be-found-only-by-some-pair-of-these-functions-and-251212-is-the-only-roll-that-can-be-found-by-all-three-but-none-of-the-algorythms-calc-calc3-calc4-and-calc5-which-uniquely-solve-some-rolls-those-four-along-with-any-one-of-calc2-calc6-or-calc7-are-sufficient-to-find-at-least-one-solution-if-a-roll-is-solvable-a-corrolary-is-that-if-calc-calc2-calc3-calc4-and-calc5-cant-find-a-solution-calc6-and-calc7-wont-either-i-tested-this-by-removing-calc6-and-calc7-from-impossibleshs-and-renaming-it-impossibles2hs-like-impossibleshs-it-found-the-104-impossible-rolls-only-in-133-instead-of-150-seconds" aria-hidden="true"><span class="octicon octicon-link"></span></a>There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the algorythms (calc, calc3, calc4, and calc5) which uniquely solve some rolls. Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corrolary is that if calc, calc2, calc3, calc4, and calc5 can't find a solution, calc6 and calc7 won't either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds.</h6>
+
+<p>The module Fm uses the seven algorythms to find solutions to random rolls or numbers entered by Score players. It massages the output into a single line of Text with solutions separated by "<br>". The browsers receive the Text as a Javascript string which, when appended to a div, displays the solutions neatly in a column.</p>
       </section>
     </div>
 
