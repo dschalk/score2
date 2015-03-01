@@ -204,15 +204,14 @@ talk conn state (user, _, _) = forever $ do
                 st <- readMVar state 
                 broadcast msg st
 
-    else if "CG#$42" `T.isPrefixOf` msg
+        else if "CG#$42" `T.isPrefixOf` msg
         then 
             mask_ $ do  
                 old <- takeMVar state
                 let new = upScore sender old
                 putMVar state new 
-                st2 <- readMVar state
-                broadcast msg st2
-                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
+                broadcast msg new
+                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr new))) new
 
     else if "CI#$42" `T.isPrefixOf` msg
         then 
@@ -220,9 +219,8 @@ talk conn state (user, _, _) = forever $ do
                 old <- takeMVar state
                 let new = downScore sender old
                 putMVar state new 
-                st2 <- readMVar state
-                broadcast msg st2
-                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
+                broadcast msg new
+                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr new))) new
 
     else if "CL#$42" `T.isPrefixOf` msg
         then 
@@ -230,9 +228,8 @@ talk conn state (user, _, _) = forever $ do
                 old <- takeMVar state
                 let new = downScore sender old
                 putMVar state new 
-                st2 <- readMVar state
-                broadcast msg st2
-                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
+                broadcast msg new
+                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr new))) new
 
     else if "CM#$42" `T.isPrefixOf` msg
         then 
@@ -250,9 +247,8 @@ talk conn state (user, _, _) = forever $ do
                 old <- takeMVar state
                 let new = downScore2 extra old
                 putMVar state new 
-                st2 <- readMVar state
-                broadcast msg st2
-                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st2))) st2 
+                broadcast msg new
+                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr new))) new
     else 
         do 
             liftIO $ readMVar state >>= broadcast (user `mappend` ": " `mappend` msg) 
