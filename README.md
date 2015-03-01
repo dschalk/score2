@@ -54,7 +54,7 @@ case "CB#$42":
 $("#users").html(event.data.substring(6));    // Refresh browser with server state.
 break;
 ```
-The browsers do not need to process the message because the server interspersed '<br>' into the state data text it sent, and the browser receives it as a string of HTML. The text 'CC#42' is received a a six-character string, prompting a response as follows:
+The browsers do not need to process the message because the server interspersed '\<br>' into the state data text it sent, and the browser receives it as a string of HTML. The text 'CC#42' is received a a six-character string, prompting a response as follows:
 
 ```javascript
 ws.onmessage = function(event) {
@@ -630,7 +630,7 @@ And here is what I got:
 ```
 ###### There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the algorythms (calc, calc3, calc4, and calc5) which uniquely solve some rolls. Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corrolary is that if calc, calc2, calc3, calc4, and calc5 can't find a solution, calc6 and calc7 won't either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds.
 
-The module Fm uses the seven algorythms to find solutions to random rolls or numbers entered by Score players. It massages the output into a single line of Text with solutions separated by "<br>". The browsers receive the Text as a Javascript string which, when appended to a div, displays the solutions neatly in a column.
+The module Fm uses the seven algorythms to find solutions to random rolls or numbers entered by Score players. It massages the output into a single line of Text with solutions separated by "\<br>". The browsers receive the Text as a Javascript string which, when appended to a div, displays the solutions neatly in a column.
 
 
 
