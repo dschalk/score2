@@ -127,8 +127,6 @@ $(document).ready(function () {
         var ext7 = gameArray[7];
         var ext8 = gameArray[8];
         var p = $(document.createElement('p')).text(event.data); 
-        $("#stop60").html("<h2>" + d2);
-        console.log("sender is " + sender + "__plX is " + plX + "__prX is " + prX + "__sourceStatus is " + sourceStatus);
         if (plX === sender || prX !== "a@F$Uy&private" &&  sourceStatus !== "a@F$Uy&private") {
             switch (d2) {
                 case "CA#$42":               // Set up the next round of play.
