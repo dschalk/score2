@@ -168,9 +168,41 @@ The 'msg' being broadcast is just the unaltered message that was received, prefi
 
 **Digression On Immutable Variables**
 
+
 I played around with some functional javascript libraries that take pains to avoid mutating Javascript variables. Most of the score2 variables are contained in the DS_ob object. I could use setters that remove DS_ob elements and replace them with new versions, much in the manner of replacing state the server MVar, but what would be the point? It seems to me that, at the cost of some unnecessary overhead, I would end up with precisely the same thing I get with 'DS_ob.element = "new value" '. I could re-define DS_ob as a monad, but composability and the other monad features would be useless baggage in score2.
 
 The state MVar gets defined once and only its contents change as the game goes on. The same is true of DS_ob.
+
+But notice what the defining code does:
+
+```javascript
+function makeDS_ob() {
+    this.t = -1,
+    this.privateClicker = "a@F$Uy&private";
+    this.player = "Happy Clown";
+    this.impossibleClicker = "Adrien Apple";
+    this.scoreClicker = "Beaming Banana" ;
+    this.rollText = "1,1,1,1,42"
+    this.d = -1;
+    this.ar = [];
+    this.bool = [];
+    this.game = "off";
+    this.scoreFunc = function() {
+        $("#countdown").html("");
+        $("#a0").html("");
+        if (this.player === this.scoreClicker) {
+            ws.send("CL#$42," + this.privateClicker + "," + this.player + "," + "dummy");
+        }
+        if ( this.player === this.impossibleClicker) {
+            ws.send("CM#$42,"+ this.privateClicker + "," + this.player + "," + "dummy");
+            $("#stop60").triggerHandler('click');
+        }
+    }
+}
+var DS_ob = new makeDS_ob();
+```
+
+The use of new in the last line sets the context of DS_ob in concrete. Merely defining DS_ob as an object without explicitely making the variables elements of "this" would appear to accomplish the same thing. I don't know if either of the alternatives tends to promote better performance in the browsers.
 
 **Screening Massages Arriving At The Browsers**
 
