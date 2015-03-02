@@ -50,7 +50,7 @@ function makeDS_ob() {
         }
     }
 }
-DS_ob = new makeDS_ob();
+var DS_ob = new makeDS_ob();
 }
 
 refresh = function() {
