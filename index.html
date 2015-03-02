@@ -198,6 +198,35 @@ upScore name = <span class="pl-s3">map</span> (incFunc name)
 
 <p>The state MVar gets defined once and only its contents change as the game goes on. The same is true of DS_ob.</p>
 
+<p>But notice what the defining code does:</p>
+
+<div class="highlight highlight-javascript"><pre><span class="pl-st">function</span> <span class="pl-en">makeDS_ob</span>() {
+    <span class="pl-v">this</span>.t <span class="pl-k">=</span> <span class="pl-k">-</span><span class="pl-c1">1</span>,
+    <span class="pl-v">this</span>.privateClicker <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">"</span>a@F$Uy&amp;private<span class="pl-pds">"</span></span>;
+    <span class="pl-v">this</span>.player <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">"</span>Happy Clown<span class="pl-pds">"</span></span>;
+    <span class="pl-v">this</span>.impossibleClicker <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">"</span>Adrien Apple<span class="pl-pds">"</span></span>;
+    <span class="pl-v">this</span>.scoreClicker <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">"</span>Beaming Banana<span class="pl-pds">"</span></span> ;
+    <span class="pl-v">this</span>.rollText <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">"</span>1,1,1,1,42<span class="pl-pds">"</span></span>
+    <span class="pl-v">this</span>.d <span class="pl-k">=</span> <span class="pl-k">-</span><span class="pl-c1">1</span>;
+    <span class="pl-v">this</span>.ar <span class="pl-k">=</span> [];
+    <span class="pl-v">this</span>.bool <span class="pl-k">=</span> [];
+    <span class="pl-v">this</span>.game <span class="pl-k">=</span> <span class="pl-s1"><span class="pl-pds">"</span>off<span class="pl-pds">"</span></span>;
+    <span class="pl-s3">this</span>.<span class="pl-en">scoreFunc</span> <span class="pl-k">=</span> <span class="pl-st">function</span>() {
+        $(<span class="pl-s1"><span class="pl-pds">"</span>#countdown<span class="pl-pds">"</span></span>).html(<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>);
+        $(<span class="pl-s1"><span class="pl-pds">"</span>#a0<span class="pl-pds">"</span></span>).html(<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pds">"</span></span>);
+        <span class="pl-k">if</span> (<span class="pl-v">this</span>.player <span class="pl-k">===</span> <span class="pl-v">this</span>.scoreClicker) {
+            ws.<span class="pl-s3">send</span>(<span class="pl-s1"><span class="pl-pds">"</span>CL#$42,<span class="pl-pds">"</span></span> <span class="pl-k">+</span> <span class="pl-v">this</span>.privateClicker <span class="pl-k">+</span> <span class="pl-s1"><span class="pl-pds">"</span>,<span class="pl-pds">"</span></span> <span class="pl-k">+</span> <span class="pl-v">this</span>.player <span class="pl-k">+</span> <span class="pl-s1"><span class="pl-pds">"</span>,<span class="pl-pds">"</span></span> <span class="pl-k">+</span> <span class="pl-s1"><span class="pl-pds">"</span>dummy<span class="pl-pds">"</span></span>);
+        }
+        <span class="pl-k">if</span> ( <span class="pl-v">this</span>.player <span class="pl-k">===</span> <span class="pl-v">this</span>.impossibleClicker) {
+            ws.<span class="pl-s3">send</span>(<span class="pl-s1"><span class="pl-pds">"</span>CM#$42,<span class="pl-pds">"</span></span><span class="pl-k">+</span> <span class="pl-v">this</span>.privateClicker <span class="pl-k">+</span> <span class="pl-s1"><span class="pl-pds">"</span>,<span class="pl-pds">"</span></span> <span class="pl-k">+</span> <span class="pl-v">this</span>.player <span class="pl-k">+</span> <span class="pl-s1"><span class="pl-pds">"</span>,<span class="pl-pds">"</span></span> <span class="pl-k">+</span> <span class="pl-s1"><span class="pl-pds">"</span>dummy<span class="pl-pds">"</span></span>);
+            $(<span class="pl-s1"><span class="pl-pds">"</span>#stop60<span class="pl-pds">"</span></span>).triggerHandler(<span class="pl-s1"><span class="pl-pds">'</span>click<span class="pl-pds">'</span></span>);
+        }
+    }
+}
+<span class="pl-s">var</span> DS_ob <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">makeDS_ob</span>();</pre></div>
+
+<p>The use of new in the last line sets the context of DS_ob in concrete. Merely defining DS_ob as an object without explicitely making the variables elements of "this" would appear to accomplish the same thing. I don't know if either of the alternatives tends to promote better performance in the browsers.</p>
+
 <p><strong>Screening Massages Arriving At The Browsers</strong></p>
 
 <p>The first stage of processing messages coming into the browsers is as follows:</p>
