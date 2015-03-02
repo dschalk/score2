@@ -40,7 +40,7 @@
 
 <p>I started with the chat example at github.com/wai/wai-websockets. It is Jasper Van der Jeugt 's websockets adapted to the warp web server. The routine work of the chat server is receiving messages from individual browsers and broadcasting them to all participants. The server facilitates what is tantamount to peer-to-peer interactions among the browsers. It also parses sign in messages to make sure the format is correct and there are no duplicate user names. The server keeps a list of participants in an MVar, and replaces the list with an updated version whenever there is a disconnect or a sign-in.</p>
 
-<p>I modified the participant list to include scores along with names. Whenever the list is replaced due to a score change, sign-in, or disconnect, the server sends a line of text interspersed with "<br>" and the prefix 'CB#$42'. The browsers intercept these messages and divert them away from the chat message section and into the scoreboard. There are fifteen six-character message prefixes in the format 'Cx#42' where 'x' is some capital letter. None of these go into the chat message section. They contain data and instructions for the game. Application messages are either Javascript strings or Haskell Text. Browsers split comma-separated strings into arrays and distribute the elements according to the their six-character prefixes (element '0' in the arrays).</p>
+<p>I modified the participant list to include scores along with names. Whenever the list is replaced due to a score change, sign-in, or disconnect, the server sends a line of text interspersed with 'br' in brackets and the prefix 'CB#$42'. The browsers intercept these messages and divert them away from the chat message section and into the scoreboard. There are fifteen six-character message prefixes in the format 'Cx#42' where 'x' is some capital letter. None of these go into the chat message section. They contain data and instructions for the game. Application messages are either Javascript strings or Haskell Text. Browsers split comma-separated strings into arrays and distribute the elements according to the their six-character prefixes (element '0' in the arrays).</p>
 
 <p>It would be nice if players could compete in small groups in discreet chat rooms, or even play solitaire in their own room. Solitaire play is currently an option, but the chat messages and scoreboard are communal. I am also thinking of providing the option of changing the dice from 6, 6, 12, and 20 sided to whatever the players choose. The goal in 'Score' is to make the number '20' out of four random numbers in two or three stages using addition, subtraction, multiplication, division, and concatenation. The goal of '20' could be made adjustable along with the maximum sizes of the four random integers. Suggestions are very welcome.</p>
 
@@ -56,89 +56,105 @@
 
 <p><strong>Initiation Stage</strong></p>
 
-<p>Score2 is based on websockets messages. Chat messages go to the server and are broadcast to all participating browsers. Messages intended for game control rather than chat boxes are prefixed by C_#$42 where "_" is a capital letter. Messages received by browsers which are for game control, and which usually carry data, also have the C _#$42 prefixes. The flow of this application can be understood by tracing the routes of the prefixed messages.</p>
+<p>The game interface in the browsers responds to text messages transmitted by the server. Javascript interprets these as strings, and the strings it sends become text before they are used in the server application. Chat messages sent to the server and are broadcast to all participating browsers. Messages intended for game control are prefixed by C_#$42 where "_" is a capital letter. Messages received by browsers which are for game control, and which usually carry data, also have the C _#$42 prefixes. The flow of the game can be understood by tracing the routes of the prefixed messages.</p>
 
 <p>A player joins the game by entering a name in a form. Here is the Javascript form code:</p>
 
-<div class="highlight highlight-Javascript"><pre>    $(<span class="pl-s1"><span class="pl-pds">'</span>#join-form<span class="pl-pds">'</span></span>).<span class="pl-s3">submit</span>(<span class="pl-st">function</span> () {
-        $(<span class="pl-s1"><span class="pl-pds">'</span>#warnings<span class="pl-pds">'</span></span>).html(<span class="pl-s1"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>);
-        <span class="pl-s">var</span> user <span class="pl-k">=</span> $(<span class="pl-s1"><span class="pl-pds">'</span>#user<span class="pl-pds">'</span></span>).val();
-        players.setPlayer(user);
-        ws <span class="pl-k">=</span> createWebSocket(<span class="pl-s1"><span class="pl-pds">'</span>/<span class="pl-pds">'</span></span>);
-        <span class="pl-s3">ws</span>.<span class="pl-en">onopen</span> <span class="pl-k">=</span> <span class="pl-st">function</span>() {
-            ws.<span class="pl-s3">send</span>(<span class="pl-s1"><span class="pl-pds">"</span>CC#$42<span class="pl-pds">"</span></span> <span class="pl-k">+</span> user);
-        };</pre></div>
+<div class="highlight highlight-Javascript"><pre>$(<span class="pl-s1"><span class="pl-pds">'</span>#join-form<span class="pl-pds">'</span></span>).<span class="pl-s3">submit</span>(<span class="pl-st">function</span> () {
+    $(<span class="pl-s1"><span class="pl-pds">'</span>#warnings<span class="pl-pds">'</span></span>).html(<span class="pl-s1"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>);
+    <span class="pl-s">var</span> user <span class="pl-k">=</span> $(<span class="pl-s1"><span class="pl-pds">'</span>#user<span class="pl-pds">'</span></span>).val();
+    players.setPlayer(user);
+    ws <span class="pl-k">=</span> createWebSocket(<span class="pl-s1"><span class="pl-pds">'</span>/<span class="pl-pds">'</span></span>);
+    <span class="pl-s3">ws</span>.<span class="pl-en">onopen</span> <span class="pl-k">=</span> <span class="pl-st">function</span>() {
+        ws.<span class="pl-s3">send</span>(<span class="pl-s1"><span class="pl-pds">"</span>CC#$42<span class="pl-pds">"</span></span> <span class="pl-k">+</span> user);
+    };
+}</pre></div>
 
-<p>The server parses the message prefixed by CC#$42 and, if the name is in the proper format and hasn't already been taken, the server (1) adds the new user' Client tuplet, (name, 0, WebSocket), to the ServerState list, [Client], MVar; (2) broadcasts an announcement for placement in the chat section of participating browsers; broadcasts the updated state information for placement in the scoreboard section: and (3) sends the message "CC#$42" to the new player. The new state information is sent with the prefix "CB#$42", which propmts the browsers to put the updated state information where it belongs. Anytime ServerState changes in the server, a message prefixed by CB#$42 and containing the new state information is broadcast to all participating players, keeping scoreboards syncronized with the servers state MVar.</p>
+<p>The server parses the message prefixed by CC#\$42 and, if the name is in the proper format and hasn't already been taken, the server (1) replaces ServerState list of Clients in the state MVar with with a ServerState list which includes the new player, (2) broadcasts an announcement for placement in the chat section of participating browsers, [3] broadcasts the updated state information for placement in the scoreboard section: and (4) sends the message "CC#$42" to the new player. The new state information is sent with the prefix "CB#$42", which instructs the browsers to put the updated state information where it belongs. Anytime a new ServerState is created in the server, a message prefixed by CB#$42 and containing the new state information is broadcast to all participating players, keeping scoreboards syncronized with the servers ServerState Client list.</p>
 
 <p>The sign-in form sends a message prefixed by CC#$42 to the server and, if everything is in order, the server responds with</p>
 
 <div class="highlight highlight-haskell"><pre>liftIO $ modifyMVar_ state $ \s -&gt; <span class="pl-k">do</span>
-<span class="pl-k">let</span> s' = addClient client s  
-<span class="pl-c1">WS</span>.sendTextData conn $ <span class="pl-c1">T</span>.pack <span class="pl-s1"><span class="pl-pds">"</span>CC#$42<span class="pl-pds">"</span></span>
-broadcast (getName client <span class="pl-k">`mappend`</span> <span class="pl-s1"><span class="pl-pds">"</span> joined<span class="pl-pds">"</span></span>) s'
-broadcast (<span class="pl-s1"><span class="pl-pds">"</span>CB#$42<span class="pl-pds">"</span></span> <span class="pl-k">`mappend`</span> <span class="pl-c1">T</span>.<span class="pl-s3">concat</span>(intersperse (<span class="pl-c1">T</span>.pack <span class="pl-s1"><span class="pl-pds">"</span>&lt;br&gt;<span class="pl-pds">"</span></span>) (<span class="pl-s3">map</span> tr s'))) s'
-<span class="pl-s3">return</span> s'</pre></div>
+    <span class="pl-k">let</span> s' = addClient client s  
+    <span class="pl-c1">WS</span>.sendTextData conn $ <span class="pl-c1">T</span>.pack <span class="pl-s1"><span class="pl-pds">"</span>CC#$42<span class="pl-pds">"</span></span>
+    broadcast (getName client <span class="pl-k">`mappend`</span> <span class="pl-s1"><span class="pl-pds">"</span> joined<span class="pl-pds">"</span></span>) s'
+    broadcast (<span class="pl-s1"><span class="pl-pds">"</span>CB#$42<span class="pl-pds">"</span></span> <span class="pl-k">`mappend`</span> <span class="pl-c1">T</span>.<span class="pl-s3">concat</span>(intersperse (<span class="pl-c1">T</span>.pack <span class="pl-s1"><span class="pl-pds">"</span>&lt;br&gt;<span class="pl-pds">"</span></span>) (<span class="pl-s3">map</span> tr s'))) s'
+    <span class="pl-s3">return</span> s'</pre></div>
 
 <p>The message prefixed by "CB#$42" is processed in the browsers as follows:</p>
 
 <div class="highlight highlight-javascript"><pre><span class="pl-k">case</span> <span class="pl-s1"><span class="pl-pds">"</span>CB#$42<span class="pl-pds">"</span></span><span class="pl-k">:</span>
-$(<span class="pl-s1"><span class="pl-pds">"</span>#users<span class="pl-pds">"</span></span>).html(<span class="pl-s3">event</span>.<span class="pl-sc">data</span>.<span class="pl-s3">substring</span>(<span class="pl-c1">6</span>));    <span class="pl-c">// Refresh browser with server state.</span>
+  $(<span class="pl-s1"><span class="pl-pds">"</span>#users<span class="pl-pds">"</span></span>).html(<span class="pl-s3">event</span>.<span class="pl-sc">data</span>.<span class="pl-s3">substring</span>(<span class="pl-c1">6</span>));
 <span class="pl-k">break</span>;</pre></div>
 
-<p>The browsers do not need to process the message because the server interspersed '&lt;br&gt;' into the state data text it sent, and the browser receives it as a string of HTML. The text 'CC#42' is received a a six-character string, prompting a response as follows:</p>
+<p>The browsers do not need to process the message because the server interspersed 'br' (in HTML brackets) into the state data text it sent so the browser receives it as a string of HTML. The text 'CC#42' is received a a six-character string, prompting a response as follows:</p>
 
-<div class="highlight highlight-javascript"><pre><span class="pl-s3">ws</span>.<span class="pl-en">onmessage</span> <span class="pl-k">=</span> <span class="pl-st">function</span>(<span class="pl-vpf">event</span>) {
-  <span class="pl-k">if</span>(<span class="pl-s3">event</span>.<span class="pl-sc">data</span> <span class="pl-k">===</span> <span class="pl-s1"><span class="pl-pds">"</span>CC#$42<span class="pl-pds">"</span></span>) {
-    DS_ob.d <span class="pl-k">=</span> <span class="pl-k">-</span><span class="pl-c1">1</span>;
-    createDom();
-    createOperators();
-    createDropboxes();
-    $(<span class="pl-s1"><span class="pl-pds">'</span>.drag<span class="pl-pds">'</span></span>).draggable({ revert<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">"</span>invalid<span class="pl-pds">"</span></span>, zIndex<span class="pl-k">:</span> <span class="pl-c1">2</span> });
-    $(<span class="pl-s1"><span class="pl-pds">'</span>.dragNew<span class="pl-pds">'</span></span>).draggable({ revert<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">"</span>invalid<span class="pl-pds">"</span></span>, zIndex<span class="pl-k">:</span> <span class="pl-c1">2</span> });
-    $(<span class="pl-s1"><span class="pl-pds">'</span>.drag2<span class="pl-pds">'</span></span>).draggable({ helper<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">"</span>clone<span class="pl-pds">"</span></span>, revert<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">"</span>invalid<span class="pl-pds">"</span></span>, zIndex<span class="pl-k">:</span> <span class="pl-c1">2</span> });
-    createDrop1();
-    createDrop2();
-    $(<span class="pl-s1"><span class="pl-pds">"</span>#result1<span class="pl-pds">"</span></span>).hide();
-    $(<span class="pl-s1"><span class="pl-pds">"</span>#result2<span class="pl-pds">"</span></span>).hide();
-    $(<span class="pl-s1"><span class="pl-pds">"</span>#result3<span class="pl-pds">"</span></span>).hide();  
-    $(<span class="pl-s1"><span class="pl-pds">"</span>#b0<span class="pl-pds">"</span></span>).show();
-    $(<span class="pl-s1"><span class="pl-pds">"</span>#experiment<span class="pl-pds">"</span></span>).show();
-    $(<span class="pl-s1"><span class="pl-pds">"</span>#public<span class="pl-pds">"</span></span>).show();
-    $(<span class="pl-s1"><span class="pl-pds">"</span>#b0<span class="pl-pds">"</span></span>).html(<span class="pl-s1"><span class="pl-pds">"</span>Solitaire mode. Click above to enable competition.<span class="pl-pds">"</span></span>)
-    $(<span class="pl-s1"><span class="pl-pds">"</span>#rollA<span class="pl-pds">"</span></span>).show();
-    $(<span class="pl-s1"><span class="pl-pds">"</span>#a1<span class="pl-pds">"</span></span>).show();
-    $(<span class="pl-s1"><span class="pl-pds">'</span>#join-section<span class="pl-pds">'</span></span>).hide();
-    $(<span class="pl-s1"><span class="pl-pds">'</span>#chat-section<span class="pl-pds">'</span></span>).show();
-    $(<span class="pl-s1"><span class="pl-pds">'</span>#users-section<span class="pl-pds">'</span></span>).show();
-    $(<span class="pl-s1"><span class="pl-pds">"</span>#messages<span class="pl-pds">"</span></span>).show();
-    $(<span class="pl-s1"><span class="pl-pds">"</span>.dropx<span class="pl-pds">"</span></span>).hide();
-    $(<span class="pl-s1"><span class="pl-pds">"</span>.drop2x<span class="pl-pds">"</span></span>).hide();
-    ws.onmessage <span class="pl-k">=</span> onMessage;
-    $(<span class="pl-s1"><span class="pl-pds">'</span>#message-form<span class="pl-pds">'</span></span>).<span class="pl-s3">submit</span>(<span class="pl-st">function</span> () {
-      <span class="pl-s">var</span> text <span class="pl-k">=</span> $(<span class="pl-s1"><span class="pl-pds">'</span>#text<span class="pl-pds">'</span></span>).val();
-      ws.<span class="pl-s3">send</span>(text);
-      $(<span class="pl-s1"><span class="pl-pds">'</span>#text<span class="pl-pds">'</span></span>).val(<span class="pl-s1"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>);
-      <span class="pl-k">return</span> <span class="pl-c1">false</span>;
+<div class="highlight highlight-javascript"><pre>    $(<span class="pl-s1"><span class="pl-pds">'</span>#join-form<span class="pl-pds">'</span></span>).<span class="pl-s3">submit</span>(<span class="pl-st">function</span> () {
+        $(<span class="pl-s1"><span class="pl-pds">'</span>#warnings<span class="pl-pds">'</span></span>).html(<span class="pl-s1"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>);
+        <span class="pl-s">var</span> user <span class="pl-k">=</span> $(<span class="pl-s1"><span class="pl-pds">'</span>#user<span class="pl-pds">'</span></span>).val();
+        DS_ob.player <span class="pl-k">=</span> user;
+        ws <span class="pl-k">=</span> createWebSocket(<span class="pl-s1"><span class="pl-pds">'</span>/<span class="pl-pds">'</span></span>);
+        <span class="pl-s3">ws</span>.<span class="pl-en">onopen</span> <span class="pl-k">=</span> <span class="pl-st">function</span>() {
+            ws.<span class="pl-s3">send</span>(<span class="pl-s1"><span class="pl-pds">"</span>CC#$42<span class="pl-pds">"</span></span> <span class="pl-k">+</span> user);
+        };
+        <span class="pl-s3">ws</span>.<span class="pl-en">onmessage</span> <span class="pl-k">=</span> <span class="pl-st">function</span>(<span class="pl-vpf">event</span>) {
+            <span class="pl-k">if</span>(<span class="pl-s3">event</span>.<span class="pl-sc">data</span> <span class="pl-k">===</span> <span class="pl-s1"><span class="pl-pds">"</span>CC#$42<span class="pl-pds">"</span></span>) {
+                DS_ob.d <span class="pl-k">=</span> <span class="pl-k">-</span><span class="pl-c1">1</span>;
+                createDom();
+                createOperators();
+                createDropboxes();
+                $(<span class="pl-s1"><span class="pl-pds">'</span>.drag<span class="pl-pds">'</span></span>).draggable({ revert<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">"</span>invalid<span class="pl-pds">"</span></span>, zIndex<span class="pl-k">:</span> <span class="pl-c1">2</span> });
+                $(<span class="pl-s1"><span class="pl-pds">'</span>.dragNew<span class="pl-pds">'</span></span>).draggable({ revert<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">"</span>invalid<span class="pl-pds">"</span></span>, zIndex<span class="pl-k">:</span> <span class="pl-c1">2</span> });
+                $(<span class="pl-s1"><span class="pl-pds">'</span>.drag2<span class="pl-pds">'</span></span>).draggable({ helper<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">"</span>clone<span class="pl-pds">"</span></span>, revert<span class="pl-k">:</span> <span class="pl-s1"><span class="pl-pds">"</span>invalid<span class="pl-pds">"</span></span>, zIndex<span class="pl-k">:</span> <span class="pl-c1">2</span> });
+                createDrop1();
+                createDrop2();
+                $(<span class="pl-s1"><span class="pl-pds">"</span>#result1<span class="pl-pds">"</span></span>).hide();
+                $(<span class="pl-s1"><span class="pl-pds">"</span>#result2<span class="pl-pds">"</span></span>).hide();
+                $(<span class="pl-s1"><span class="pl-pds">"</span>#result3<span class="pl-pds">"</span></span>).hide();
+                $(<span class="pl-s1"><span class="pl-pds">"</span>#b0<span class="pl-pds">"</span></span>).show();
+                $(<span class="pl-s1"><span class="pl-pds">"</span>#experiment<span class="pl-pds">"</span></span>).show();
+                $(<span class="pl-s1"><span class="pl-pds">"</span>#public<span class="pl-pds">"</span></span>).show();
+                $(<span class="pl-s1"><span class="pl-pds">"</span>#b0<span class="pl-pds">"</span></span>).html(<span class="pl-s1"><span class="pl-pds">"</span>Solitaire mode. Click above to enable competition.<span class="pl-pds">"</span></span>)
+                $(<span class="pl-s1"><span class="pl-pds">"</span>#rollA<span class="pl-pds">"</span></span>).show();
+                $(<span class="pl-s1"><span class="pl-pds">"</span>#a1<span class="pl-pds">"</span></span>).show();
+                $(<span class="pl-s1"><span class="pl-pds">'</span>#join-section<span class="pl-pds">'</span></span>).hide();
+                $(<span class="pl-s1"><span class="pl-pds">'</span>#chat-section<span class="pl-pds">'</span></span>).show();
+                $(<span class="pl-s1"><span class="pl-pds">'</span>#users-section<span class="pl-pds">'</span></span>).show();
+                $(<span class="pl-s1"><span class="pl-pds">"</span>#messages<span class="pl-pds">"</span></span>).show();
+                $(<span class="pl-s1"><span class="pl-pds">"</span>.dropx<span class="pl-pds">"</span></span>).hide();
+                $(<span class="pl-s1"><span class="pl-pds">"</span>.drop2x<span class="pl-pds">"</span></span>).hide();
+                ws.onmessage <span class="pl-k">=</span> onMessage;
+                $(<span class="pl-s1"><span class="pl-pds">'</span>#message-form<span class="pl-pds">'</span></span>).<span class="pl-s3">submit</span>(<span class="pl-st">function</span> () {
+                    <span class="pl-s">var</span> text <span class="pl-k">=</span> $(<span class="pl-s1"><span class="pl-pds">'</span>#text<span class="pl-pds">'</span></span>).val();
+                    ws.<span class="pl-s3">send</span>(text);
+                    $(<span class="pl-s1"><span class="pl-pds">'</span>#text<span class="pl-pds">'</span></span>).val(<span class="pl-s1"><span class="pl-pds">'</span><span class="pl-pds">'</span></span>);
+                    <span class="pl-k">return</span> <span class="pl-c1">false</span>;
+                });
+            } <span class="pl-k">else</span> {
+                <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">"</span>What?<span class="pl-pds">"</span></span>);
+                $(<span class="pl-s1"><span class="pl-pds">'</span>#warnings<span class="pl-pds">'</span></span>).append(<span class="pl-s3">event</span>.<span class="pl-sc">data</span>);
+                ws.<span class="pl-s3">close</span>();
+            }
+        };
+
+        $(<span class="pl-s1"><span class="pl-pds">'</span>#join<span class="pl-pds">'</span></span>).append(<span class="pl-s1"><span class="pl-pds">'</span>Connecting...<span class="pl-pds">'</span></span>);
+
+        <span class="pl-k">return</span> <span class="pl-c1">false</span>;
     });
-  } <span class="pl-k">else</span> {
-    <span class="pl-en">console</span><span class="pl-s3">.log</span>(<span class="pl-s1"><span class="pl-pds">"</span>What?<span class="pl-pds">"</span></span>);
-    $(<span class="pl-s1"><span class="pl-pds">'</span>#warnings<span class="pl-pds">'</span></span>).append(<span class="pl-s3">event</span>.<span class="pl-sc">data</span>);
-    ws.<span class="pl-s3">close</span>();
-  }
-};</pre></div>
+    $(<span class="pl-s1"><span class="pl-pds">'</span>#join-form<span class="pl-pds">'</span></span>).destroy();
+});</pre></div>
 
-<p>After sign-in, this block of code probably gets garbage-collected. ws.onmessage = onMessage kicks in, and in onMessage we have the code:</p>
+<p>After it initiates the player interface, 'ws.onmessage = onMessage' de-references the anonymous function and re-assignes the variable 'ws.onmessage' to onMessage. The entire 'join-form' section becomes eligible for garbage collection after the final line,' $('#join-form').destroy();'.</p>
+
+<p>When current players receive "CC#$42" prefixed messages from new sign-ins, they do not make it to the chat message section. They hit a dead end in the 'onMessage' section pursuant to the following 'do nothing' code:</p>
 
 <div class="highlight highlight-javascript"><pre><span class="pl-k">case</span> <span class="pl-s1"><span class="pl-pds">"</span>CC#$42<span class="pl-pds">"</span></span><span class="pl-k">:</span>
 <span class="pl-c">// Prevents new player login data from defaulting to a chat message.</span>
 <span class="pl-k">break</span>;</pre></div>
 
-<p>This creates a dead end for messages prefixed by 'CC#42'.</p>
+<p><strong>State And Its MVar</strong></p>
 
-<p><strong>State And Its Containing MVar</strong></p>
-
-<p>Here is how the game state is defined:</p>
+<p>I have mentioned a ServerState list of clients and an MVar that holds the current state of the game. Here is how that game state is defined:</p>
 
 <div class="highlight highlight-haskell"><pre><span class="pl-k">type</span> <span class="pl-c1">Name</span> = <span class="pl-c1">Text</span>
 <span class="pl-k">type</span> <span class="pl-c1">Score</span> = <span class="pl-c1">Int</span>
@@ -154,7 +170,7 @@ newServerState = <span class="pl-c1">[]</span></pre></div>
     state &lt;- newMVar newServerState
 ...</pre></div>
 
-<p>State is modified during game play by removing state from the MVar and replacing it with the modified version. For example, the following code increases a player's score:</p>
+<p>State is modified during game play by replacing the ServerState list of Clients in the MVar. For example, the following code increases a player's score:</p>
 
 <div class="highlight highlight-haskell"><pre><span class="pl-en">incFunc</span> <span class="pl-k">::</span> <span class="pl-st">Text</span> <span class="pl-k">-&gt;</span> <span class="pl-st">Client</span> <span class="pl-k">-&gt;</span> <span class="pl-st">Client</span>
 incFunc x (a, b, c)   | x == a   = (a, b + <span class="pl-c1">1</span>, c)
@@ -163,16 +179,24 @@ incFunc x (a, b, c)   | x == a   = (a, b + <span class="pl-c1">1</span>, c)
 <span class="pl-en">upScore</span> <span class="pl-k">::</span> <span class="pl-st">Text</span> <span class="pl-k">-&gt;</span> <span class="pl-st">ServerState</span> <span class="pl-k">-&gt;</span> <span class="pl-st">ServerState</span>
 upScore name = <span class="pl-s3">map</span> (incFunc name)
 
-<span class="pl-k">else</span> <span class="pl-k">if</span> <span class="pl-s1"><span class="pl-pds">"</span>CG#$42<span class="pl-pds">"</span></span> `<span class="pl-c1">T</span>.isPrefixOf` msg
-<span class="pl-k">then</span>
-mask_ $ <span class="pl-k">do</span>  
-old &lt;- takeMVar state
-<span class="pl-k">let</span> new = upScore sender old
-putMVar state new
-broadcast msg new
-broadcast (<span class="pl-s1"><span class="pl-pds">"</span>CB#$42<span class="pl-pds">"</span></span> <span class="pl-k">`mappend`</span> <span class="pl-c1">T</span>.<span class="pl-s3">concat</span> (intersperse <span class="pl-s1"><span class="pl-pds">"</span>&lt;br&gt;<span class="pl-pds">"</span></span> (<span class="pl-s3">map</span> tr new))) new</pre></div>
+. . .
 
-<p>The 'msg' being broadcast is just the unaltered message that was received. The 'CB#$42' prefixed message updates the browser scoreboards.</p>
+<span class="pl-k">else</span> <span class="pl-k">if</span> <span class="pl-s1"><span class="pl-pds">"</span>CG#$42<span class="pl-pds">"</span></span> `<span class="pl-c1">T</span>.isPrefixOf` msg
+    <span class="pl-k">then</span>
+    mask_ $ <span class="pl-k">do</span>  
+        old &lt;- takeMVar state
+        <span class="pl-k">let</span> new = upScore sender old
+        putMVar state new
+        broadcast msg new
+        broadcast (<span class="pl-s1"><span class="pl-pds">"</span>CB#$42<span class="pl-pds">"</span></span> <span class="pl-k">`mappend`</span> <span class="pl-c1">T</span>.<span class="pl-s3">concat</span> (intersperse <span class="pl-s1"><span class="pl-pds">"</span>&lt;br&gt;<span class="pl-pds">"</span></span> (<span class="pl-s3">map</span> tr new))) new</pre></div>
+
+<p>The 'msg' being broadcast is just the unaltered message that was received, prefixed by 'CG#$42' and containing the sender's name, among other things. The 'CB#$42' prefixed message updates the browser scoreboards.</p>
+
+<p><strong>Digression On Immutable Variables</strong></p>
+
+<p>I played around with some functional javascript libraries that take pains to avoid mutating Javascript variables. Most of the score2 variables are contained in the DS_ob object. I could use setters that remove DS_ob elements and replace them with new versions, much in the manner of replacing state the server MVar, but what would be the point? It seems to me that, at the cost of some unnecessary overhead, I would end up with precisely the same thing I get with 'DS_ob.element = "new value" '. I could re-define DS_ob as a monad, but composability and the other monad features would be useless baggage in score2.</p>
+
+<p>The state MVar gets defined once and only its contents change as the game goes on. The same is true of DS_ob.</p>
 
 <p><strong>Screening Massages Arriving At The Browsers</strong></p>
 
@@ -200,7 +224,7 @@ broadcast (<span class="pl-s1"><span class="pl-pds">"</span>CB#$42<span class="p
     <span class="pl-k">switch</span> (d2) {
 </pre></div>
 
-<p>Other than chat messages and the scoreboard update, each message is sent to the server begining with a six-digit prefix, the status (solitaire or group play) of the sender, and the name of the sender, all separated by commas. The server broadcasts messages with these same three preliminary items intact so, after splitting into 'gameArray', gameArray[0] is the six-character prefix, gameArray[1] is the sender's status, and gameArray[2] is the sender's name. The game status, prefixed by 'CB#$42', is sent without commas so instead of d2 = gamearray[0], we have 'd2 = event.data.substring(0,6)'. The test in the 'if' statement returns 'true' if the sender is the receiver of the prefix, or if the sender and receiver are both involved in group play. 'a@F$Uy&amp;private' is the default status; i.e., private. When a player opts for group play, status is set equal to the player's name. This information is kept in the object 'DS_ob'.</p>
+<p>Other than chat messages and the scoreboard update, each message is sent to the server begining with a six-digit prefix, the status (solitaire or group play) of the sender, and the name of the sender, all separated by commas. The server broadcasts messages with these same three preliminary items intact so, after splitting into 'gameArray', gameArray[0] is the six-character prefix, gameArray[1] is the sender's status, and gameArray[2] is the sender's name. The game status, prefixed by 'CB#$42', is sent without commas so instead of d2 = gamearray[0], we have 'd2 = event.data.substring(0,6)'. The test in the 'if' statement returns 'true' if the sender is the receiver of the prefix, or if the sender and receiver are both involved in group play. 'a@F$Uy&amp;private' is the default status; i.e., private. When a player opts for group play, status is set equal to the player's name. This information is kept in the 'DS_ob' object.</p>
 
 <p><em>To be continued</em></p>
 
@@ -290,7 +314,7 @@ calc7 a b c d = [ (a',b',c',d') |
                             op3 &lt;- ops,
                             op3 a' (op2 b' (op1 c' d')) == <span class="pl-c1">20</span>]</pre></div>
 
-<p>It is easy to see that there are seven ways to order two or three sequential computations on four numbers. They can be represented by </p>
+<p>It is easy to see that there are seven ways to order two or three sequential computations on four numbers. They can be represented by</p>
 
 <div class="highlight highlight-javascript"><pre>a bc
 ab c
@@ -324,7 +348,7 @@ f x = <span class="pl-s3">show</span> (<span class="pl-s3">round</span> x)
 scoreDiv az bz  | bz == <span class="pl-c1">0</span>  = <span class="pl-c1">99999</span>
                 | <span class="pl-s3">otherwise</span> = (/) az bz
 
-ops =  [cat, (+), (-), (*), scoreDiv] 
+ops =  [cat, (+), (-), (*), scoreDiv]
 
 <span class="pl-en">calc</span> <span class="pl-k">::</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> <span class="pl-s3">Double</span> <span class="pl-k">-&gt;</span> [(<span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>, <span class="pl-s3">Double</span>)]
 calc a b c d = [ (a',b',c',d') |
@@ -379,50 +403,50 @@ calc7 a b c d = [ (a',b',c',d') |
 
 
 
-only_calc = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+only_calc = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>],
                      a &lt;= b, b &lt;= c, c &lt;= d,
-                     <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc a b c d), <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d, 
-                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc a b c d), <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d,
+                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d,
                      <span class="pl-s3">null</span> $ calc7 a b c d ]
 
 
-only_calc2 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+only_calc2 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>],
                      a &lt;= b, b &lt;= c, c &lt;= d,
-                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc2 a b c d), <span class="pl-s3">null</span> $ calc3 a b c d, 
-                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc2 a b c d), <span class="pl-s3">null</span> $ calc3 a b c d,
+                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d,
                      <span class="pl-s3">null</span> $ calc7 a b c d ]
 
-only_calc3 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+only_calc3 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>],
                      a &lt;= b, b &lt;= c, c &lt;= d,
-                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc3 a b c d), 
-                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc3 a b c d),
+                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d,
                      <span class="pl-s3">null</span> $ calc7 a b c d ]
 
-only_calc4 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+only_calc4 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>],
                      a &lt;= b, b &lt;= c, c &lt;= d,
-                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d, 
-                     <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc4 a b c d), <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d,
+                     <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc4 a b c d), <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d,
                      <span class="pl-s3">null</span> $ calc7 a b c d ]
 
-only_calc5 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+only_calc5 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>],
                      a &lt;= b, b &lt;= c, c &lt;= d,
-                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d, 
-                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc5 a b c d), <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d,
+                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc5 a b c d), <span class="pl-s3">null</span> $ calc6 a b c d,
                      <span class="pl-s3">null</span> $ calc7 a b c d ]
 
-only_calc6 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+only_calc6 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>],
                      a &lt;= b, b &lt;= c, c &lt;= d,
-                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d, 
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d,
                      <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc6 a b c d),
                      <span class="pl-s3">null</span> $ calc7 a b c d ]
 
-only_calc7 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+only_calc7 = [ [a, b, c, d] | a &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d &lt;- [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>],
                      a &lt;= b, b &lt;= c, c &lt;= d,
-                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d, 
-                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d, 
+                     <span class="pl-s3">null</span> $ calc a b c d, <span class="pl-s3">null</span> $ calc2 a b c d, <span class="pl-s3">null</span> $ calc3 a b c d,
+                     <span class="pl-s3">null</span> $ calc4 a b c d, <span class="pl-s3">null</span> $ calc5 a b c d, <span class="pl-s3">null</span> $ calc6 a b c d,
                      <span class="pl-s3">not</span> (<span class="pl-s3">null</span> $ calc7 a b c d <span class="pl-k">)]</span>
 
-main = <span class="pl-k">do</span> 
+main = <span class="pl-k">do</span>
     <span class="pl-s3">print</span> <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc<span class="pl-pds">"</span></span>
     t1 &lt;- getCPUTime
     <span class="pl-s3">mapM_</span> <span class="pl-s3">print</span> only_calc
@@ -536,7 +560,7 @@ scoreDiv <span class="pl-k">::</span> (Eq a, Fractional a) <span class="pl-k">=&
 scoreDiv az bz  | bz <span class="pl-k">==</span> <span class="pl-c1">0</span>  <span class="pl-k">=</span> <span class="pl-c1">99999</span>
                 | otherwise <span class="pl-k">=</span> (/) az bz
 
-ops <span class="pl-k">=</span>  [cat, (<span class="pl-k">+</span>), (<span class="pl-k">-</span>), (<span class="pl-k">*</span>), scoreDiv] 
+ops <span class="pl-k">=</span>  [cat, (<span class="pl-k">+</span>), (<span class="pl-k">-</span>), (<span class="pl-k">*</span>), scoreDiv]
 
 calc <span class="pl-k">::</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> Double <span class="pl-k">-&gt;</span> [(Double, Double, Double, Double)]
 calc a b c d <span class="pl-k">=</span> [ (a<span class="pl-s1"><span class="pl-pds">'</span>,b<span class="pl-pds">'</span></span>,c<span class="pl-s1"><span class="pl-pds">'</span>,d<span class="pl-pds">'</span></span>) |
@@ -590,32 +614,32 @@ calc7 a b c d <span class="pl-k">=</span> [ (a<span class="pl-s1"><span class="p
                             op3 a<span class="pl-s1"><span class="pl-pds">'</span> (op2 b<span class="pl-pds">'</span></span> (op1 c<span class="pl-s1"><span class="pl-pds">'</span> d<span class="pl-pds">'</span></span>)) <span class="pl-k">==</span> <span class="pl-c1">20</span>]
 
 
-only_calc2_or_6 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+only_calc2_or_6 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>],
                      a <span class="pl-k">&lt;=</span> b, b <span class="pl-k">&lt;=</span> c, c <span class="pl-k">&lt;=</span> d,
-                     <span class="pl-c1">null</span> $ calc a b c d, not (<span class="pl-c1">null</span> $ calc2 a b c d), <span class="pl-c1">null</span> $ calc3 a b c d, 
-                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, not (<span class="pl-c1">null</span> $ calc6 a b c d), 
+                     <span class="pl-c1">null</span> $ calc a b c d, not (<span class="pl-c1">null</span> $ calc2 a b c d), <span class="pl-c1">null</span> $ calc3 a b c d,
+                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, not (<span class="pl-c1">null</span> $ calc6 a b c d),
                      <span class="pl-c1">null</span> $ calc7 a b c d ]
 
-only_calc2_or_7 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+only_calc2_or_7 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>],
                      a <span class="pl-k">&lt;=</span> b, b <span class="pl-k">&lt;=</span> c, c <span class="pl-k">&lt;=</span> d,
-                     <span class="pl-c1">null</span> $ calc a b c d, not (<span class="pl-c1">null</span> $ calc2 a b c d), <span class="pl-c1">null</span> $ calc3 a b c d, 
-                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, <span class="pl-c1">null</span> $ calc6 a b c d, 
+                     <span class="pl-c1">null</span> $ calc a b c d, not (<span class="pl-c1">null</span> $ calc2 a b c d), <span class="pl-c1">null</span> $ calc3 a b c d,
+                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, <span class="pl-c1">null</span> $ calc6 a b c d,
                      not (<span class="pl-c1">null</span> $ calc7 a b c d) ]
 
-only_calc6_or_7 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+only_calc6_or_7 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>],
                      a <span class="pl-k">&lt;=</span> b, b <span class="pl-k">&lt;=</span> c, c <span class="pl-k">&lt;=</span> d,
-                     <span class="pl-c1">null</span> $ calc a b c d, <span class="pl-c1">null</span> $ calc2 a b c d, <span class="pl-c1">null</span> $ calc3 a b c d, 
-                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, not (<span class="pl-c1">null</span> $ calc6 a b c d), 
+                     <span class="pl-c1">null</span> $ calc a b c d, <span class="pl-c1">null</span> $ calc2 a b c d, <span class="pl-c1">null</span> $ calc3 a b c d,
+                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, not (<span class="pl-c1">null</span> $ calc6 a b c d),
                      not (<span class="pl-c1">null</span> $ calc7 a b c d )]
 
 
-only_calc2_or_6_or_7 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>], 
+only_calc2_or_6_or_7 <span class="pl-k">=</span> [ [a, b, c, d] | a <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], b <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">6</span>], c <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">12</span>], d <span class="pl-k">&lt;-</span> [<span class="pl-c1">1</span>..<span class="pl-c1">20</span>],
                      a <span class="pl-k">&lt;=</span> b, b <span class="pl-k">&lt;=</span> c, c <span class="pl-k">&lt;=</span> d,
-                     <span class="pl-c1">null</span> $ calc a b c d, not (<span class="pl-c1">null</span> $ calc2 a b c d), <span class="pl-c1">null</span> $ calc3 a b c d, 
-                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, not (<span class="pl-c1">null</span> $ calc6 a b c d), 
+                     <span class="pl-c1">null</span> $ calc a b c d, not (<span class="pl-c1">null</span> $ calc2 a b c d), <span class="pl-c1">null</span> $ calc3 a b c d,
+                     <span class="pl-c1">null</span> $ calc4 a b c d, <span class="pl-c1">null</span> $ calc5 a b c d, not (<span class="pl-c1">null</span> $ calc6 a b c d),
                      not (<span class="pl-c1">null</span> $ calc7 a b c d )]
 
-main <span class="pl-k">=</span> <span class="pl-k">do</span> 
+main <span class="pl-k">=</span> <span class="pl-k">do</span>
     print <span class="pl-s1"><span class="pl-pds">"</span>*****************************___only_calc2_or_6<span class="pl-pds">"</span></span>
     t1 <span class="pl-k">&lt;-</span> getCPUTime
     mapM_ print only_calc2_or_6
