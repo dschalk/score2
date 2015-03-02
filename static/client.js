@@ -191,7 +191,7 @@ $(document).ready(function () {
                     $("#scoreF").hide();
                     $('#go30').triggerHandler('click');
                     if (plX !== scX) {
-                        $("#a0").append(scX + " clicked SCORE and must make the " +
+                        $("#a0").append(sender + " clicked SCORE and must make the " +
                             "number '20' before time runs out.</h3>");
                         $("#newDisplay").hide();
                         $("#impossibleJ").hide();
