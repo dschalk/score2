@@ -4,7 +4,7 @@
 ###Overview
 I started with the chat example at github.com/wai/wai-websockets. It is Jasper Van der Jeugt 's websockets adapted to the warp web server. The routine work of the chat server is receiving messages from individual browsers and broadcasting them to all participants. The server facilitates what is tantamount to peer-to-peer interactions among the browsers. It also parses sign in messages to make sure the format is correct and there are no duplicate user names. The server keeps a list of participants in an MVar, and replaces the list with an updated version whenever there is a disconnect or a sign-in.
 
-I modified the participant list to include scores along with names. Whenever the list is replaced due to a score change, sign-in, or disconnect, the server sends a line of text interspersed with "<br>" and the prefix 'CB#$42'. The browsers intercept these messages and divert them away from the chat message section and into the scoreboard. There are fifteen six-character message prefixes in the format 'Cx#42' where 'x' is some capital letter. None of these go into the chat message section. They contain data and instructions for the game. Application messages are either Javascript strings or Haskell Text. Browsers split comma-separated strings into arrays and distribute the elements according to the their six-character prefixes (element '0' in the arrays).
+I modified the participant list to include scores along with names. Whenever the list is replaced due to a score change, sign-in, or disconnect, the server sends a line of text interspersed with 'br' in brackets and the prefix 'CB#$42'. The browsers intercept these messages and divert them away from the chat message section and into the scoreboard. There are fifteen six-character message prefixes in the format 'Cx#42' where 'x' is some capital letter. None of these go into the chat message section. They contain data and instructions for the game. Application messages are either Javascript strings or Haskell Text. Browsers split comma-separated strings into arrays and distribute the elements according to the their six-character prefixes (element '0' in the arrays).
 
 It would be nice if players could compete in small groups in discreet chat rooms, or even play solitaire in their own room. Solitaire play is currently an option, but the chat messages and scoreboard are communal. I am also thinking of providing the option of changing the dice from 6, 6, 12, and 20 sided to whatever the players choose. The goal in 'Score' is to make the number '20' out of four random numbers in two or three stages using addition, subtraction, multiplication, division, and concatenation. The goal of '20' could be made adjustable along with the maximum sizes of the four random integers. Suggestions are very welcome.
 
@@ -20,95 +20,112 @@ In order to gain a point by making the number "20", a player must use a number g
 
 **Initiation Stage**
 
-Score2 is based on websockets messages. Chat messages go to the server and are broadcast to all participating browsers. Messages intended for game control rather than chat boxes are prefixed by C\_#$42 where "\_" is a capital letter. Messages received by browsers which are for game control, and which usually carry data, also have the C _#$42 prefixes. The flow of this application can be understood by tracing the routes of the prefixed messages.
+The game interface in the browsers responds to text messages transmitted by the server. Javascript interprets these as strings, and the strings it sends become text before they are used in the server application. Chat messages sent to the server and are broadcast to all participating browsers. Messages intended for game control are prefixed by C\_#$42 where "\_" is a capital letter. Messages received by browsers which are for game control, and which usually carry data, also have the C _#$42 prefixes. The flow of the game can be understood by tracing the routes of the prefixed messages.
 
 A player joins the game by entering a name in a form. Here is the Javascript form code:
 
 ```Javascript
-    $('#join-form').submit(function () {
-        $('#warnings').html('');
-        var user = $('#user').val();
-        players.setPlayer(user);
-        ws = createWebSocket('/');
-        ws.onopen = function() {
-            ws.send("CC#$42" + user);
-        };
+$('#join-form').submit(function () {
+    $('#warnings').html('');
+    var user = $('#user').val();
+    players.setPlayer(user);
+    ws = createWebSocket('/');
+    ws.onopen = function() {
+        ws.send("CC#$42" + user);
+    };
+}
 ```
 
-The server parses the message prefixed by CC#$42 and, if the name is in the proper format and hasn't already been taken, the server (1) adds the new user' Client tuplet, (name, 0, WebSocket), to the ServerState list, [Client], MVar; (2) broadcasts an announcement for placement in the chat section of participating browsers; broadcasts the updated state information for placement in the scoreboard section: and (3) sends the message "CC#$42" to the new player. The new state information is sent with the prefix "CB#$42", which propmts the browsers to put the updated state information where it belongs. Anytime ServerState changes in the server, a message prefixed by CB#$42 and containing the new state information is broadcast to all participating players, keeping scoreboards syncronized with the servers state MVar.
+The server parses the message prefixed by CC#\$42 and, if the name is in the proper format and hasn't already been taken, the server (1) replaces ServerState list of Clients in the state MVar with with a ServerState list which includes the new player, (2) broadcasts an announcement for placement in the chat section of participating browsers, [3] broadcasts the updated state information for placement in the scoreboard section: and (4) sends the message "CC#$42" to the new player. The new state information is sent with the prefix "CB#$42", which instructs the browsers to put the updated state information where it belongs. Anytime a new ServerState is created in the server, a message prefixed by CB#$42 and containing the new state information is broadcast to all participating players, keeping scoreboards syncronized with the servers ServerState Client list.
 
 The sign-in form sends a message prefixed by CC#$42 to the server and, if everything is in order, the server responds with
 
 ```haskell
 liftIO $ modifyMVar_ state $ \s -> do
-let s' = addClient client s  
-WS.sendTextData conn $ T.pack "CC#$42"
-broadcast (getName client `mappend` " joined") s'
-broadcast ("CB#$42" `mappend` T.concat(intersperse (T.pack "<br>") (map tr s'))) s'
-return s'
+    let s' = addClient client s  
+    WS.sendTextData conn $ T.pack "CC#$42"
+    broadcast (getName client `mappend` " joined") s'
+    broadcast ("CB#$42" `mappend` T.concat(intersperse (T.pack "<br>") (map tr s'))) s'
+    return s'
 ```
 The message prefixed by "CB#$42" is processed in the browsers as follows:
 
 ```javascript
 case "CB#$42":
-$("#users").html(event.data.substring(6));    // Refresh browser with server state.
+  $("#users").html(event.data.substring(6));
 break;
 ```
-The browsers do not need to process the message because the server interspersed '\<br>' into the state data text it sent, and the browser receives it as a string of HTML. The text 'CC#42' is received a a six-character string, prompting a response as follows:
+The browsers do not need to process the message because the server interspersed 'br' (in HTML brackets) into the state data text it sent so the browser receives it as a string of HTML. The text 'CC#42' is received a a six-character string, prompting a response as follows:
 
 ```javascript
-ws.onmessage = function(event) {
-  if(event.data === "CC#$42") {
-    DS_ob.d = -1;
-    createDom();
-    createOperators();
-    createDropboxes();
-    $('.drag').draggable({ revert: "invalid", zIndex: 2 });
-    $('.dragNew').draggable({ revert: "invalid", zIndex: 2 });
-    $('.drag2').draggable({ helper: "clone", revert: "invalid", zIndex: 2 });
-    createDrop1();
-    createDrop2();
-    $("#result1").hide();
-    $("#result2").hide();
-    $("#result3").hide();  
-    $("#b0").show();
-    $("#experiment").show();
-    $("#public").show();
-    $("#b0").html("Solitaire mode. Click above to enable competition.")
-    $("#rollA").show();
-    $("#a1").show();
-    $('#join-section').hide();
-    $('#chat-section').show();
-    $('#users-section').show();
-    $("#messages").show();
-    $(".dropx").hide();
-    $(".drop2x").hide();
-    ws.onmessage = onMessage;
-    $('#message-form').submit(function () {
-      var text = $('#text').val();
-      ws.send(text);
-      $('#text').val('');
-      return false;
+    $('#join-form').submit(function () {
+        $('#warnings').html('');
+        var user = $('#user').val();
+        DS_ob.player = user;
+        ws = createWebSocket('/');
+        ws.onopen = function() {
+            ws.send("CC#$42" + user);
+        };
+        ws.onmessage = function(event) {
+            if(event.data === "CC#$42") {
+                DS_ob.d = -1;
+                createDom();
+                createOperators();
+                createDropboxes();
+                $('.drag').draggable({ revert: "invalid", zIndex: 2 });
+                $('.dragNew').draggable({ revert: "invalid", zIndex: 2 });
+                $('.drag2').draggable({ helper: "clone", revert: "invalid", zIndex: 2 });
+                createDrop1();
+                createDrop2();
+                $("#result1").hide();
+                $("#result2").hide();
+                $("#result3").hide();
+                $("#b0").show();
+                $("#experiment").show();
+                $("#public").show();
+                $("#b0").html("Solitaire mode. Click above to enable competition.")
+                $("#rollA").show();
+                $("#a1").show();
+                $('#join-section').hide();
+                $('#chat-section').show();
+                $('#users-section').show();
+                $("#messages").show();
+                $(".dropx").hide();
+                $(".drop2x").hide();
+                ws.onmessage = onMessage;
+                $('#message-form').submit(function () {
+                    var text = $('#text').val();
+                    ws.send(text);
+                    $('#text').val('');
+                    return false;
+                });
+            } else {
+                console.log("What?");
+                $('#warnings').append(event.data);
+                ws.close();
+            }
+        };
+
+        $('#join').append('Connecting...');
+
+        return false;
     });
-  } else {
-    console.log("What?");
-    $('#warnings').append(event.data);
-    ws.close();
-  }
-};
+    $('#join-form').destroy();
+});
 ```
-After sign-in, this block of code probably gets garbage-collected. ws.onmessage = onMessage kicks in, and in onMessage we have the code:
+After it initiates the player interface, 'ws.onmessage = onMessage' de-references the anonymous function and re-assignes the variable 'ws.onmessage' to onMessage. The entire 'join-form' section becomes eligible for garbage collection after the final line,' $('#join-form').destroy();'.
+
+When current players receive "CC#$42" prefixed messages from new sign-ins, they do not make it to the chat message section. They hit a dead end in the 'onMessage' section pursuant to the following 'do nothing' code:
 
 ```javascript
 case "CC#$42":
 // Prevents new player login data from defaulting to a chat message.
 break;
 ```
-This creates a dead end for messages prefixed by 'CC#42'.
 
-**State And Its Containing MVar**
+**State And Its MVar**
 
-Here is how the game state is defined:
+I have mentioned a ServerState list of clients and an MVar that holds the current state of the game. Here is how that game state is defined:
 
 ```haskell
 type Name = Text
@@ -126,7 +143,7 @@ main = do
     state <- newMVar newServerState
 ...
 ```
-State is modified during game play by removing state from the MVar and replacing it with the modified version. For example, the following code increases a player's score:
+State is modified during game play by replacing the ServerState list of Clients in the MVar. For example, the following code increases a player's score:
 
 ```haskell
 incFunc :: Text -> Client -> Client
@@ -136,16 +153,24 @@ incFunc x (a, b, c)   | x == a   = (a, b + 1, c)
 upScore :: Text -> ServerState -> ServerState
 upScore name = map (incFunc name)
 
+. . .
+
 else if "CG#$42" `T.isPrefixOf` msg
-then
-mask_ $ do  
-old <- takeMVar state
-let new = upScore sender old
-putMVar state new
-broadcast msg new
-broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr new))) new
+    then
+    mask_ $ do  
+        old <- takeMVar state
+        let new = upScore sender old
+        putMVar state new
+        broadcast msg new
+        broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr new))) new
 ```
-The 'msg' being broadcast is just the unaltered message that was received. The 'CB#$42' prefixed message updates the browser scoreboards.
+The 'msg' being broadcast is just the unaltered message that was received, prefixed by 'CG#$42' and containing the sender's name, among other things. The 'CB#$42' prefixed message updates the browser scoreboards.
+
+**Digression On Immutable Variables**
+
+I played around with some functional javascript libraries that take pains to avoid mutating Javascript variables. Most of the score2 variables are contained in the DS_ob object. I could use setters that remove DS_ob elements and replace them with new versions, much in the manner of replacing state the server MVar, but what would be the point? It seems to me that, at the cost of some unnecessary overhead, I would end up with precisely the same thing I get with 'DS_ob.element = "new value" '. I could re-define DS_ob as a monad, but composability and the other monad features would be useless baggage in score2.
+
+The state MVar gets defined once and only its contents change as the game goes on. The same is true of DS_ob.
 
 **Screening Massages Arriving At The Browsers**
 
@@ -174,7 +199,7 @@ function onMessage(event) {
     switch (d2) {
 
 ```
-Other than chat messages and the scoreboard update, each message is sent to the server begining with a six-digit prefix, the status (solitaire or group play) of the sender, and the name of the sender, all separated by commas. The server broadcasts messages with these same three preliminary items intact so, after splitting into 'gameArray', gameArray[0] is the six-character prefix, gameArray[1] is the sender's status, and gameArray[2] is the sender's name. The game status, prefixed by 'CB#$42', is sent without commas so instead of d2 = gamearray[0], we have 'd2 = event.data.substring(0,6)'. The test in the 'if' statement returns 'true' if the sender is the receiver of the prefix, or if the sender and receiver are both involved in group play. 'a@F$Uy&private' is the default status; i.e., private. When a player opts for group play, status is set equal to the player's name. This information is kept in the object 'DS_ob'.
+Other than chat messages and the scoreboard update, each message is sent to the server begining with a six-digit prefix, the status (solitaire or group play) of the sender, and the name of the sender, all separated by commas. The server broadcasts messages with these same three preliminary items intact so, after splitting into 'gameArray', gameArray[0] is the six-character prefix, gameArray[1] is the sender's status, and gameArray[2] is the sender's name. The game status, prefixed by 'CB#$42', is sent without commas so instead of d2 = gamearray[0], we have 'd2 = event.data.substring(0,6)'. The test in the 'if' statement returns 'true' if the sender is the receiver of the prefix, or if the sender and receiver are both involved in group play. 'a@F$Uy&private' is the default status; i.e., private. When a player opts for group play, status is set equal to the player's name. This information is kept in the 'DS_ob' object.
 
 *To be continued*
 
@@ -266,7 +291,7 @@ calc7 a b c d = [ (a',b',c',d') |
                             op3 a' (op2 b' (op1 c' d')) == 20]
 ```
 
-It is easy to see that there are seven ways to order two or three sequential computations on four numbers. They can be represented by 
+It is easy to see that there are seven ways to order two or three sequential computations on four numbers. They can be represented by
 ```javascript
 a bc
 ab c
@@ -301,7 +326,7 @@ scoreDiv :: (Eq a, Fractional a) => a -> a -> a
 scoreDiv az bz  | bz == 0  = 99999
                 | otherwise = (/) az bz
 
-ops =  [cat, (+), (-), (*), scoreDiv] 
+ops =  [cat, (+), (-), (*), scoreDiv]
 
 calc :: Double -> Double -> Double -> Double -> [(Double, Double, Double, Double)]
 calc a b c d = [ (a',b',c',d') |
@@ -356,50 +381,50 @@ calc7 a b c d = [ (a',b',c',d') |
 
 
 
-only_calc = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
+only_calc = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
                      a <= b, b <= c, c <= d,
-                     not (null $ calc a b c d), null $ calc2 a b c d, null $ calc3 a b c d, 
-                     null $ calc4 a b c d, null $ calc5 a b c d, null $ calc6 a b c d, 
+                     not (null $ calc a b c d), null $ calc2 a b c d, null $ calc3 a b c d,
+                     null $ calc4 a b c d, null $ calc5 a b c d, null $ calc6 a b c d,
                      null $ calc7 a b c d ]
 
 
-only_calc2 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
+only_calc2 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
                      a <= b, b <= c, c <= d,
-                     null $ calc a b c d, not (null $ calc2 a b c d), null $ calc3 a b c d, 
-                     null $ calc4 a b c d, null $ calc5 a b c d, null $ calc6 a b c d, 
+                     null $ calc a b c d, not (null $ calc2 a b c d), null $ calc3 a b c d,
+                     null $ calc4 a b c d, null $ calc5 a b c d, null $ calc6 a b c d,
                      null $ calc7 a b c d ]
 
-only_calc3 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
+only_calc3 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
                      a <= b, b <= c, c <= d,
-                     null $ calc a b c d, null $ calc2 a b c d, not (null $ calc3 a b c d), 
-                     null $ calc4 a b c d, null $ calc5 a b c d, null $ calc6 a b c d, 
+                     null $ calc a b c d, null $ calc2 a b c d, not (null $ calc3 a b c d),
+                     null $ calc4 a b c d, null $ calc5 a b c d, null $ calc6 a b c d,
                      null $ calc7 a b c d ]
 
-only_calc4 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
+only_calc4 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
                      a <= b, b <= c, c <= d,
-                     null $ calc a b c d, null $ calc2 a b c d, null $ calc3 a b c d, 
-                     not (null $ calc4 a b c d), null $ calc5 a b c d, null $ calc6 a b c d, 
+                     null $ calc a b c d, null $ calc2 a b c d, null $ calc3 a b c d,
+                     not (null $ calc4 a b c d), null $ calc5 a b c d, null $ calc6 a b c d,
                      null $ calc7 a b c d ]
 
-only_calc5 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
+only_calc5 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
                      a <= b, b <= c, c <= d,
-                     null $ calc a b c d, null $ calc2 a b c d, null $ calc3 a b c d, 
-                     null $ calc4 a b c d, not (null $ calc5 a b c d), null $ calc6 a b c d, 
+                     null $ calc a b c d, null $ calc2 a b c d, null $ calc3 a b c d,
+                     null $ calc4 a b c d, not (null $ calc5 a b c d), null $ calc6 a b c d,
                      null $ calc7 a b c d ]
 
-only_calc6 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
+only_calc6 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
                      a <= b, b <= c, c <= d,
-                     null $ calc a b c d, null $ calc2 a b c d, null $ calc3 a b c d, 
+                     null $ calc a b c d, null $ calc2 a b c d, null $ calc3 a b c d,
                      null $ calc4 a b c d, null $ calc5 a b c d, not (null $ calc6 a b c d),
                      null $ calc7 a b c d ]
 
-only_calc7 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
+only_calc7 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
                      a <= b, b <= c, c <= d,
-                     null $ calc a b c d, null $ calc2 a b c d, null $ calc3 a b c d, 
-                     null $ calc4 a b c d, null $ calc5 a b c d, null $ calc6 a b c d, 
+                     null $ calc a b c d, null $ calc2 a b c d, null $ calc3 a b c d,
+                     null $ calc4 a b c d, null $ calc5 a b c d, null $ calc6 a b c d,
                      not (null $ calc7 a b c d )]
 
-main = do 
+main = do
     print "*****************************___only_calc"
     t1 <- getCPUTime
     mapM_ print only_calc
@@ -514,7 +539,7 @@ scoreDiv :: (Eq a, Fractional a) => a -> a -> a
 scoreDiv az bz  | bz == 0  = 99999
                 | otherwise = (/) az bz
 
-ops =  [cat, (+), (-), (*), scoreDiv] 
+ops =  [cat, (+), (-), (*), scoreDiv]
 
 calc :: Double -> Double -> Double -> Double -> [(Double, Double, Double, Double)]
 calc a b c d = [ (a',b',c',d') |
@@ -568,32 +593,32 @@ calc7 a b c d = [ (a',b',c',d') |
                             op3 a' (op2 b' (op1 c' d')) == 20]
 
 
-only_calc2_or_6 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
+only_calc2_or_6 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
                      a <= b, b <= c, c <= d,
-                     null $ calc a b c d, not (null $ calc2 a b c d), null $ calc3 a b c d, 
-                     null $ calc4 a b c d, null $ calc5 a b c d, not (null $ calc6 a b c d), 
+                     null $ calc a b c d, not (null $ calc2 a b c d), null $ calc3 a b c d,
+                     null $ calc4 a b c d, null $ calc5 a b c d, not (null $ calc6 a b c d),
                      null $ calc7 a b c d ]
 
-only_calc2_or_7 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
+only_calc2_or_7 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
                      a <= b, b <= c, c <= d,
-                     null $ calc a b c d, not (null $ calc2 a b c d), null $ calc3 a b c d, 
-                     null $ calc4 a b c d, null $ calc5 a b c d, null $ calc6 a b c d, 
+                     null $ calc a b c d, not (null $ calc2 a b c d), null $ calc3 a b c d,
+                     null $ calc4 a b c d, null $ calc5 a b c d, null $ calc6 a b c d,
                      not (null $ calc7 a b c d) ]
 
-only_calc6_or_7 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
+only_calc6_or_7 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
                      a <= b, b <= c, c <= d,
-                     null $ calc a b c d, null $ calc2 a b c d, null $ calc3 a b c d, 
-                     null $ calc4 a b c d, null $ calc5 a b c d, not (null $ calc6 a b c d), 
+                     null $ calc a b c d, null $ calc2 a b c d, null $ calc3 a b c d,
+                     null $ calc4 a b c d, null $ calc5 a b c d, not (null $ calc6 a b c d),
                      not (null $ calc7 a b c d )]
 
 
-only_calc2_or_6_or_7 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
+only_calc2_or_6_or_7 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
                      a <= b, b <= c, c <= d,
-                     null $ calc a b c d, not (null $ calc2 a b c d), null $ calc3 a b c d, 
-                     null $ calc4 a b c d, null $ calc5 a b c d, not (null $ calc6 a b c d), 
+                     null $ calc a b c d, not (null $ calc2 a b c d), null $ calc3 a b c d,
+                     null $ calc4 a b c d, null $ calc5 a b c d, not (null $ calc6 a b c d),
                      not (null $ calc7 a b c d )]
 
-main = do 
+main = do
     print "*****************************___only_calc2_or_6"
     t1 <- getCPUTime
     mapM_ print only_calc2_or_6
@@ -631,19 +656,3 @@ And here is what I got:
 ###### There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the algorythms (calc, calc3, calc4, and calc5) which uniquely solve some rolls. Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corrolary is that if calc, calc2, calc3, calc4, and calc5 can't find a solution, calc6 and calc7 won't either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds.
 
 The module Fm uses the seven algorythms to find solutions to random rolls or numbers entered by Score players. It massages the output into a single line of Text with solutions separated by "\<br>". The browsers receive the Text as a Javascript string which, when appended to a div, displays the solutions neatly in a column.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
