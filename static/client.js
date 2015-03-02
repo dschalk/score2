@@ -27,18 +27,18 @@ var calc;
 var sub1;
 var sub2;
 
-DS_ob = {
-    t: -1,
-    privateClicker: "a@F$Uy&private",
-    player: "Happy Clown",
-    impossibleClicker: "Adrien Apple",
-    scoreClicker: "Beaming Banana" ,
-    rollText: "1,1,1,1,42",
-    d: -1,
-    ar: [],
-    bool: [],
-    game: "off",
-    scoreFunc: function() {
+function makeDS_ob() {
+    this.t = -1,
+    this.privateClicker = "a@F$Uy&private";
+    this.player = "Happy Clown";
+    this.impossibleClicker = "Adrien Apple";
+    this.scoreClicker = "Beaming Banana" ;
+    this.rollText = "1,1,1,1,42"
+    this.d = -1;
+    this.ar = [];
+    this.bool = [];
+    this.game = "off";
+    this.scoreFunc = function() {
         $("#countdown").html("");
         $("#a0").html("");
         if (this.player === this.scoreClicker) {
@@ -49,6 +49,8 @@ DS_ob = {
             $("#stop60").triggerHandler('click');
         }
     }
+}
+DS_ob = new makeDS_ob();
 }
 
 refresh = function() {
