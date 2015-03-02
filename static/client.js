@@ -19,8 +19,7 @@ var createOperators;
 var createDropboxes;
 var createDrop1;
 var createDrop2;
-var timer;  
-var tog = 0;
+var timer;
 var refreshDropboxes;
 var populate;
 var refresh;
@@ -44,7 +43,7 @@ DS_ob = {
         $("#a0").html("");
         if (this.player === this.scoreClicker) {
             ws.send("CL#$42," + this.privateClicker + "," + this.player + "," + "dummy");
-        }    
+        }
         if ( this.player === this.impossibleClicker) {
             ws.send("CM#$42,"+ this.privateClicker + "," + this.player + "," + "dummy");
             $("#stop60").triggerHandler('click');
@@ -77,6 +76,7 @@ refresh = function() {
     $("#scoreF").hide();
     $("#impossibleJ").hide();
     $("#newDisplay").hide();
+    $("#countdown").html("");
     $(".dropx").hide();
     $(".drop2x").hide();
     $(".drop").show();
@@ -111,6 +111,7 @@ $(document).ready(function () {
         $("#go60").hide();
         $("#stop30").hide();
         $("#stop60").show();
+        var game = DS_ob.game;
         var impX = DS_ob.impossibleClicker;
         var plX = DS_ob.player;
         var scX = DS_ob.scoreClicker;
@@ -126,15 +127,15 @@ $(document).ready(function () {
         var ext6 = gameArray[6];
         var ext7 = gameArray[7];
         var ext8 = gameArray[8];
-        var p = $(document.createElement('p')).text(event.data); 
+        var p = $(document.createElement('p')).text(event.data);
         if (plX === sender || prX !== "a@F$Uy&private" &&  sourceStatus !== "a@F$Uy&private") {
             switch (d2) {
                 case "CA#$42":               // Set up the next round of play.
-                    refresh(); 
+                    refresh();
                     $(".dropx").hide();
                     $(".drop2x").hide();
                     $(".drop").show();
-                    $(".drop2").show();                    
+                    $(".drop2").show();
                     $("#impossibleJ").show();
                     $("#scoreF").show();
                     $("#info1").html("");
@@ -159,25 +160,17 @@ $(document).ready(function () {
                     $("#users").html(event.data.substring(6));    // Refresh browser with server state.
                 break;
 
-                case "CC#$42":       // Prevent new player login data from displaying as a chat message.
-                    
+                case "CC#$42":
+                    // Prevents new player login data from defaulting to a chat message.
                 break;
 
                 case "CD#$42":       // Prevent new player login data from displaying as a chat message.
                     if (sender !== player) {
                         $("#" + gameArray[3]).hide();
                         $("#" + gameArray[5]).val(gameArray[4]);
-                        $("#" + gameArray[5]).html(gameArray[4]);                   
+                        $("#" + gameArray[5]).html(gameArray[4]);
                     }
-                break;      
-
-                case "CK#$42":       // Prevent new player login data from displaying as a chat message.
-                    if (sender !== player) {
-                        $("#" + gameArray[3]).hide();
-                        $("#1").val(gameArray[4]);
-                        $("#1").html(gameArray[4]);                 
-                    }
-                break;                         
+                break;
 
                 case "CE#$42":
                     $("#a4").append(extra);  // Display computations.
@@ -187,6 +180,8 @@ $(document).ready(function () {
                 break;
 
                 case "CF#$42":
+                    game = "on";
+                    DS_ob.game = "on";
                     $("#a2").append("<br>" + sender + " clicked 'SCORE'");
                     DS_ob.ar = [];
                     $("#rollA").hide();
@@ -194,11 +189,15 @@ $(document).ready(function () {
                     $("#scoreF").hide();
                     $('#go30').triggerHandler('click');
                     if (plX !== scX) {
-                        $("#a1").append("<h3> <br><br><br>" + scX + " must make the number '20' before time runs out.</h3>");
+                        $("#a0").append(scX + " clicked SCORE and must make the " +
+                            "number '20' before time runs out.</h3>");
                         $("#newDisplay").hide();
                         $("#impossibleJ").hide();
+                        $(".dropx").show();
+                        $(".drop2x").show();
+                        $(".drop").hide();
+                        $(".drop2").hide();
                     }
-                    DS_ob.game = "on";
                 break;
 
                 case "CG#$42":
@@ -206,19 +205,24 @@ $(document).ready(function () {
                     $("#a0").html("");
                     $("#a2").append("<br>One point for " + sender);
                     $("#a1").prepend("<span style='font-size:75px; background:#000; color:#f00;'>Score!</span>");
-                    $("#newDisplay").show(); 
+                    $("#newDisplay").show();
+                    $("#countdown").html("");
                 break;
 
-                case "CH#$42": 
+                case "CH#$42":
                     if (plX !== sender && DS_ob.game === "on") {
-                        $(".dropx").show();
-                        $(".drop2x").show();
-                        $(".drop").hide();
-                        $(".drop2").hide();
                         assign (extra, ext4, ext5, ext6, ext7, ext8);
                         console.log("From CH#$42 " + extra, ext4, ext5, ext6, ext7, ext8)
                     }
-                    
+
+                break;
+
+                case "CK#$42":       // Prevent new player login data from displaying as a chat message.
+                    if (sender !== player) {
+                        $("#" + gameArray[3]).hide();
+                        $("#1").val(gameArray[4]);
+                        $("#1").html(gameArray[4]);
+                    }
                 break;
 
                 case "CO#$42":
@@ -256,12 +260,12 @@ $(document).ready(function () {
 
                 case "CN#$42":
                     $("#stop30").triggerHandler('click');
-                    $("#a2").append("<br>deduct two points from " + impX + 
+                    $("#a2").append("<br>deduct two points from " + impX +
                         "'s score. <br>A solution was found before 60 seconds had passed.");
                     $("#newDisplay").show();
                 break;
 
-                case "CR#$42": 
+                case "CR#$42":
                     refresh();
                 break;
 
@@ -279,7 +283,7 @@ $(document).ready(function () {
 
                 break;
 
-                default: 
+                default:
                     $('#messages').append(p);
                     $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
                 break;
@@ -287,7 +291,7 @@ $(document).ready(function () {
         }
 
 
-        else if (d2 === "CB#$42") { 
+        else if (d2 === "CB#$42") {
             $("#users").html(event.data.substring(6));
         }
 
@@ -314,7 +318,7 @@ $(document).ready(function () {
     };
 
     createOperators = function() {
-        $("#operators").html( 
+        $("#operators").html(
             '<div id="drag11" class="drag2" >+</div>' +
             '<div id="drag13" class="drag2" >-</div>' +
             '<div id="drag15" class="drag2" >*</div>' +
@@ -325,7 +329,7 @@ $(document).ready(function () {
     };
 
     createDropboxes = function() {
-        $("#dropBoxes").html( 
+        $("#dropBoxes").html(
             '<div id="0" class="drop" >Num</div>' +
             '<div id="1" class="drop2" >Op</div>' +
             '<div id="2" class="drop" >Num</div>' +
@@ -345,7 +349,7 @@ $(document).ready(function () {
                 var player = DS_ob.player;
                 var ar = DS_ob.ar;
                 var bool = DS_ob.bool;
-                var dropID = $(this).attr( 'id' ); 
+                var dropID = $(this).attr( 'id' );
                 var dragID = ui.draggable.attr( 'id' );
                 console.log("@@@###############$$$$$$$$$$_____dragID: " + dragID);
                 var val = ui.draggable.html();
@@ -353,13 +357,13 @@ $(document).ready(function () {
                 ar[(parseInt(dropID) + 3).toString()] = dragID;
                 console.log("________ar = " + ar);
                 bool.push(ui.draggable.attr( "name" ));  // "name" is either "undefined" or "new".
-                ui.draggable.hide( "puff" ); 
-                $(this).html(val);           
+                ui.draggable.hide( "puff" );
+                $(this).html(val);
                 bb = (bool.indexOf("new") !== -1); // Did the player use a number generated by a previous computation?
                 if (ar[0] !== undefined && ar[1] !== undefined && ar[2] !== undefined) {
                     calc(ar[0], ar[1], ar[2], bb);
-                    ws.send("CH#$42," + status + "," + player + "," + 
-                        ar[0] + "," + ar[1] + "," + ar[2] + "," + ar[3] + "," + 
+                    ws.send("CH#$42," + status + "," + player + "," +
+                        ar[0] + "," + ar[1] + "," + ar[2] + "," + ar[3] + "," +
                         ar[5] + "," + (DS_ob.d + 1));
                     refreshDropboxes();
                }
@@ -377,7 +381,7 @@ $(document).ready(function () {
                 var bool = DS_ob.bool;
                 var dropID = $(this).attr( 'id' );
                 var val = ui.draggable.html();
-                ar[dropID] = val;        
+                ar[dropID] = val;
                 $(this).html(val);
                 bb = (bool.indexOf("new") !== -1); // Did the player use a number generated by a previous computation?
                 if (ar[0] !== undefined && ar[1] !== undefined && ar[2] !== undefined) {
@@ -486,8 +490,8 @@ $(document).ready(function () {
     refreshDropboxes = function() {
         ar = [];
         $("#0").html("Num");
-        $("#1").html("Op"); 
-        $("#2").html("Num"); 
+        $("#1").html("Op");
+        $("#2").html("Num");
     }
 
     var priv = $("#private")
@@ -505,8 +509,8 @@ $(document).ready(function () {
         DS_ob.privateClicker = DS_ob.player;
         $("#private").show();
         $("#public").hide();
-        $("#b0").html("Now in multiplayer mode. Be careful." + 
-            " Clicking 'ROLL' inserts the roll numbers in all" + 
+        $("#b0").html("Now in multiplayer mode. Be careful." +
+            " Clicking 'ROLL' inserts the roll numbers in all" +
             " participating browsers.");
     });
 
@@ -519,7 +523,7 @@ $(document).ready(function () {
     $("#experiment").hide();
     $("#private").hide();
     $("#public").hide();
-    $("#rollA").hide(); 
+    $("#rollA").hide();
     $(".erase").hide();
     $(".erase2").hide();
     $("#computations").hide();
@@ -536,12 +540,12 @@ $(document).ready(function () {
     $('.drag2').draggable({ helper: "clone", revert: "invalid", zIndex: 2 });
 
     var source1 = Rx.Observable.timer(
-        0, 
+        0,
         1000)
        .map(function (x, i) { return (x, 30 - i)});
 
     var source2 = Rx.Observable.timer(
-        0, 
+        0,
         1000)
        .map(function (x, i) { return (x, 60 - i)});
 
@@ -622,7 +626,7 @@ $(document).ready(function () {
                 DS_ob.d = -1;
                 createDom();
                 createOperators();
-                createDropboxes();            
+                createDropboxes();
                 $('.drag').draggable({ revert: "invalid", zIndex: 2 });
                 $('.dragNew').draggable({ revert: "invalid", zIndex: 2 });
                 $('.drag2').draggable({ helper: "clone", revert: "invalid", zIndex: 2 });
@@ -630,12 +634,12 @@ $(document).ready(function () {
                 createDrop2();
                 $("#result1").hide();
                 $("#result2").hide();
-                $("#result3").hide();  
+                $("#result3").hide();
                 $("#b0").show();
                 $("#experiment").show();
                 $("#public").show();
                 $("#b0").html("Solitaire mode. Click above to enable competition.")
-                $("#rollA").show();   
+                $("#rollA").show();
                 $("#a1").show();
                 $('#join-section').hide();
                 $('#chat-section').show();
@@ -661,6 +665,7 @@ $(document).ready(function () {
 
         return false;
     });
+    $('#join-form').destroy();
 });
 
 calc = function (ax,b,cx,bb) {
@@ -696,13 +701,13 @@ calc = function (ax,b,cx,bb) {
         ws.send("CE#$42," + privateClicker + "," + player + "," + "<br>" + a + " " + b + " " + c + " = " + res + "<br>");
         $("#newDisplay").show();
     }
-    
-    if (d === 1) { 
+
+    if (d === 1) {
         ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
         console.log("__________________bb = " + bb);
         if (res === 20 && bb)   {
-            $("#countdown").html("");   
-            if ((player === scoreClicker) && t > 0) { 
+            $("#countdown").html("");
+            if ((player === scoreClicker) && t > 0) {
                 console.log("if ((player === scoreClicker) && t > 0) { ");
                 $("#stop30").triggerHandler('click');
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
@@ -712,7 +717,7 @@ calc = function (ax,b,cx,bb) {
             }
             else {
                 $("#a2").append("<br>No point for " + player + ". The clock wasn't running.");
-                $("#a1").prepend("<span style='font-size:25px; background:#000;" + 
+                $("#a1").prepend("<span style='font-size:25px; background:#000;" +
                     "color:#f00;'>20, but no increase in " + player + "'s score</span>");
                 $("#newDisplay").show();
             }
@@ -724,10 +729,10 @@ calc = function (ax,b,cx,bb) {
         $("#newDisplay").show();
     }
 
-    if (d === 2) { 
+    if (d === 2) {
         console.log("__________________bb = " + bb);
         ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
-        if (res === 20) { 
+        if (res === 20) {
             $("#countdown").html("");
             console.log("d === 2 and res === 20");
             $("#stop30").triggerHandler('click');
@@ -739,7 +744,7 @@ calc = function (ax,b,cx,bb) {
             }
             else {
                 $("#a2").append("<br>No point for " + player + ". The clock wasn't running.");
-                $("#a1").prepend("<span style='font-size:25px;color:#f00;'>20, but no increase in " + 
+                $("#a1").prepend("<span style='font-size:25px;color:#f00;'>20, but no increase in " +
                     player + "'s score</span>");
                 $("#newDisplay").show();
             }
@@ -755,4 +760,3 @@ calc = function (ax,b,cx,bb) {
         }
     }
 };
-
