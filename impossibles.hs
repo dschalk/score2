@@ -77,6 +77,7 @@ impossibles = [ [round a, round b, round c, round d] | a <- [1..6], b <- [1..6],
                      null $ calc4 a b c d, null $ calc5 a b c d, null $ calc6 a b c d, 
                      null $ calc7 a b c d ]
 
+
 main = do 
     t1 <- getCPUTime 
     mapM_ print impossibles
