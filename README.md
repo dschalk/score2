@@ -103,6 +103,7 @@ The browsers do not need to process the message because the server interspersed 
                 console.log("What?");
                 $('#warnings').append(event.data);
                 ws.close();
+                delete $('#join-form');
             }
         };
 
@@ -113,7 +114,7 @@ The browsers do not need to process the message because the server interspersed 
     $('#join-form').destroy();
 });
 ```
-After it initiates the player interface, 'ws.onmessage = onMessage' de-references the anonymous function and re-assignes the variable 'ws.onmessage' to onMessage. The entire 'join-form' section becomes eligible for garbage collection after the final line,' $('#join-form').destroy();'.
+After it initiates the player interface, 'ws.onmessage = onMessage' de-references the anonymous function and re-assignes the variable 'ws.onmessage' to onMessage. The entire 'join-form' section becomes eligible for garbage collection after the final line,' delete $('#join-form');'.
 
 When current players receive "CC#$42" prefixed messages from new sign-ins, they do not make it to the chat message section. They hit a dead end in the 'onMessage' section pursuant to the following 'do nothing' code:
 
