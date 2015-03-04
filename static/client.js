@@ -1,7 +1,8 @@
 function createWebSocket(path) {
     var host = window.location.hostname;
+    var port = window.location.port;
     if(host == '') host = 'localhost';
-    var uri = 'ws://' + host + ':3000' + path;
+    var uri = 'ws://' + host + ":" + port + path;
     var Socket = WebSocket           // "MozWebSocket" in window ? MozWebSocket : WebSocket;
     return new Socket(uri);
     connect("/",{
@@ -9,6 +10,7 @@ function createWebSocket(path) {
         "reconnect": false
     });
 }
+
 var ws;
 var users = [];
 var ar = [];
@@ -655,7 +657,7 @@ $(document).ready(function () {
                     $('#text').val('');
                     return false;
                 });
-                $('#join-form').removey();
+                $('#join-form').remove();
                 delete $('#join-form');
             } else {
                 console.log("What?");
