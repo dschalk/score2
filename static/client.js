@@ -51,7 +51,6 @@ function makeDS_ob() {
     }
 }
 var DS_ob = new makeDS_ob();
-}
 
 refresh = function() {
     DS_ob.game = "off";
@@ -656,6 +655,8 @@ $(document).ready(function () {
                     $('#text').val('');
                     return false;
                 });
+                $('#join-form').removey();
+                delete $('#join-form');
             } else {
                 console.log("What?");
                 $('#warnings').append(event.data);
@@ -667,7 +668,6 @@ $(document).ready(function () {
 
         return false;
     });
-    $('#join-form').destroy();
 });
 
 calc = function (ax,b,cx,bb) {
