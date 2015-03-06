@@ -3,6 +3,16 @@ body {
     background-color: black;
 }
 
+a {
+    font-size: 30px;
+    float:left;
+    color: #f7096c;
+}
+
+a:hover {
+    color: #ea2aaa;
+}
+
 span {
     color: #ff0000; 
     font-size: 24px;
@@ -10,14 +20,14 @@ span {
 
 #show {
     color: #F8E839;
-    width: 100$;
+    width: 100%;
     float: left;
     font-size: 24px;
 }
 
 #show2 {
     color: #F8E839;
-    width: 100$;
+    width: 100%;
     float: left;
     font-size: 24px;
     padding-left: 80px;
@@ -42,7 +52,6 @@ span {
     text-align: center;
     vertical-align: middle;
     cursor: pointer;
-    length: 30px;
     width: 30px;
     padding: 5px;
     float: right;
@@ -240,7 +249,7 @@ h3 {
     color: #bdefbf;
     margin-left: 20px;
     width: 80%;
-    float: left:
+    float: left;
 }
 
 #info2 {
@@ -248,7 +257,7 @@ h3 {
     color: #bdefbf;
     margin-left: 20px;
     width: 80%;
-    float: left:
+    float: left;
 }
 
 
@@ -262,7 +271,6 @@ h3 {
     border-color: #ff0000 !important;
     margin: 5px;
     height: 50px;
-    radius: 2px;
 }
 
 button {
@@ -273,7 +281,6 @@ button {
     padding: 0px !important;
     border-color: #ff0000 !important;
     margin: 5px;
-    radius: 2px;
 }
 
 h1 {
