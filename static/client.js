@@ -29,7 +29,7 @@ var calc;
 var sub1;
 var sub2;
 
-function makeDS_ob() {
+function MakeDS_ob() {
     this.t = -1,
     this.privateClicker = "a@F$Uy&private";
     this.player = "Happy Clown";
@@ -52,9 +52,11 @@ function makeDS_ob() {
         }
     }
 }
-var DS_ob = new makeDS_ob();
+var DS_ob = new MakeDS_ob();
 
 refresh = function() {
+    sub1.dispose();
+    sub2.dispose();
     DS_ob.game = "off";
     DS_ob.d = -1;
     DS_ob.scoreClicker = "a@F$Uy&score";
@@ -178,7 +180,6 @@ $(document).ready(function () {
                 case "CE#$42":
                     $("#a4").append(extra);  // Display computations.
                     $("#rollA").hide();
-                    $("#newDisplay").show();
                     DS_ob.ar = [];
                 break;
 
@@ -188,14 +189,13 @@ $(document).ready(function () {
                     $("#a2").append("<br>" + sender + " clicked 'SCORE'");
                     DS_ob.ar = [];
                     $("#rollA").hide();
-                    $("#newDisplay").show();
+                    $("#newDisplay").hide();
+                    $("#impossibleJ").hide();
                     $("#scoreF").hide();
                     $('#go30').triggerHandler('click');
                     if (plX !== scX) {
                         $("#a0").append(sender + " clicked SCORE and must make the " +
                             "number '20' before time runs out.</h3>");
-                        $("#newDisplay").hide();
-                        $("#impossibleJ").hide();
                         $(".dropx").show();
                         $(".drop2x").show();
                         $(".drop").hide();
@@ -587,6 +587,8 @@ $(document).ready(function () {
     var go30 = $('#go30');
     var go30Src = Rx.Observable.fromEvent(go30, 'click');
     var go30Sub = go30Src.subscribe(function (e) {
+        sub2.dispose();
+        sub1.dispose();
         sub1 = source1.subscribe(
         function (x) {
           sub2.dispose();
@@ -605,7 +607,6 @@ $(document).ready(function () {
     var go60Sub = go60Src.subscribe(function (e) {
         sub2 = source2.subscribe(
         function (x) {
-          sub1.dispose();
           $("#countdown").html(x);
           DS_ob.t = x;
           if (x === 0) {
@@ -700,20 +701,20 @@ calc = function (ax,b,cx,bb) {
     }
 
     if (d === 0) {
-        $("#newDisplay").show();
         $("#result1").show().html(res);
         ws.send("CE#$42," + privateClicker + "," + player + "," + "<br>" + a + " " + b + " " + c + " = " + res + "<br>");
-        $("#newDisplay").show();
     }
 
     if (d === 1) {
         ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
         console.log("__________________bb = " + bb);
         if (res === 20 && bb)   {
+            ("#newDisplay").show();
             $("#countdown").html("");
             if ((player === scoreClicker) && t > 0) {
                 console.log("if ((player === scoreClicker) && t > 0) { ");
-                $("#stop30").triggerHandler('click');
+                sub1.dispose();
+                DS_ob.t = -1;
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
                 if (impossibleClicker !== "a@F$Uy&impossible") {
                     ws.send("CN#$42," + privateClicker + "," + player + "," + impossibleClicker);
@@ -723,14 +724,12 @@ calc = function (ax,b,cx,bb) {
                 $("#a2").append("<br>No point for " + player + ". The clock wasn't running.");
                 $("#a1").prepend("<span style='font-size:25px; background:#000;" +
                     "color:#f00;'>20, but no increase in " + player + "'s score</span>");
-                $("#newDisplay").show();
             }
             t = -1;
             $("#operators").html("");
             $("#dropBoxes").html("");
         }
         $("#result2").show().html(res);
-        $("#newDisplay").show();
     }
 
     if (d === 2) {
@@ -739,7 +738,9 @@ calc = function (ax,b,cx,bb) {
         if (res === 20) {
             $("#countdown").html("");
             console.log("d === 2 and res === 20");
-            $("#stop30").triggerHandler('click');
+            sub1.dispose();
+            DS_ob.t = -1
+            ("#newDisplay").show();
             if ((player === scoreClicker) && t > 0) {
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
                 if (impossibleClicker !== "a@F$Uy&impossible") {
@@ -750,7 +751,6 @@ calc = function (ax,b,cx,bb) {
                 $("#a2").append("<br>No point for " + player + ". The clock wasn't running.");
                 $("#a1").prepend("<span style='font-size:25px;color:#f00;'>20, but no increase in " +
                     player + "'s score</span>");
-                $("#newDisplay").show();
             }
             DS_ob.t = -1;
             $("#operators").html("");
@@ -758,9 +758,9 @@ calc = function (ax,b,cx,bb) {
         }
         $("#result3").show().html(res);
         if (res !== 20 && (player === scoreClicker) && t > 0) {
-            $("#stop30").triggerHandler('click');
+            sub1.dispose();
+            DS_ob.t = -1;
             DS_ob.scoreFunc();
-            $("#newDisplay").show();
         }
     }
 };
