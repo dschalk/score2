@@ -3,7 +3,7 @@
 
 ####Rules of "Score"
 
-Four dice are rolled. The default die are two six-sided, one twelve-sided, and one twenty-sided die. As mentioned above, the goal is to make the number "20" in two or three steps using addition, subtraction, multiplication, division, and/or concatenation.
+Four dice are rolled. The default die are two six-sided, one twelve-sided, and one twenty-sided die. she goal is to make the number "20" in two or three steps using addition, subtraction, multiplication, division, and/or concatenation.
 
 If a player calls out "Score!", or clicks "SCORE" in the computer version, he or she must quickly demonstrate how to make the number "20". Failure to do so loses the player one point; success gains a point. Clicking "SCORE" starts a countdown which currently allows 30 seconds, which is more than enough time.
 
