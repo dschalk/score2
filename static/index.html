@@ -13,9 +13,15 @@
     <body>
       <div class="spacer" id="left">
         <div class="spacer">
-            <button id="private">GO PRIVATE</button>
-            <button id="public">GO MULTIPLAYER</button>
+            <button id="private">Private Play</button>
+            <button id="publicA">Group A</button>
+            <button id="publicB">Group B</button>
+            <button id="publicNew">Player Created</button>
             <div id="b0"></div>
+            <div id="newgroup">
+                <label for="new">Enter group name: </label>
+                <input type="text" id="new">
+            </div>
         </div>
         <div id="a0"></div>
         <div id="a2"></div>
@@ -58,7 +64,7 @@
                 </form>
             </div>
             <div id="users-section" style="display: none">
-                <h2>Players</h2>
+                <h2>Player _ Score _ Group</h2>
                 <ul id="users">
                 </ul>
             </div>
