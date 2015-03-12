@@ -31,11 +31,11 @@ var sub2;
 
 function MakeDS_ob() {
     this.t = -1,
-    this.privateClicker = "a@F$Uy&private";
     this.player = "Happy Clown";
     this.impossibleClicker = "Adrien Apple";
     this.scoreClicker = "Beaming Banana" ;
     this.rollText = "1,1,1,1,42"
+    this.group = "private";
     this.d = -1;
     this.ar = [];
     this.bool = [];
@@ -44,10 +44,10 @@ function MakeDS_ob() {
         $("#countdown").html("");
         $("#a0").html("");
         if (this.player === this.scoreClicker) {
-            ws.send("CL#$42," + this.privateClicker + "," + this.player + "," + "dummy");
+            ws.send("CL#$42," + this.group + "," + this.player + "," + "dummy");
         }
         if ( this.player === this.impossibleClicker) {
-            ws.send("CM#$42,"+ this.privateClicker + "," + this.player + "," + "dummy");
+            ws.send("CM#$42,"+ this.group + "," + this.player + "," + "dummy");
             $("#stop60").triggerHandler('click');
         }
     }
@@ -89,6 +89,7 @@ refresh = function() {
 };
 
 $(document).ready(function () {
+    $("#newgroup").hide();
     function assign (a, b, c, d, e, f) { 
         var res;
         $("#"+d).hide();
@@ -117,14 +118,14 @@ $(document).ready(function () {
         $("#stop30").hide();
         $("#stop60").show();
         var game = DS_ob.game;
-        var impX = DS_ob.impossibleClicker;
+        var impX = DS_ob.impossible
         var plX = DS_ob.player;
         var scX = DS_ob.scoreClicker;
-        var prX = DS_ob.privateClicker;
+        var prX = DS_ob.group;
         var gameArray = event.data.split(",");
         var d2 = event.data.substring(0,6);
         var d3 = event.data.substring(2,6);
-        var sourceStatus = gameArray[1];  // Value of sender's privateClicker
+        var sourceStatus = gameArray[1];  // Value of sender's group
         var sender = gameArray[2];
         var extra = gameArray[3];
         var ext4= gameArray[4];
@@ -133,7 +134,7 @@ $(document).ready(function () {
         var ext7 = gameArray[7];
         var ext8 = gameArray[8];
         var p = $(document.createElement('p')).text(event.data);
-        if (plX === sender || prX !== "a@F$Uy&private" &&  sourceStatus !== "a@F$Uy&private") {
+        if (prX === sourceStatus) {
             switch (d2) {
                 case "CA#$42":               // Set up the next round of play.
                     refresh();
@@ -348,7 +349,7 @@ $(document).ready(function () {
             hoverClass: 'active',
             accept: ".drag, .dragNew",
             drop: function(e, ui) {
-                var status = DS_ob.privateClicker;
+                var status = DS_ob.group;
                 var player = DS_ob.player;
                 var ar = DS_ob.ar;
                 var bool = DS_ob.bool;
@@ -415,14 +416,14 @@ $(document).ready(function () {
     var rollASub = rollASrc.subscribe( function () {
             bool = [];
             DS_ob.d = -1;
-            ws.send("CA#$42," + DS_ob.privateClicker + "," + DS_ob.player + "," + "dummy");
+            ws.send("CA#$42," + DS_ob.group + "," + DS_ob.player + "," + "dummy");
         }
     );
 
     var solutions = $('#solutions');
     var solutionsSrc = Rx.Observable.fromEvent(solutions, 'click');
     var solutionsSub = solutionsSrc.subscribe( function () {
-            ws.send("CZ#$42," + DS_ob.privateClicker + "," + DS_ob.player + "," + rollText);
+            ws.send("CZ#$42," + DS_ob.group + "," + DS_ob.player + "," + rollText);
         }
     );
 
@@ -454,7 +455,7 @@ $(document).ready(function () {
         $("#x1").val("");
         $("#x2").val("");
         $("#x3").val("");
-        ws.send("CW#$42," + DS_ob.privateClicker + "," + DS_ob.player  + "," + e);
+        ws.send("CW#$42," + DS_ob.group + "," + DS_ob.player  + "," + e);
         console.log("Sent CW3442 ************************************************")
         $('#computations').show();
         $(".erase2").show();
@@ -467,20 +468,20 @@ $(document).ready(function () {
         $("#scoreF").hide();
         DS_ob.scoreClicker = DS_ob.player;
         $("#impossibleJ").hide();
-        ws.send("CF#$42," + DS_ob.privateClicker + "," + DS_ob.player + "," + "dummy");
+        ws.send("CF#$42," + DS_ob.group + "," + DS_ob.player + "," + "dummy");
     });
 
     var imp = $("#impossibleJ");
     var impSrc = Rx.Observable.fromEvent(imp, 'click');
     var impSub = impSrc.subscribe( function () {
         DS_ob.impossibleClicker = DS_ob.player;
-        ws.send("CJ#$42," + DS_ob.privateClicker + "," + DS_ob.player + "," + "dummy");
+        ws.send("CJ#$42," + DS_ob.group + "," + DS_ob.player + "," + "dummy");
     })
 
     var nD = $("#newDisplay")
     var nDSrc = Rx.Observable.fromEvent(nD, 'click');
     var nDSub = nDSrc.subscribe( function () {
-        ws.send("CR#$42," + DS_ob.privateClicker + "," + DS_ob.player + "," + "dummy");
+        ws.send("CR#$42," + DS_ob.group + "," + DS_ob.player + "," + "dummy");
     });
 
     populate = function(a,b,c,d) {
@@ -500,32 +501,57 @@ $(document).ready(function () {
     var priv = $("#private")
     var privSrc = Rx.Observable.fromEvent(priv, 'click');
     var privSub = privSrc.subscribe( function () {
-        $("#public").show();
-        $("#private").hide();
-        DS_ob.privateClicker = "a@F$Uy&private";
+        DS_ob.group = "private";
+        ws.send("CO#$42," + "private" + "," + DS_ob.player + "," + "dummy");
         $("#b0").html("Solitaire mode. Your actions do not affect other players.")
     });
 
-    var pub = $("#public")
-    var pubSrc = Rx.Observable.fromEvent(pub, 'click');
-    var pubSub = pubSrc.subscribe( function () {
-        DS_ob.privateClicker = DS_ob.player;
-        $("#private").show();
-        $("#public").hide();
-        $("#b0").html("Now in multiplayer mode. Be careful." +
+    var pubA = $("#publicA");
+    var pubASrc = Rx.Observable.fromEvent(pubA, 'click');
+    var pubASub = pubASrc.subscribe( function () {
+        DS_ob.group = "pubA";
+        ws.send("CO#$42," + "pubA" + "," + DS_ob.player + "," + "dummy");
+        $("#b0").html("You are now in Group A. Be careful." +
             " Clicking 'ROLL' inserts the roll numbers in all" +
-            " participating browsers.");
+            " Group A browsers.");
     });
 
-    setPrivate = function(x) {
-        privateClicker = x;
-        $("#b0").html("Solitaire mode. Your actions do not affect other players.")
-    };
+    var pubB = $("#publicB");
+    var pubBSrc = Rx.Observable.fromEvent(pubB, 'click');
+    var pubBSub = pubBSrc.subscribe( function () {
+        DS_ob.group = "pubB";
+        ws.send("CO#$42," + "pubB" + "," + DS_ob.player + "," + "dummy");
+        $("#b0").html("Now in group B. Be careful." +
+            " Clicking 'ROLL' inserts the roll numbers in all" +
+            " group B browsers.");
+    });
+
+    var pubNew = $("#publicNew");
+    var pubNewSrc = Rx.Observable.fromEvent(pubNew, 'click');
+    var pubNewSub = pubNewSrc.subscribe( function () {
+        DS_ob.group = DS_ob.player;  
+        $("#b0").html("");
+        $("#newgroup").show();
+    });
+
+    var newG = $("#new");
+    var newGSrc = Rx.Observable.fromEvent(newG, 'keydown');
+    var newGSub = newGSrc.subscribe( function (e) {
+    if (e.which === 13) { 
+    var name = $("#new").val();
+    DS_ob.group = name;
+    ws.send("CO#$42," + name + "," + DS_ob.player + "," + "dummy");
+    $("#newgroup").hide();
+    $("#b0").html("Now in group " + name);
+    }
+    });
 
     $("#b0").hide();
     $("#experiment").hide();
     $("#private").hide();
-    $("#public").hide();
+    $("#publicA").hide();
+    $("#publicB").hide();
+    $("#publicNew").hide();
     $("#rollA").hide();
     $(".erase").hide();
     $(".erase2").hide();
@@ -551,7 +577,6 @@ $(document).ready(function () {
         0,
         1000)
        .map(function (x, i) { return (x, 60 - i)});
-
 
     sub1 = source1.subscribe(
     function (x) {
@@ -621,6 +646,7 @@ $(document).ready(function () {
         $('#warnings').html('');
         var user = $('#user').val();
         DS_ob.player = user;
+        DS_ob.group = user;
         ws = createWebSocket('/');
         ws.onopen = function() {
             ws.send("CC#$42" + user);
@@ -641,7 +667,10 @@ $(document).ready(function () {
                 $("#result3").hide();
                 $("#b0").show();
                 $("#experiment").show();
-                $("#public").show();
+                $("#private").show();
+                $("#publicA").show();
+                $("#publicB").show();
+                $("#publicNew").show();
                 $("#b0").html("Solitaire mode. Click above to enable competition.")
                 $("#rollA").show();
                 $("#a1").show();
@@ -679,7 +708,7 @@ calc = function (ax,b,cx,bb) {
     var impossibleClicker = DS_ob.impossibleClicker;
     var player = DS_ob.player;
     var scoreClicker = DS_ob.scoreClicker;
-    var privateClicker = DS_ob.privateClicker;
+    var privateClicker = DS_ob.group;
     DS_ob.d = DS_ob.d + 1;
     var d = DS_ob.d;
     DS_ob.ar = [];
@@ -709,7 +738,7 @@ calc = function (ax,b,cx,bb) {
         ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
         console.log("__________________bb = " + bb);
         if (res === 20 && bb)   {
-            ("#newDisplay").show();
+            $("#newDisplay").show();
             $("#countdown").html("");
             if ((player === scoreClicker) && t > 0) {
                 console.log("if ((player === scoreClicker) && t > 0) { ");
@@ -740,7 +769,7 @@ calc = function (ax,b,cx,bb) {
             console.log("d === 2 and res === 20");
             sub1.dispose();
             DS_ob.t = -1
-            ("#newDisplay").show();
+            $("#newDisplay").show();
             if ((player === scoreClicker) && t > 0) {
                 ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
                 if (impossibleClicker !== "a@F$Uy&impossible") {
