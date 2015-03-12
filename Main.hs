@@ -25,24 +25,25 @@ go = T.pack "GO"
 
 type Name = Text
 type Score = Int
-type Client = (Name, Score, WS.Connection)
+type Group = Text
+type Client = (Name, Score, Group, WS.Connection)
 type ServerState = [Client] 
 
-fx :: [String] -> Text
-fx [_,b,_,_] = T.pack b
-fx _ = T.pack "EE#$42"
-
-fz :: [String] -> Text
-fz [_,_,c,_] = T.pack c
-fz _ = T.pack "EE#$42"
-
 fw :: [String] -> Text
-fw [_,_,_,d] = T.pack d
+fw [_,b,_,_] = T.pack b
 fw _ = T.pack "EE#$42"
 
-fstatus :: [String] -> Text
-fstatus [_,b,_,_,_,_,_,_] = T.pack b
-fstatus _ = T.pack "EE#$42"
+fx :: [String] -> Text
+fx [_,_,c,_] = T.pack c
+fx _ = T.pack "EE#$42"
+
+fy :: [String] -> Text
+fy [_,_,_,d] = T.pack d
+fy _ = T.pack "EE#$42"
+
+fgroup :: [String] -> Text
+fgroup [_,b,_,_,_,_,_,_] = T.pack b
+fgroup _ = T.pack "EE#$42"
 
 fsender :: [String] -> Text
 fsender [_,_,c,_,_,_,_,_] = T.pack c
@@ -53,33 +54,39 @@ froll [_,_,_,a,b,c,d,e] = T.pack $ a ++ "," ++ b ++ "," ++ c ++ "," ++ d ++ "," 
 froll _ = T.pack "EE#$42"
 
 getName :: Client -> Name
-getName (a,_,_) = a
-
+getName (a,_,_,_) = a
 
 getScore :: Client -> Score
-getScore (_,b,_) = b
-
-
-getConn :: Client -> WS.Connection
-getConn (_,_,c) = c
+getScore (_,b,_,_) = b
 
 tr :: Client -> Text
-tr x = getName x `mappend` T.pack " " `mappend` T.pack (show (getScore x))
+tr x = getName x `mappend` T.pack " _ " `mappend` T.pack (show (getScore x)) 
+    `mappend` T.pack " _ " `mappend` getGroup x
 
-getUnderlying :: Client -> (Text, Int, WS.Connection)
-getUnderlying x = x
+getUnderlying :: Client -> (Text, Int, Text)
+getUnderlying (a, b, c, d) = (a, b, c)
+
+newGroup :: Text -> Text -> Client -> Client
+newGroup name group (a, b, c, d)   | name == a  = (a, b, group, d)
+                                   | otherwise = (a, b, c, d)
+
+changeGroup :: Text -> Text -> ServerState -> ServerState
+changeGroup name group = map (newGroup name group) 
+
+getGroup :: Client -> Group
+getGroup (_,_,c,_) = c
 
 incFunc :: Text -> Client -> Client
-incFunc x (a, b, c)   | x == a   = (a, b + 1, c)
-                      | otherwise = (a, b, c)
+incFunc x (a, b, c, d)   | x == a   = (a, b + 1, c, d)
+                         | otherwise = (a, b, c, d)
 
 decFunc :: Text -> Client -> Client
-decFunc x (a, b, c)   | x == a   = (a, b - 1, c)
-                      | otherwise = (a, b, c)
+decFunc x (a, b, c, d)   | x == a   = (a, b - 1, c, d)
+                         | otherwise = (a, b, c, d)
 
 decFunc2 :: Text -> Client -> Client
-decFunc2 x (a, b, c)   | x == a   = (a, b - 2, c)
-                       | otherwise = (a, b, c)
+decFunc2 x (a, b, c, d)   | x == a   = (a, b - 2, c, d)
+                          | otherwise = (a, b, c, d)
 
 upScore :: Text -> ServerState -> ServerState 
 upScore name = map (incFunc name)
@@ -112,14 +119,16 @@ removeClient client = filter ((/= getName client) . getName)
 broadcast :: Text -> ServerState -> IO ()
 broadcast message clients = do
     T.putStrLn message
-    forM_ clients $ \(_, _, conn) -> WS.sendTextData conn message
+    forM_ clients $ \(_ , _, _, conn) -> WS.sendTextData conn message
 
 main :: IO ()
 main = do
+    args <- getArgs
+    let port = fromIntegral (read $ head args :: Int)
     state <- newMVar newServerState
     Warp.runSettings Warp.defaultSettings
       { Warp.settingsTimeout = 36000,
-        Warp.settingsPort = 3000
+        Warp.settingsPort = port
       } $ WaiWS.websocketsOr WS.defaultConnectionOptions (application state) staticApp
 staticApp :: Network.Wai.Application
 staticApp = Static.staticApp $ Static.embeddedSettings $(embedDir "static")
@@ -149,7 +158,7 @@ application state pending = do
                 talk conn state client 
          where
                 prefix     = "CC#$42"
-                client     = (T.drop (T.length prefix) msg, 0, conn)
+                client     = (T.drop (T.length prefix) msg, 0, T.pack "private", conn)
                 disconnect = do
                   s <- modifyMVar state $ \s ->
                      let s' = removeClient client s in return (s', s')
@@ -157,22 +166,24 @@ application state pending = do
                   s'' <- readMVar state
                   broadcast ("CB#$42" `mappend` T.concat (intersperse (T.pack "<br>") (map tr s''))) s''
 talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
-talk conn state (user, _, _) = forever $ do
+talk conn state (user, _, _, _) = forever $ do
     msg <- WS.receiveData conn
     let msgArray = splitOn "," (T.unpack msg)
-    let source = fx msgArray
-    let sender = fz msgArray
-    let extra = fw msgArray
-    let source2 = fstatus msgArray
+    let group = fw msgArray
+    let sender = fx msgArray
+    let extra = fy msgArray
+    let group2 = fgroup msgArray
     let sender2 = fsender msgArray
     let extra2 = froll msgArray
-    print $ "source, sender, extra, msg " `mappend` source  `mappend` ", " `mappend` sender  `mappend` ", " `mappend` extra `mappend` ", " `mappend` msg
+    print $ "group, sender, extra, msg: " `mappend` group  `mappend` ", " 
+        `mappend` sender  `mappend` ", " `mappend` extra `mappend` ", " `mappend` msg
     if "CA#$42" `T.isPrefixOf` msg 
         then 
             do 
                 st <- readMVar state 
                 z <- rText
-                broadcast ("CA#$42," `mappend` source `mappend` "," `mappend` sender `mappend` "," `mappend` z) st
+                broadcast ("CA#$42," `mappend` group `mappend` "," 
+                    `mappend` sender `mappend` "," `mappend` z) st
 
     else if "CZ#$42" `T.isPrefixOf` msg
             then do 
@@ -180,7 +191,8 @@ talk conn state (user, _, _) = forever $ do
                 y <- liftIO $ truck $ tru ro
                 let yzz = T.pack y 
                 st <- readMVar state
-                broadcast ("CZ#$42," `mappend` source2 `mappend` "," `mappend` sender2 `mappend` "," `mappend` yzz) st        
+                broadcast ("CZ#$42," `mappend` group2 `mappend` "," 
+                    `mappend` sender2 `mappend` "," `mappend` yzz) st        
 
     else if "CW#$42" `T.isPrefixOf` msg
             then do 
@@ -188,7 +200,8 @@ talk conn state (user, _, _) = forever $ do
                 y <- liftIO $ truck $ tru ro
                 let zz = T.pack y 
                 st <- readMVar state
-                broadcast ("CW#$42," `mappend` source2 `mappend` "," `mappend` sender2 `mappend` "," `mappend` zz) st  
+                broadcast ("CW#$42," `mappend` group2 `mappend` "," 
+                    `mappend` sender2 `mappend` "," `mappend` zz) st  
 
     else if "CB#$42" `T.isPrefixOf` msg
         then 
@@ -198,7 +211,7 @@ talk conn state (user, _, _) = forever $ do
 
     else if "CC#$42" `T.isPrefixOf` msg || "CE#$42" `T.isPrefixOf` msg || "CF#$42" `T.isPrefixOf` msg || 
         "CH#$42" `T.isPrefixOf` msg || "CJ#$42" `T.isPrefixOf` msg || "CK#$42" `T.isPrefixOf` msg || 
-        "CO#$42" `T.isPrefixOf` msg || "CP#$42" `T.isPrefixOf` msg || "CQ#$42" `T.isPrefixOf` msg || 
+        "CP#$42" `T.isPrefixOf` msg || "CQ#$42" `T.isPrefixOf` msg || 
         "CY#$42" `T.isPrefixOf` msg || "CR#$42" `T.isPrefixOf` msg || "CD#$42" `T.isPrefixOf` msg || 
         "CF#$42" `T.isPrefixOf` msg
         then 
@@ -251,6 +264,16 @@ talk conn state (user, _, _) = forever $ do
                 putMVar state new 
                 broadcast msg new
                 broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr new))) new
+    
+    else if "CO#$42" `T.isPrefixOf` msg
+        then 
+            mask_ $ do 
+                old <- takeMVar state
+                let new = changeGroup sender group old
+                putMVar state new 
+                broadcast msg new
+                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr new))) new
+    
     else 
         do 
             liftIO $ readMVar state >>= broadcast (user `mappend` ": " `mappend` msg) 
