@@ -29,26 +29,86 @@ var calc;
 var sub1;
 var sub2;
 
+function MONAD() {
+    'use strict';
+    var prototype = Object.create(null);
+    prototype.is_monad = true;
+    function unit(value) {
+        var monad = Object.create(prototype);
+        monad.val = value;
+        monad.bind = function (func, args) {
+            return func.apply(
+                undefined,
+                [value].concat(Array.prototype.slice.apply(args || []))
+            );
+        };
+        return monad;
+    }
+    return unit;
+}
+
+var newData = function newData(x,y,z) {
+  newVal = x;
+  newVal[z] = y; 
+  this.val = identity(newVal);
+  return this;
+}
+
+var identity = MONAD();
+var monad = identity([0,0,0,0,0,0,0,0,0,0,0]);
+
+function newplayer(name) { 
+    return monad.bind(newData, [name, 0]).val;
+}
+playerM = newplayer("Jack of Hearts");
+
+function newimpossibleClicker(name) { 
+    return monad.bind(newData, [name, 1]).val;
+}
+impossibleClickerM = newimpossibleClicker("King of Diamonds");
+
+function newscoreClicker(name) { 
+    return monad.bind(newData, [name, 2]).val;
+}
+scoreClickerM = newscoreClicker("Ace of Spades");
+// scoreClicker = scoreClickerM.val[2];
+
+
+function newgroup(name) { 
+    return monad.bind(newData, [name, 3]).val;
+}
+groupM = newgroup("private");
+
+
+function newrollText(name) { 
+    return monad.bind(newData, [name, 4]).val;
+}
+rollTextM = newrollText("1,1,1,1,42");
+
+
+function newd(num) { 
+    return monad.bind(newData, [num, 5]).val;
+}
+dM = newd(-1);
+
+
+function newgame(toggle) { 
+    return monad.bind(newData, [toggle, 6]).val;
+}
+gameM = newgame("off");
+
 function MakeDS_ob() {
     this.t = -1,
-    this.player = "Happy Clown";
-    this.impossibleClicker = "Adrien Apple";
-    this.scoreClicker = "Beaming Banana" ;
-    this.rollText = "1,1,1,1,42"
-    this.group = "private";
-    this.d = -1;
     this.ar = [];
     this.bool = [];
-    this.game = "off";
     this.scoreFunc = function() {
         $("#countdown").html("");
         $("#a0").html("");
-        if (this.player === this.scoreClicker) {
-            ws.send("CL#$42," + this.group + "," + this.player + "," + "dummy");
+        if (playerM.val[0] === scoreClickerM.val[2]) {
+            ws.send("CL#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
         }
-        if ( this.player === this.impossibleClicker) {
-            ws.send("CM#$42,"+ this.group + "," + this.player + "," + "dummy");
-            $("#stop60").triggerHandler('click');
+        if ( playerM.val[0] === impossibleClickerM.val[1]) {
+            ws.send("CM#$42,"+ groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
         }
     }
 }
@@ -57,10 +117,10 @@ var DS_ob = new MakeDS_ob();
 refresh = function() {
     sub1.dispose();
     sub2.dispose();
-    DS_ob.game = "off";
-    DS_ob.d = -1;
-    DS_ob.scoreClicker = "a@F$Uy&score";
-    DS_ob.impossibleClicker = "a@F$Uy&impossible";
+    gameM = newgame("off");
+    dM = newd(-1);
+    impossibleClickerM = newimpossibleClicker("a@F$Uy&imp");
+    scoreClickerM = newscoreClicker("a@F$Uy&score");   
     DS_ob.ar = [];
     DS_ob.bool = [];
     $("#a0").html("");
@@ -117,15 +177,17 @@ $(document).ready(function () {
         $("#go60").hide();
         $("#stop30").hide();
         $("#stop60").show();
-        var game = DS_ob.game;
-        var impX = DS_ob.impossible
-        var plX = DS_ob.player;
-        var scX = DS_ob.scoreClicker;
-        var prX = DS_ob.group;
+        var game = gameM.val[6];
+        var impX = impossibleClickerM.val[1];
+        var plX = playerM.val[0];
+        var scX = scoreClickerM.val[2];
+        var prX = groupM.val[3];
+        console.log("impX, plX, scX, prX " + (impX, plX, scX, prX));
         var gameArray = event.data.split(",");
         var d2 = event.data.substring(0,6);
         var d3 = event.data.substring(2,6);
         var sourceStatus = gameArray[1];  // Value of sender's group
+        var group = gameArray[1];
         var sender = gameArray[2];
         var extra = gameArray[3];
         var ext4= gameArray[4];
@@ -133,6 +195,7 @@ $(document).ready(function () {
         var ext6 = gameArray[6];
         var ext7 = gameArray[7];
         var ext8 = gameArray[8];
+        console.log(gameArray);
         var p = $(document.createElement('p')).text(event.data);
         if (prX === sourceStatus) {
             switch (d2) {
@@ -155,9 +218,9 @@ $(document).ready(function () {
                     var buu = gameArray[4]
                     var cuu = gameArray[5]
                     var duu = gameArray[6]
-                    rollText = auu + "," + buu + "," + cuu + "," + duu + "," + 42;
-                    DS_ob.rollText = rollText;
-                    DS_ob.d = -1;
+                    rText = auu + "," + buu + "," + cuu + "," + duu + "," + 42;
+                    rollTextM = newrollText(rText);
+                    dM = newd(-1);
                     populate(auu,buu,cuu,duu);
                     $("#a4").html(auu + " &nbsp; " + buu + " &nbsp; " + cuu + " &nbsp; " + duu);
                 break;
@@ -186,7 +249,7 @@ $(document).ready(function () {
 
                 case "CF#$42":
                     game = "on";
-                    DS_ob.game = "on";
+                    gameM = newgame("on");
                     $("#a2").append("<br>" + sender + " clicked 'SCORE'");
                     DS_ob.ar = [];
                     $("#rollA").hide();
@@ -208,15 +271,15 @@ $(document).ready(function () {
                     $("#stop30").triggerHandler('click');
                     $("#a0").html("");
                     $("#a2").append("<br>One point for " + sender);
-                    $("#a1").prepend("<span style='font-size:75px; background:#000; color:#f00;'>Score!</span>");
+                    $("#a1").prepend("<span style='font-size:75px; background:#000; color:#f00;'>" +
+                        "Score!</span>");
                     $("#newDisplay").show();
                     $("#countdown").html("");
                 break;
 
                 case "CH#$42":
-                    if (plX !== sender && DS_ob.game === "on") {
+                    if (plX !== sender && gameM.val[6] === "on") {
                         assign (extra, ext4, ext5, ext6, ext7, ext8);
-                        console.log("From CH#$42 " + extra, ext4, ext5, ext6, ext7, ext8)
                     }
 
                 break;
@@ -230,7 +293,7 @@ $(document).ready(function () {
                 break;
 
                 case "CO#$42":
-
+                    $("#b0").html(sender + " is now in group " + group);
                 break;
 
                 case "CP#$42":
@@ -244,7 +307,7 @@ $(document).ready(function () {
 
                 case "CJ#$42":
                     $("#impossibleJ").hide();
-                    DS_ob.impossibleClicker = sender;
+                    impossibleClickerM.val[1] = sender;
                     $("#a2").prepend("<br>" + sender + " clicked 'IMPOSSIBLE'");
                     $('#go60').triggerHandler('click');
                 break;
@@ -252,12 +315,14 @@ $(document).ready(function () {
                 case "CL#$42":
                     $("#a2").append("<br>deduct one point from " + sender + "'s score.");
                     $("#newDisplay").show();
+                    $("#stop60").triggerHandler('click');
                 break;
 
                 case "CM#$42":
                     $('#stop60').triggerHandler('click');
                     $("#a2").append("<br>One point for " + sender);
-                    $("#a1").prepend("<span style='font-size:75px; background:#000; color:#f00;'>Score!</span>");
+                    $("#a1").prepend("<span style='font-size:75px; background:#000; color:#f00;'>" +
+                        "Score!</span>");
                     $("#a2").prepend("<br>Time's up and nobody found a solution");
                     $("#newDisplay").show();
                 break;
@@ -349,17 +414,15 @@ $(document).ready(function () {
             hoverClass: 'active',
             accept: ".drag, .dragNew",
             drop: function(e, ui) {
-                var status = DS_ob.group;
-                var player = DS_ob.player;
+                var status = groupM.val[3];
+                var player = playerM.val[0];
                 var ar = DS_ob.ar;
                 var bool = DS_ob.bool;
                 var dropID = $(this).attr( 'id' );
                 var dragID = ui.draggable.attr( 'id' );
-                console.log("@@@###############$$$$$$$$$$_____dragID: " + dragID);
                 var val = ui.draggable.html();
                 ar[dropID] = val;
                 ar[(parseInt(dropID) + 3).toString()] = dragID;
-                console.log("________ar = " + ar);
                 bool.push(ui.draggable.attr( "name" ));  // "name" is either "undefined" or "new".
                 ui.draggable.hide( "puff" );
                 $(this).html(val);
@@ -368,7 +431,7 @@ $(document).ready(function () {
                     calc(ar[0], ar[1], ar[2], bb);
                     ws.send("CH#$42," + status + "," + player + "," +
                         ar[0] + "," + ar[1] + "," + ar[2] + "," + ar[3] + "," +
-                        ar[5] + "," + (DS_ob.d + 1));
+                        ar[5] + "," + (dM.val[5] + 1));
                     refreshDropboxes();
                }
             }
@@ -415,15 +478,15 @@ $(document).ready(function () {
     var rollASrc = Rx.Observable.fromEvent(rollA, 'click');
     var rollASub = rollASrc.subscribe( function () {
             bool = [];
-            DS_ob.d = -1;
-            ws.send("CA#$42," + DS_ob.group + "," + DS_ob.player + "," + "dummy");
+            dM = newd(-1);
+            ws.send("CA#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
         }
     );
 
     var solutions = $('#solutions');
     var solutionsSrc = Rx.Observable.fromEvent(solutions, 'click');
     var solutionsSub = solutionsSrc.subscribe( function () {
-            ws.send("CZ#$42," + DS_ob.group + "," + DS_ob.player + "," + rollText);
+            ws.send("CZ#$42," + groupM.val[3] + "," + playerM.val[0] + "," + rollTextM.val[4]);
         }
     );
 
@@ -455,8 +518,7 @@ $(document).ready(function () {
         $("#x1").val("");
         $("#x2").val("");
         $("#x3").val("");
-        ws.send("CW#$42," + DS_ob.group + "," + DS_ob.player  + "," + e);
-        console.log("Sent CW3442 ************************************************")
+        ws.send("CW#$42," + groupM.val[3] + "," + playerM.val[0]  + "," + e);
         $('#computations').show();
         $(".erase2").show();
         $("#show2").show();
@@ -466,22 +528,23 @@ $(document).ready(function () {
     var sFSrc = Rx.Observable.fromEvent(sF, 'click');
     var sFSub = sFSrc.subscribe( function () {
         $("#scoreF").hide();
-        DS_ob.scoreClicker = DS_ob.player;
+        scoreClickerM = newscoreClicker(playerM.val[0]);
         $("#impossibleJ").hide();
-        ws.send("CF#$42," + DS_ob.group + "," + DS_ob.player + "," + "dummy");
+        ws.send("CF#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
+        console.log("CF#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
     });
 
     var imp = $("#impossibleJ");
     var impSrc = Rx.Observable.fromEvent(imp, 'click');
     var impSub = impSrc.subscribe( function () {
-        DS_ob.impossibleClicker = DS_ob.player;
-        ws.send("CJ#$42," + DS_ob.group + "," + DS_ob.player + "," + "dummy");
+        impossibleClickerM = newimpossibleClicker(playerM.val[0]);
+        ws.send("CJ#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
     })
 
     var nD = $("#newDisplay")
     var nDSrc = Rx.Observable.fromEvent(nD, 'click');
     var nDSub = nDSrc.subscribe( function () {
-        ws.send("CR#$42," + DS_ob.group + "," + DS_ob.player + "," + "dummy");
+        ws.send("CR#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
     });
 
     populate = function(a,b,c,d) {
@@ -501,16 +564,16 @@ $(document).ready(function () {
     var priv = $("#private")
     var privSrc = Rx.Observable.fromEvent(priv, 'click');
     var privSub = privSrc.subscribe( function () {
-        DS_ob.group = "private";
-        ws.send("CO#$42," + "private" + "," + DS_ob.player + "," + "dummy");
+        groupM = newgroup("private");
+        ws.send("CO#$42," + "private" + "," + playerM.val[0] + "," + "dummy");
         $("#b0").html("Solitaire mode. Your actions do not affect other players.")
     });
 
     var pubA = $("#publicA");
     var pubASrc = Rx.Observable.fromEvent(pubA, 'click');
     var pubASub = pubASrc.subscribe( function () {
-        DS_ob.group = "pubA";
-        ws.send("CO#$42," + "pubA" + "," + DS_ob.player + "," + "dummy");
+        groupM = newgroup("pubA");
+        ws.send("CO#$42," + "pubA" + "," + playerM.val[0] + "," + "dummy");
         $("#b0").html("You are now in Group A. Be careful." +
             " Clicking 'ROLL' inserts the roll numbers in all" +
             " Group A browsers.");
@@ -519,30 +582,22 @@ $(document).ready(function () {
     var pubB = $("#publicB");
     var pubBSrc = Rx.Observable.fromEvent(pubB, 'click');
     var pubBSub = pubBSrc.subscribe( function () {
-        DS_ob.group = "pubB";
-        ws.send("CO#$42," + "pubB" + "," + DS_ob.player + "," + "dummy");
+        groupM = newgroup("pubB");
+        ws.send("CO#$42," + "pubB" + "," + playerM.val[0] + "," + "dummy");
         $("#b0").html("Now in group B. Be careful." +
             " Clicking 'ROLL' inserts the roll numbers in all" +
             " group B browsers.");
-    });
-
-    var pubNew = $("#publicNew");
-    var pubNewSrc = Rx.Observable.fromEvent(pubNew, 'click');
-    var pubNewSub = pubNewSrc.subscribe( function () {
-        DS_ob.group = DS_ob.player;  
-        $("#b0").html("");
-        $("#newgroup").show();
     });
 
     var newG = $("#new");
     var newGSrc = Rx.Observable.fromEvent(newG, 'keydown');
     var newGSub = newGSrc.subscribe( function (e) {
     if (e.which === 13) { 
-    var name = $("#new").val();
-    DS_ob.group = name;
-    ws.send("CO#$42," + name + "," + DS_ob.player + "," + "dummy");
-    $("#newgroup").hide();
-    $("#b0").html("Now in group " + name);
+        var name = $("#new").val();
+        groupM = newgroup(name);
+        ws.send("CO#$42," + name + "," + playerM.val[0] + "," + "dummy");
+        $("#newgroup").hide();
+        $("#b0").html("Now in group " + name);
     }
     });
 
@@ -580,13 +635,11 @@ $(document).ready(function () {
 
     sub1 = source1.subscribe(
     function (x) {
-      console.log(x);
       if (x < 0) {sub1.dispose();}
     });
 
     sub2 = source2.subscribe(
     function (x) {
-      console.log(x);
       if (x < 0) {sub2.dispose();}
     });
 
@@ -645,15 +698,14 @@ $(document).ready(function () {
     $('#join-form').submit(function () {
         $('#warnings').html('');
         var user = $('#user').val();
-        DS_ob.player = user;
-        DS_ob.group = user;
+        playerM = newplayer(user);
         ws = createWebSocket('/');
         ws.onopen = function() {
             ws.send("CC#$42" + user);
         };
         ws.onmessage = function(event) {
             if(event.data === "CC#$42") {
-                DS_ob.d = -1;
+                dM = newd(-1);
                 createDom();
                 createOperators();
                 createDropboxes();
@@ -705,12 +757,13 @@ $(document).ready(function () {
 calc = function (ax,b,cx,bb) {
     var d = DS_ob.t;
     var t = DS_ob.t;
-    var impossibleClicker = DS_ob.impossibleClicker;
-    var player = DS_ob.player;
-    var scoreClicker = DS_ob.scoreClicker;
-    var privateClicker = DS_ob.group;
-    DS_ob.d = DS_ob.d + 1;
-    var d = DS_ob.d;
+    var impossibleClicker = impossibleClickerM.val[1];
+    var player = playerM.val[0];
+    var scoreClicker = scoreClickerM.val[2];
+    var group = groupM.val[3];
+    var ddd = dM.val[5] + 1;
+    var d = ddd;
+    dM = newd(ddd)
     DS_ob.ar = [];
     DS_ob.bool = [];
     var res;
@@ -731,22 +784,21 @@ calc = function (ax,b,cx,bb) {
 
     if (d === 0) {
         $("#result1").show().html(res);
-        ws.send("CE#$42," + privateClicker + "," + player + "," + "<br>" + a + " " + b + " " + c + " = " + res + "<br>");
+        ws.send("CE#$42," + group + "," + player + "," + "<br>" + a + " " + b + " " + c + " = " + res + "<br>");
     }
 
     if (d === 1) {
-        ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
-        console.log("__________________bb = " + bb);
+        ws.send("CE#$42," + group + "," + player + "," + a + " " + 
+            b + " " + c + " = " + res + "<br>");
         if (res === 20 && bb)   {
             $("#newDisplay").show();
             $("#countdown").html("");
             if ((player === scoreClicker) && t > 0) {
-                console.log("if ((player === scoreClicker) && t > 0) { ");
                 sub1.dispose();
                 DS_ob.t = -1;
-                ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
+                ws.send("CG#$42," + group + "," + player + "," + "cow");
                 if (impossibleClicker !== "a@F$Uy&impossible") {
-                    ws.send("CN#$42," + privateClicker + "," + player + "," + impossibleClicker);
+                    ws.send("CN#$42," + group + "," + player + "," + impossibleClicker);
                 }
             }
             else {
@@ -762,18 +814,16 @@ calc = function (ax,b,cx,bb) {
     }
 
     if (d === 2) {
-        console.log("__________________bb = " + bb);
-        ws.send("CE#$42," + privateClicker + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
+        ws.send("CE#$42," + group + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
         if (res === 20) {
             $("#countdown").html("");
-            console.log("d === 2 and res === 20");
             sub1.dispose();
             DS_ob.t = -1
             $("#newDisplay").show();
             if ((player === scoreClicker) && t > 0) {
-                ws.send("CG#$42," + privateClicker + "," + player + "," + "cow");
+                ws.send("CG#$42," + group + "," + player + "," + "cow");
                 if (impossibleClicker !== "a@F$Uy&impossible") {
-                    ws.send("CN#$42," + privateClicker + "," + player + "," + impossibleClicker);
+                    ws.send("CN#$42," + group + "," + player + "," + impossibleClicker);
                 }
             }
             else {
@@ -786,7 +836,7 @@ calc = function (ax,b,cx,bb) {
             $("#dropBoxes").html("");
         }
         $("#result3").show().html(res);
-        if (res !== 20 && (player === scoreClicker) && t > 0) {
+        if (res !== 20 && (player === scoreClicker && t > 0)) {
             sub1.dispose();
             DS_ob.t = -1;
             DS_ob.scoreFunc();
