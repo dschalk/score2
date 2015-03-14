@@ -835,11 +835,12 @@ calc = function (ax,b,cx,bb) {
             $("#operators").html("");
             $("#dropBoxes").html("");
         }
-        $("#result3").show().html(res);
         if (res !== 20 && (player === scoreClicker && t > 0)) {
             sub1.dispose();
             DS_ob.t = -1;
             DS_ob.scoreFunc();
         }
+        $("#result3").show().html(res);
+        $("#newDisplay").show();
     }
 };
