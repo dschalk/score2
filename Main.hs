@@ -60,11 +60,8 @@ getScore :: Client -> Score
 getScore (_,b,_,_) = b
 
 tr :: Client -> Text
-tr x = getName x `mappend` T.pack " _ " `mappend` T.pack (show (getScore x)) 
-    `mappend` T.pack " _ " `mappend` getGroup x
-
-getUnderlying :: Client -> (Text, Int, Text)
-getUnderlying (a, b, c, d) = (a, b, c)
+tr x = getName x `mappend` T.pack " _( " `mappend` T.pack (show (getScore x)) 
+    `mappend` T.pack " )_ " `mappend` getGroup x
 
 newGroup :: Text -> Text -> Client -> Client
 newGroup name group (a, b, c, d)   | name == a  = (a, b, group, d)
@@ -212,8 +209,7 @@ talk conn state (user, _, _, _) = forever $ do
     else if "CC#$42" `T.isPrefixOf` msg || "CE#$42" `T.isPrefixOf` msg || "CF#$42" `T.isPrefixOf` msg || 
         "CH#$42" `T.isPrefixOf` msg || "CJ#$42" `T.isPrefixOf` msg || "CK#$42" `T.isPrefixOf` msg || 
         "CP#$42" `T.isPrefixOf` msg || "CQ#$42" `T.isPrefixOf` msg || 
-        "CY#$42" `T.isPrefixOf` msg || "CR#$42" `T.isPrefixOf` msg || "CD#$42" `T.isPrefixOf` msg || 
-        "CF#$42" `T.isPrefixOf` msg
+        "CY#$42" `T.isPrefixOf` msg || "CR#$42" `T.isPrefixOf` msg || "CD#$42" `T.isPrefixOf` msg
         then 
             do 
                 st <- readMVar state 
@@ -273,6 +269,8 @@ talk conn state (user, _, _, _) = forever $ do
                 putMVar state new 
                 broadcast msg new
                 broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr new))) new
+                broadcast ("CO#$42," `mappend` group `mappend` "," 
+                    `mappend` sender `mappend` "," `mappend` extra) new
     
     else 
         do 
