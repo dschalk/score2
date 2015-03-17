@@ -18,7 +18,7 @@ import Fm hiding (main)
 import Data.List (intersperse)
 import Control.Exception.Base (mask_)
 import Data.List.Split (splitOn)
-import System.Environment (getArgs)
+import System.Environment (getEnv)
 
 go :: Text
 go = T.pack "GO"
@@ -120,8 +120,10 @@ broadcast message clients = do
 
 main :: IO ()
 main = do
-    args <- getArgs
-    let port = fromIntegral (read $ head args :: Int)
+    -- args <- getArgs
+    -- let port = fromIntegral (read $ head args :: Int
+    por <- getEnv "PORT"
+    let port = read por
     state <- newMVar newServerState
     Warp.runSettings Warp.defaultSettings
       { Warp.settingsTimeout = 36000,
@@ -178,7 +180,7 @@ talk conn state (user, _, _, _) = forever $ do
         then 
             do 
                 st <- readMVar state 
-                z <- rText
+                z <- rText 6 6 12 20
                 broadcast ("CA#$42," `mappend` group `mappend` "," 
                     `mappend` sender `mappend` "," `mappend` z) st
 

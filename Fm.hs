@@ -217,8 +217,8 @@ arg :: [Double]
 arg = [1,1,1,1,42]
 
 rText :: IO T.Text
-rText = do 
-    x <- roll 6 6 12 20 
+rText a b c d = do 
+    x <- roll a b c d
     let y = map round x
     let z = map show y
     return $ rollFunc z
