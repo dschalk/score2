@@ -120,8 +120,6 @@ broadcast message clients = do
 
 main :: IO ()
 main = do
-    -- args <- getArgs
-    -- let port = fromIntegral (read $ head args :: Int
     por <- getEnv "PORT"
     let port = read por
     state <- newMVar newServerState
