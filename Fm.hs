@@ -216,7 +216,7 @@ truck x = do
 arg :: [Double]
 arg = [1,1,1,1,42]
 
-rText :: IO T.Text
+rText :: Int -> Int -> Int -> Int -> IO T.Text
 rText a b c d = do 
     x <- roll a b c d
     let y = map round x
