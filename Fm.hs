@@ -225,7 +225,7 @@ rText a b c d = do
 
 main :: IO ()
 main = do 
-    rText >>= print
+    rText 6 6 12 20 >>= print
     return ()
 
 
