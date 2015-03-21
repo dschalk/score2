@@ -32,7 +32,6 @@ var sub2;
 function MONAD() {
     'use strict';
     var prototype = Object.create(null);
-    prototype.is_monad = true;
     function unit(value) {
         var monad = Object.create(prototype);
         monad.val = value;
@@ -55,7 +54,12 @@ var newData = function newData(x,y,z) {
 }
 
 var identity = MONAD();
-var monad = identity([0,0,0,0,0,0,0,0,0,0,0]);
+var monad = identity([0,1,2,3,4,5,6,7,8,9,10,11,12]);
+
+function newroll(name) { 
+    return monad.bind(newData, [name, 10]).val;
+}
+rollM = newroll("6,6,12,20");
 
 function newplayer(name) { 
     return monad.bind(newData, [name, 0]).val;
@@ -65,37 +69,43 @@ playerM = newplayer("Jack of Hearts");
 function newimpossibleClicker(name) { 
     return monad.bind(newData, [name, 1]).val;
 }
-impossibleClickerM = newimpossibleClicker("King of Diamonds");
+impossibleClickerM = newimpossibleClicker("a@F$Uy&impossible");
 
 function newscoreClicker(name) { 
     return monad.bind(newData, [name, 2]).val;
 }
-scoreClickerM = newscoreClicker("Ace of Spades");
+scoreClickerM = newscoreClicker("a@F$Uy&score");
 // scoreClicker = scoreClickerM.val[2];
-
 
 function newgroup(name) { 
     return monad.bind(newData, [name, 3]).val;
 }
 groupM = newgroup("private");
 
-
 function newrollText(name) { 
     return monad.bind(newData, [name, 4]).val;
 }
-rollTextM = newrollText("1,1,1,1,42");
-
+rollTextM = newrollText("1,1,1,1");
 
 function newd(num) { 
     return monad.bind(newData, [num, 5]).val;
 }
 dM = newd(-1);
 
-
 function newgame(toggle) { 
     return monad.bind(newData, [toggle, 6]).val;
 }
 gameM = newgame("off");
+
+function newgoal(name) { 
+    return monad.bind(newData, [name, 7]).val;
+}
+goalM = newgoal(20);
+
+function newgoal32(name) { 
+    return monad.bind(newData, [name, 11]).val;
+}
+goal32M = newgoal32(25);
 
 function MakeDS_ob() {
     this.t = -1,
@@ -105,10 +115,10 @@ function MakeDS_ob() {
         $("#countdown").html("");
         $("#a0").html("");
         if (playerM.val[0] === scoreClickerM.val[2]) {
-            ws.send("CL#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
+            ws.send("CL#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "place holder");
         }
         if ( playerM.val[0] === impossibleClickerM.val[1]) {
-            ws.send("CM#$42,"+ groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
+            ws.send("CM#$42,"+ groupM.val[3] + "," + playerM.val[0] + "," + "place holder");
         }
     }
 }
@@ -119,7 +129,7 @@ refresh = function() {
     sub2.dispose();
     gameM = newgame("off");
     dM = newd(-1);
-    impossibleClickerM = newimpossibleClicker("a@F$Uy&imp");
+    impossibleClickerM = newimpossibleClicker("a@F$Uy&impossible");
     scoreClickerM = newscoreClicker("a@F$Uy&score");   
     DS_ob.ar = [];
     DS_ob.bool = [];
@@ -177,19 +187,13 @@ $(document).ready(function () {
         $("#go60").hide();
         $("#stop30").hide();
         $("#stop60").show();
-        var game = gameM.val[6];
-        var impX = impossibleClickerM.val[1];
-        var plX = playerM.val[0];
-        var scX = scoreClickerM.val[2];
-        var prX = groupM.val[3];
-        console.log("impX, plX, scX, prX " + (impX, plX, scX, prX));
         var gameArray = event.data.split(",");
         var d2 = event.data.substring(0,6);
         var d3 = event.data.substring(2,6);
-        var sourceStatus = gameArray[1];  // Value of sender's group
-        var group = gameArray[1];
+        var sendersGroup= gameArray[1];   // The sender's group.
         var sender = gameArray[2];
         var extra = gameArray[3];
+        console.log(rollM.val[10])
         var ext4= gameArray[4];
         var ext5 = gameArray[5];
         var ext6 = gameArray[6];
@@ -197,7 +201,7 @@ $(document).ready(function () {
         var ext8 = gameArray[8];
         console.log(gameArray);
         var p = $(document.createElement('p')).text(event.data);
-        if (prX === sourceStatus) {
+        if (((groupM.val[3] === gameArray[1]) && (groupM.val[3] !== "private")) || (playerM.val[0] === sender)) {   
             switch (d2) {
                 case "CA#$42":               // Set up the next round of play.
                     refresh();
@@ -214,15 +218,11 @@ $(document).ready(function () {
                     $("#solutions").show();
                     $("#iutions2").show();
                     $("#a0").html("");
-                    var auu = gameArray[3]
-                    var buu = gameArray[4]
-                    var cuu = gameArray[5]
-                    var duu = gameArray[6]
-                    rText = auu + "," + buu + "," + cuu + "," + duu + "," + 42;
-                    rollTextM = newrollText(rText);
+                    var r = extra + "," + ext4 + "," + ext5 + "," + ext6;
+                    rollTextM = newrollText(r);
                     dM = newd(-1);
-                    populate(auu,buu,cuu,duu);
-                    $("#a4").html(auu + " &nbsp; " + buu + " &nbsp; " + cuu + " &nbsp; " + duu);
+                    populate(extra,ext4,ext5,ext6);
+                    $("#a4").html(extra + " " + ext4 +  " " + ext5 + " " + ext6);
                 break;
 
                 case "CB#$42":
@@ -234,7 +234,7 @@ $(document).ready(function () {
                 break;
 
                 case "CD#$42":       // Prevent new player login data from displaying as a chat message.
-                    if (sender !== player) {
+                    if (sender !== playerM.val[0]) {
                         $("#" + gameArray[3]).hide();
                         $("#" + gameArray[5]).val(gameArray[4]);
                         $("#" + gameArray[5]).html(gameArray[4]);
@@ -248,7 +248,6 @@ $(document).ready(function () {
                 break;
 
                 case "CF#$42":
-                    game = "on";
                     gameM = newgame("on");
                     $("#a2").append("<br>" + sender + " clicked 'SCORE'");
                     DS_ob.ar = [];
@@ -257,9 +256,9 @@ $(document).ready(function () {
                     $("#impossibleJ").hide();
                     $("#scoreF").hide();
                     $('#go30').triggerHandler('click');
-                    if (plX !== scX) {
+                    if (playerM.val[0] !==  scoreClickerM.val[2]) {
                         $("#a0").append(sender + " clicked SCORE and must make the " +
-                            "number '20' before time runs out.</h3>");
+                            "number " + goalM.val[7] + " before time runs out.</h3>");
                         $(".dropx").show();
                         $(".drop2x").show();
                         $(".drop").hide();
@@ -278,14 +277,14 @@ $(document).ready(function () {
                 break;
 
                 case "CH#$42":
-                    if (plX !== sender && gameM.val[6] === "on") {
+                    if (playerM.val[0] !== sender && gameM.val[6] === "on") {
                         assign (extra, ext4, ext5, ext6, ext7, ext8);
                     }
 
                 break;
 
                 case "CK#$42":       // Prevent new player login data from displaying as a chat message.
-                    if (sender !== player) {
+                    if (sender !== playerM.val[0]) {
                         $("#" + gameArray[3]).hide();
                         $("#1").val(gameArray[4]);
                         $("#1").html(gameArray[4]);
@@ -293,7 +292,7 @@ $(document).ready(function () {
                 break;
 
                 case "CO#$42":
-                    $("#b0").html(sender + " is now in group " + group);
+                    $("#b0").html(sender + " is now in group " + sendersGroup);
                 break;
 
                 case "CP#$42":
@@ -318,18 +317,38 @@ $(document).ready(function () {
                     $("#stop60").triggerHandler('click');
                 break;
 
+
+
+
+                case "CS#$42":
+                    $("#a2").append("The goal is " + extra);
+                    goalM = newgoal(extra);
+                    ws.send("CA#$42," + groupM.val[3] + "," + playerM.val[0] + "," + rollM.val[10]);
+                break;
+
+                case "CW#$42":
+                    if ( sender == playerM.val[0] ) {
+                        $("#show2").prepend(extra);
+                    }
+                break;                                                            
+
+
+
+
+
+
                 case "CM#$42":
-                    $('#stop60').triggerHandler('click');
-                    $("#a2").append("<br>One point for " + sender);
-                    $("#a1").prepend("<span style='font-size:75px; background:#000; color:#f00;'>" +
-                        "Score!</span>");
                     $("#a2").prepend("<br>Time's up and nobody found a solution");
                     $("#newDisplay").show();
                 break;
 
+                case "CQ#$42": 
+                    rollM = newroll(extra + "," + ext4 + "," + ext5 + "," + ext6);
+                break;
+
                 case "CN#$42":
                     $("#stop30").triggerHandler('click');
-                    $("#a2").append("<br>deduct two points from " + impX +
+                    $("#a2").append("<br>deduct two points from " + impossibleClickerM.val[1] +
                         "'s score. <br>A solution was found before 60 seconds had passed.");
                     $("#newDisplay").show();
                 break;
@@ -338,10 +357,7 @@ $(document).ready(function () {
                     refresh();
                 break;
 
-                case "CW#$42":
-                    $("#show2").prepend(extra);
-                    $("#show2").append("<br>Brought to you by " + plX)
-                break;
+
 
                 case "CZ#$42":
                     $("#show").prepend("<br>" + extra);
@@ -358,7 +374,6 @@ $(document).ready(function () {
                 break;
             }
         }
-
 
         else if (d2 === "CB#$42") {
             $("#users").html(event.data.substring(6));
@@ -429,7 +444,7 @@ $(document).ready(function () {
                 bb = (bool.indexOf("new") !== -1); // Did the player use a number generated by a previous computation?
                 if (ar[0] !== undefined && ar[1] !== undefined && ar[2] !== undefined) {
                     calc(ar[0], ar[1], ar[2], bb);
-                    ws.send("CH#$42," + status + "," + player + "," +
+                    ws.send("CH#$42," + status + "," + playerM.val[0] + "," +
                         ar[0] + "," + ar[1] + "," + ar[2] + "," + ar[3] + "," +
                         ar[5] + "," + (dM.val[5] + 1));
                     refreshDropboxes();
@@ -479,49 +494,81 @@ $(document).ready(function () {
     var rollASub = rollASrc.subscribe( function () {
             bool = [];
             dM = newd(-1);
-            ws.send("CA#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
+            ws.send("CA#$42," + groupM.val[3] + "," + playerM.val[0] + "," + rollM.val[10]);
         }
     );
 
     var solutions = $('#solutions');
     var solutionsSrc = Rx.Observable.fromEvent(solutions, 'click');
     var solutionsSub = solutionsSrc.subscribe( function () {
-            ws.send("CZ#$42," + groupM.val[3] + "," + playerM.val[0] + "," + rollTextM.val[4]);
+            var x = "CZ#$42," + groupM.val[3] + "," + playerM.val[0] + "," + rollTextM.val[4] + "," + goalM.val[7];
+            ws.send(x);
         }
     );
 
     var sol = $('#solutions2');
     var solSrc = Rx.Observable.fromEvent(sol, 'click');
     var solSub = solSrc.subscribe( function () {
-        var a = $("#x0").val();
-        if (isNaN(a) || a === "") {
-            alert(a + " is not a number.");
+        var a3 = $("#x30").val();
+        if (isNaN(a3) || a3 === "") {
+            alert(a3 + " is not a number.");
             return;
         }
-        var b = $("#x1").val();
-        if (isNaN(b) || b === "") {
-            alert(b + " is not a number.");
+        var b3 = $("#x31").val();
+        if (isNaN(b3) || b3 === "") {
+            alert(b3 + " is not a number.");
             return;
         }
-        var c = $("#x2").val();
-        if (isNaN(c) || c === "") {
-            alert(c + " is not a number.");
+        var c3 = $("#x32").val();
+        if (isNaN(c3) || c3 === "") {
+            alert(c3 + " is not a number.");
             return;
         }
-        var d = $("#x3").val();
-        if (isNaN(d) || d === "") {
-            alert(d + " is not a number.");
+        var d3 = $("#x33").val();
+        if (isNaN(d3) || d3 === "") {
+            alert(d3 + " is not a number.");
             return;
         }
-        var e = a + "," + b + "," + c + "," + d + "," + "42"
-        $("#x0").val("");
-        $("#x1").val("");
-        $("#x2").val("");
-        $("#x3").val("");
+        var e = a3 + "," + b3 + "," + c3 + "," + d3 + "," + goal32M.val[11]
+        $("#x30").val("");
+        $("#x31").val("");
+        $("#x32").val("");
+        $("#x33").val("");
         ws.send("CW#$42," + groupM.val[3] + "," + playerM.val[0]  + "," + e);
         $('#computations').show();
         $(".erase2").show();
         $("#show2").show();
+    });
+
+    var sides = $('#sides');
+    var sidesSrc = Rx.Observable.fromEvent(sides, 'click');
+    var sidesSub = sidesSrc.subscribe( function () {
+        var a2 = $("#x20").val();
+        if (isNaN(a2) || a2 === "") {
+            alert(a2 + " is not a number.");
+            return;
+        }
+        var b2 = $("#x21").val();
+        if (isNaN(b2) || b2 === "") {
+            alert(b2 + " is not a number.");
+            return;
+        }
+        var c2 = $("#x22").val();
+        if (isNaN(c2) || c2 === "") {
+            alert(c2 + " is not a number.");
+            return;
+        }
+        var d2 = $("#x23").val();
+        if (isNaN(d2) || d2 === "") {
+            alert(d2 + " is not a number.");
+            return;
+        }
+        var e = a2 + "," + b2 + "," + c2 + "," + d2
+        $("#x20").val("");
+        $("#x21").val("");
+        $("#x22").val("");
+        $("#x23").val("");
+        ws.send("CQ#$42," + groupM.val[3] + "," + playerM.val[0]  + "," + a2 + "," + b2 + "," + c2 + "," + d2);
     });
 
     var sF = $('#scoreF');
@@ -530,21 +577,20 @@ $(document).ready(function () {
         $("#scoreF").hide();
         scoreClickerM = newscoreClicker(playerM.val[0]);
         $("#impossibleJ").hide();
-        ws.send("CF#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
-        console.log("CF#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
+        ws.send("CF#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "place holder");
     });
 
     var imp = $("#impossibleJ");
     var impSrc = Rx.Observable.fromEvent(imp, 'click');
     var impSub = impSrc.subscribe( function () {
         impossibleClickerM = newimpossibleClicker(playerM.val[0]);
-        ws.send("CJ#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
+        ws.send("CJ#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "place holder");
     })
 
     var nD = $("#newDisplay")
     var nDSrc = Rx.Observable.fromEvent(nD, 'click');
     var nDSub = nDSrc.subscribe( function () {
-        ws.send("CR#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
+        ws.send("CR#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "place holder");
     });
 
     populate = function(a,b,c,d) {
@@ -561,11 +607,68 @@ $(document).ready(function () {
         $("#2").html("Num");
     }
 
+    var goal = $("#goal")
+    var goalSrc = Rx.Observable.fromEvent(goal, 'click');
+    var goalSub = goalSrc.subscribe( function () {
+        var x = $("#goal2").val()
+        if (isNaN(x)) {
+            alert(x + " <h2>is not a number.</h2> ");
+            return;
+        }
+        if (x === "") {
+            alert(" Please enter a number. ");
+            return;
+        }
+        else {        
+            ws.send("CS#$42," + groupM.val[3] + "," + playerM.val[0] + "," + x );
+        }
+    });
+
+    var goal3 = $("#goal3")
+    var goal3Src = Rx.Observable.fromEvent(goal3, 'click');
+    var goal3Sub = goal3Src.subscribe( function () {
+        var x = $("#goal4").val()
+        if (isNaN(x)) {
+            alert(x + " <h2>is not a number.</h2> ");
+            return;
+        }
+        if (x === "") {
+            alert(" Please enter a number. ");
+            return;
+        }
+        else {        
+            ws.send("CS#$42," + groupM.val[3] + "," + playerM.val[0] + "," + x );
+        }
+    });
+
+    var goal3 = $("#goal3")
+    var goal3Src = Rx.Observable.fromEvent(goal3, 'click');
+    var goal3Sub = goal3Src.subscribe( function () {
+        var x = $("#goal4").val()
+        if (isNaN(x)) {
+            alert(x + " <h2>is not a number.</h2> ");
+            return;
+        }
+        if (x === "") {
+            alert(" Please enter a number. ");
+            return;
+        }
+        else {        
+            goal32M = newgoal32(x);
+        }
+    });
+
+
+
+
+
+
+
     var priv = $("#private")
     var privSrc = Rx.Observable.fromEvent(priv, 'click');
     var privSub = privSrc.subscribe( function () {
         groupM = newgroup("private");
-        ws.send("CO#$42," + "private" + "," + playerM.val[0] + "," + "dummy");
+        ws.send("CO#$42," + "private" + "," + playerM.val[0]);
         $("#b0").html("Solitaire mode. Your actions do not affect other players.")
     });
 
@@ -573,7 +676,7 @@ $(document).ready(function () {
     var pubASrc = Rx.Observable.fromEvent(pubA, 'click');
     var pubASub = pubASrc.subscribe( function () {
         groupM = newgroup("pubA");
-        ws.send("CO#$42," + "pubA" + "," + playerM.val[0] + "," + "dummy");
+        ws.send("CO#$42," + "pubA" + "," + playerM.val[0]);
         $("#b0").html("You are now in Group A. Be careful." +
             " Clicking 'ROLL' inserts the roll numbers in all" +
             " Group A browsers.");
@@ -583,7 +686,7 @@ $(document).ready(function () {
     var pubBSrc = Rx.Observable.fromEvent(pubB, 'click');
     var pubBSub = pubBSrc.subscribe( function () {
         groupM = newgroup("pubB");
-        ws.send("CO#$42," + "pubB" + "," + playerM.val[0] + "," + "dummy");
+        ws.send("CO#$42," + "pubB" + "," + playerM.val[0]);
         $("#b0").html("Now in group B. Be careful." +
             " Clicking 'ROLL' inserts the roll numbers in all" +
             " group B browsers.");
@@ -595,7 +698,7 @@ $(document).ready(function () {
     if (e.which === 13) { 
         var name = $("#new").val();
         groupM = newgroup(name);
-        ws.send("CO#$42," + name + "," + playerM.val[0] + "," + "dummy");
+        ws.send("CO#$42," + name + "," + playerM.val[0]);
         $("#newgroup").hide();
         $("#b0").html("Now in group " + name);
     }
@@ -755,8 +858,10 @@ $(document).ready(function () {
 });
 
 calc = function (ax,b,cx,bb) {
-    var d = DS_ob.t;
+    var d = dM.val[5]
     var t = DS_ob.t;
+    var goal = (goalM.val[7])*1;
+    var goal2 = goalM.val[7]+"";
     var impossibleClicker = impossibleClickerM.val[1];
     var player = playerM.val[0];
     var scoreClicker = scoreClickerM.val[2];
@@ -782,7 +887,8 @@ calc = function (ax,b,cx,bb) {
         break;
     }
 
-    if (d === 0) {
+    if (d === 0) { 
+        console.log(goalM.val[7]);
         $("#result1").show().html(res);
         ws.send("CE#$42," + group + "," + player + "," + "<br>" + a + " " + b + " " + c + " = " + res + "<br>");
     }
@@ -790,7 +896,7 @@ calc = function (ax,b,cx,bb) {
     if (d === 1) {
         ws.send("CE#$42," + group + "," + player + "," + a + " " + 
             b + " " + c + " = " + res + "<br>");
-        if (res === 20 && bb)   {
+        if (res == goal && bb)   {
             $("#newDisplay").show();
             $("#countdown").html("");
             if ((player === scoreClicker) && t > 0) {
@@ -804,18 +910,17 @@ calc = function (ax,b,cx,bb) {
             else {
                 $("#a2").append("<br>No point for " + player + ". The clock wasn't running.");
                 $("#a1").prepend("<span style='font-size:25px; background:#000;" +
-                    "color:#f00;'>20, but no increase in " + player + "'s score</span>");
+                    "color:#f00;'>" + goal2 + ", but no increase in " + player + "'s score</span>");
             }
             t = -1;
             $("#operators").html("");
             $("#dropBoxes").html("");
         }
-        $("#result2").show().html(res);
-    }
+        $("#result2").show().html(res);    }
 
     if (d === 2) {
         ws.send("CE#$42," + group + "," + player + "," + a + " " + b + " " + c + " = " + res + "<br>");
-        if (res === 20) {
+         if (res == goal) {
             $("#countdown").html("");
             sub1.dispose();
             DS_ob.t = -1
@@ -828,14 +933,15 @@ calc = function (ax,b,cx,bb) {
             }
             else {
                 $("#a2").append("<br>No point for " + player + ". The clock wasn't running.");
-                $("#a1").prepend("<span style='font-size:25px;color:#f00;'>20, but no increase in " +
+                $("#a1").prepend("<span style='font-size:25px;color:#f00;'>" + goal2 + ", but no increase in " +
                     player + "'s score</span>");
             }
             DS_ob.t = -1;
             $("#operators").html("");
             $("#dropBoxes").html("");
+
         }
-        if (res !== 20 && (player === scoreClicker && t > 0)) {
+        if (res != goal && (player === scoreClicker && t > 0)) {
             sub1.dispose();
             DS_ob.t = -1;
             DS_ob.scoreFunc();
