@@ -63,6 +63,93 @@ span {
     margin: 15px;
     }
 
+.extra {
+    display:inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    padding-right: 42px;
+    float: left;
+    font-size: 35px;
+    background: #B1C771;
+    text-align: center;
+    padding-top: 10px;
+    margin: 5px;
+    color: #00F8B6;
+    background: #000;
+
+
+}
+
+.extra:hover {
+    display:inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    padding-right: 42px;
+    float: left;
+    font-size: 35px;
+    background: #B1C771;
+    text-align: center;
+    padding-top: 10px;
+    margin: 5px;
+    color: #ff0000;
+    background: #000;
+
+
+}
+
+.extra2 {
+    display:inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    float: left;
+    font-size: 35px;
+    background: #B1C771;
+    text-align: center;
+    padding-top: 10px;
+    margin: 5px;
+    color: #00F8B6;
+    background: #000;
+    margin-top: 7px;
+
+}
+
+.extra2:hover {
+    display:inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    float: left;
+    font-size: 35px;
+    background: #B1C771;
+    text-align: center;
+    padding-top: 10px;
+    margin: 5px;
+    color: #ff0000;
+    background: #000;
+    margin-top: 7px;
+
+}
+
+
+.range {
+    display:inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    width: 30px;
+    padding: 5px;
+    float: left;
+    font-size: 20px;
+    color: #00f;
+    background: #B1C771;
+    text-align: center;
+    padding-top: 10px;
+    margin: 15px;
+    }
+
 .erase2 {
     float: left;
 }
@@ -138,6 +225,21 @@ h3 {
     float: left;
     margin-top: 20px;
     margin-bottom: 20px;
+}
+
+.spacer2 {
+    width: 100%;
+    float: right;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#goal3 {
+    float: right;
+}
+
+#goal4 {
+    float: right;
 }
 
 .drag { 
@@ -258,19 +360,6 @@ h3 {
     margin-left: 20px;
     width: 80%;
     float: left;
-}
-
-
-.ui-button-text
-{ 
-    font-size: 18px;
-    color: #00F8B6;
-    background: #000;
-    border-width: 1px !important;
-    padding: 0px !important;
-    border-color: #ff0000 !important;
-    margin: 5px;
-    height: 50px;
 }
 
 button {
