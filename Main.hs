@@ -31,27 +31,45 @@ type ServerState = [Client]
 
 fw :: [String] -> Text
 fw [_,b,_,_] = T.pack b
-fw _ = T.pack "EE#$42"
+fw [_,b,_,_,_,_,_,_] = T.pack b 
+fw [_,b,_,_,_,_,_] = T.pack b
+fw _ = T.pack "fw malfunctioned"
 
 fx :: [String] -> Text
-fx [_,_,c,_] = T.pack c
-fx _ = T.pack "EE#$42"
+fx [_,_,c,_] = T.pack c 
+fx [_,_,c,_,_,_,_,_] = T.pack c
+fx [_,_,c,_,_,_,_] = T.pack c
+fx _ = T.pack "fx malfunctioned"
 
 fy :: [String] -> Text
-fy [_,_,_,d] = T.pack d
-fy _ = T.pack "EE#$42"
+fy [_,_,_,d] = T.pack d 
+fy [_,_,_,d,_,_,_,_] = T.pack d
+fy [_,_,_,d,_,_,_] = T.pack d
+fy _ = T.pack "fy malfunctioned"
 
-fgroup :: [String] -> Text
-fgroup [_,b,_,_,_,_,_,_] = T.pack b
-fgroup _ = T.pack "EE#$42"
+froll :: [String] -> [Double]
+froll [_,_,_,a,b,c,d,e] = map read [a, b, c, d, e]
+froll _ = [1.0,2.0,3.0,4.0]
 
-fsender :: [String] -> Text
-fsender [_,_,c,_,_,_,_,_] = T.pack c
-fsender _ = T.pack "EE#$42"
+fw3 :: [String] -> Text
+fw3 [_,b,_,_,_,_,_,_] = T.pack b
+fw3 _ = T.pack "EE#$42"
 
-froll :: [String] -> Text
-froll [_,_,_,a,b,c,d,e] = T.pack $ a ++ "," ++ b ++ "," ++ c ++ "," ++ d ++ "," ++ e
-froll _ = T.pack "EE#$42"
+fx3 :: [String] -> Text
+fx3 [_,_,c,_,_,_,_,_] = T.pack c
+fx3 _ = T.pack "EE#$42"
+
+get4 :: [String] -> [Int]
+get4 [_,_,_,a,b,c,d] = fmap read [a,b,c,d]
+get4 _ = [-1,-1,-1,-1]
+
+get4Group :: [String] -> Text
+get4Group [_,b,_,_,_,_,_] = T.pack b
+get4Group _ = "get4Group error"
+
+get4Player :: [String] -> Text
+get4Player [_,_,c,_,_,_,_] = T.pack c
+get4Player _ = "get4Player error"
 
 getName :: Client -> Name
 getName (a,_,_,_) = a
@@ -60,8 +78,8 @@ getScore :: Client -> Score
 getScore (_,b,_,_) = b
 
 tr :: Client -> Text
-tr x = getName x `mappend` T.pack " _( " `mappend` T.pack (show (getScore x)) 
-    `mappend` T.pack " )_ " `mappend` getGroup x
+tr x = getName x `mappend` T.pack " _ " `mappend` T.pack (show (getScore x)) 
+    `mappend` T.pack " _ " `mappend` getGroup x
 
 newGroup :: Text -> Text -> Client -> Client
 newGroup name group (a, b, c, d)   | name == a  = (a, b, group, d)
@@ -102,6 +120,9 @@ numClients = length
 
 matches :: Text -> ServerState -> [Client] 
 matches a ss = [ x | x <- ss, getName x == a]
+
+tint :: Text -> Int
+tint x = read $ T.unpack x 
 
 clientExists :: Text -> ServerState -> Bool
 clientExists a ss  | null (matches a ss)   = False
@@ -166,49 +187,57 @@ talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
 talk conn state (user, _, _, _) = forever $ do
     msg <- WS.receiveData conn
     let msgArray = splitOn "," (T.unpack msg)
+
     let group = fw msgArray
     let sender = fx msgArray
     let extra = fy msgArray
-    let group2 = fgroup msgArray
-    let sender2 = fsender msgArray
-    let extra2 = froll msgArray
-    print $ "group, sender, extra, msg: " `mappend` group  `mappend` ", " 
-        `mappend` sender  `mappend` ", " `mappend` extra `mappend` ", " `mappend` msg
-    if "CA#$42" `T.isPrefixOf` msg 
+  
+    let group3 = fw3 msgArray
+    let sender3 = fx3 msgArray 
+
+    let range = get4 msgArray  -- 7 items in msgArray
+    let player4 = get4Player msgArray
+    let group4 = get4Group msgArray
+
+    print "****************************msgArray next: "
+    mapM_ print msgArray 
+    mapM_ print $ froll msgArray
+    print "****************************That was msgArray"
+    if "CA#$42" `T.isPrefixOf` msg
         then 
             do 
                 st <- readMVar state 
-                z <- rText 6 6 12 20
-                broadcast ("CA#$42," `mappend` group `mappend` "," 
-                    `mappend` sender `mappend` "," `mappend` z) st
+                z <- rText range
+                broadcast ("CA#$42," `mappend` group4 `mappend` "," 
+                    `mappend` player4 `mappend` "," `mappend` z) st 
 
     else if "CZ#$42" `T.isPrefixOf` msg
             then do 
-                let ro = extra2
-                y <- liftIO $ truck $ tru ro
+                print msgArray
+                y <- liftIO $ truck $ froll msgArray
+                print y
                 let yzz = T.pack y 
                 st <- readMVar state
-                broadcast ("CZ#$42," `mappend` group2 `mappend` "," 
-                    `mappend` sender2 `mappend` "," `mappend` yzz) st        
+                broadcast ("CZ#$42," `mappend` group3 `mappend` "," 
+                    `mappend` sender3 `mappend` "," `mappend` yzz) st        
 
     else if "CW#$42" `T.isPrefixOf` msg
             then do 
-                let ro = extra2
-                y <- liftIO $ truck $ tru ro
+                y <- liftIO $ truck $ froll msgArray
                 let zz = T.pack y 
                 st <- readMVar state
-                broadcast ("CW#$42," `mappend` group2 `mappend` "," 
-                    `mappend` sender2 `mappend` "," `mappend` zz) st  
+                broadcast ("CW#$42," `mappend` group3 `mappend` "," 
+                    `mappend` sender3 `mappend` "," `mappend` zz) st  
 
     else if "CB#$42" `T.isPrefixOf` msg
         then 
             do 
-                st <- readMVar state 
-                broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st))) st 
+               st <- readMVar state 
+               broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr st))) st 
 
     else if "CC#$42" `T.isPrefixOf` msg || "CE#$42" `T.isPrefixOf` msg || "CF#$42" `T.isPrefixOf` msg || 
         "CH#$42" `T.isPrefixOf` msg || "CJ#$42" `T.isPrefixOf` msg || "CK#$42" `T.isPrefixOf` msg || 
-        "CP#$42" `T.isPrefixOf` msg || "CQ#$42" `T.isPrefixOf` msg || 
+        "CP#$42" `T.isPrefixOf` msg || "CQ#$42" `T.isPrefixOf` msg || "CS#$42" `T.isPrefixOf` msg ||
         "CY#$42" `T.isPrefixOf` msg || "CR#$42" `T.isPrefixOf` msg || "CD#$42" `T.isPrefixOf` msg
         then 
             do 
