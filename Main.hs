@@ -29,13 +29,15 @@ type Group = Text
 type Client = (Name, Score, Group, WS.Connection)
 type ServerState = [Client] 
 
-fw :: [String] -> Text
+fw :: [String] -> Text 
+fw [_,b,_] = T.pack b
 fw [_,b,_,_] = T.pack b
 fw [_,b,_,_,_,_,_,_] = T.pack b 
 fw [_,b,_,_,_,_,_] = T.pack b
 fw _ = T.pack "fw malfunctioned"
 
-fx :: [String] -> Text
+fx :: [String] -> Text 
+fx [_,_,c] = T.pack c
 fx [_,_,c,_] = T.pack c 
 fx [_,_,c,_,_,_,_,_] = T.pack c
 fx [_,_,c,_,_,_,_] = T.pack c
