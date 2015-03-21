@@ -227,6 +227,3 @@ main :: IO ()
 main = do 
     rText 6 6 12 20 >>= print
 
-
-
-
