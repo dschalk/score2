@@ -54,6 +54,58 @@ span {
     cursor: pointer;
     width: 30px;
     padding: 5px;
+    float: left;
+    font-size: 20px;
+    color: #000;
+    background: #B1C771;
+    text-align: center;
+    padding-top: 10px;
+    margin: 15px;
+}
+
+
+.rad {
+    display:inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    width: 30px;
+    padding: 5px;
+    float: left;
+    font-size: 20px;
+    color: #000;
+    background: #B1C771;
+    text-align: center;
+    padding-top: 10px;
+    margin: 15px;
+}
+
+.radfocus {
+    display:inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    padding: 5px;
+    font-weight: 6;
+    width: 65px;
+    float: left;
+    font-size: 45px;
+    color: #68f2ad;
+    background: #000;
+    text-align: center;
+    padding-top: 10px;
+    margin: 15px;
+}
+
+
+
+.rad2 {
+    display:inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    width: 30px;
+    padding: 5px;
     float: right;
     font-size: 20px;
     color: #000;
@@ -62,6 +114,7 @@ span {
     padding-top: 10px;
     margin: 15px;
     }
+
 
 .extra {
     display:inline-block;
@@ -77,11 +130,13 @@ span {
     margin: 5px;
     color: #00F8B6;
     background: #000;
-
-
 }
 
 .extra:hover {
+    color: #ff0000;
+}
+
+.focus { 
     display:inline-block;
     text-align: center;
     vertical-align: middle;
@@ -93,46 +148,31 @@ span {
     text-align: center;
     padding-top: 10px;
     margin: 5px;
-    color: #ff0000;
+    color: #c3ff00;
     background: #000;
+ }
 
 
-}
+.focus:hover { 
+    color: #f00;
+ }
 
-.extra2 {
+
+.extrafucus {
     display:inline-block;
     text-align: center;
     vertical-align: middle;
     cursor: pointer;
+    width: 50px;
+    padding: 5px;
     float: left;
     font-size: 35px;
-    background: #B1C771;
+    color: #f00;
+    background: #000;
     text-align: center;
     padding-top: 10px;
-    margin: 5px;
-    color: #00F8B6;
-    background: #000;
-    margin-top: 7px;
-
+    margin: 15px;
 }
-
-.extra2:hover {
-    display:inline-block;
-    text-align: center;
-    vertical-align: middle;
-    cursor: pointer;
-    float: left;
-    font-size: 35px;
-    background: #B1C771;
-    text-align: center;
-    padding-top: 10px;
-    margin: 5px;
-    color: #ff0000;
-    background: #000;
-    margin-top: 7px;
-
-}
-
 
 .range {
     display:inline-block;
