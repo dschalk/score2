@@ -13,7 +13,10 @@ In order to gain a point by making the number "20", a player must use a number g
 
 Players start out in solitaire mode. Clicking "Group A" or "Group B" puts a player in competition with any other players who made the same choice. Clicking "Player Created" allows a player to start a new group, or to join one that another player created. Players can communicate by exchanging text messages in the chat box. Players can return to solitaire play by clicking "Go Private".
 
-Students and anyone who wants to brush up on arithmetic are encouraged to look for mistakes in the computer generated lists of solutions. Does 15-(-5)=20 look right?. What about 2+(3*(4/(2/3)))=20? They are both correct. 4/(2/3) = 4*3/2 = 12/2 = 6; 3*6 = 18; and 18+2 = 20. You have to solve the innermost equations first, methodically working your way out.
+Students and anyone who wants to brush up on arithmetic are encouraged to look for mistakes in the computer generated lists of solutions. Does 15-(-5)=20 look right?. What about 2+(3*(4/(2/3)))=20? They are both correct. 4/(2/3) = 4*3/2 = 12/2 = 6; 3*6 = 18; and 18+2 = 20. You have to solve the innermost equations first, methodically working your way out
+
+Players can easily change the dice and/or the goal. There is also a place to experiment. See how you can make '20' with 9, 9, 9, and 9.
+
 ###How The Game Was Developed
 by David Schalk
 
