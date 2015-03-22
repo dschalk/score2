@@ -159,7 +159,9 @@ refresh = function() {
 };
 
 $(document).ready(function () {
-    $("#newgroup").hide();
+    $(".extra").hide();
+    $(".rad").hide();
+    $("#new").hide();
     function assign (a, b, c, d, e, f) { 
         var res;
         $("#"+d).hide();
@@ -673,16 +675,19 @@ $(document).ready(function () {
     var newG = $("#new");
     var newGSrc = Rx.Observable.fromEvent(newG, 'keydown');
     var newGSub = newGSrc.subscribe( function (e) {
+    $("#ng").show();
     if (e.which === 13) { 
         var name = $("#new").val();
-        groupM = newgroup(name);
-        ws.send("CO#$42," + name + "," + playerM.val[0]);
-        $("#newgroup").hide();
-        $("#b0").html("Now in group " + name);
+        if (name !== "") { 
+            groupM = newgroup(name);
+            ws.send("CO#$42," + name + "," + playerM.val[0]);
+            $("#b0").html("Now in group " + name);
+            $("#new").val("");
+        }
     }
     });
 
-    $("#b0").hide();
+    $("#b0").html("");
     $("#experiment").hide();
     $("#private").hide();
     $("#publicA").hide();
@@ -798,7 +803,9 @@ $(document).ready(function () {
                 $("#result1").hide();
                 $("#result2").hide();
                 $("#result3").hide();
-                $("#b0").show();
+                $(".extra").show();
+                $(".rad").show();
+                $("#new").show();
                 $("#experiment").show();
                 $("#private").show();
                 $("#publicA").show();

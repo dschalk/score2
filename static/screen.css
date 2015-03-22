@@ -47,6 +47,12 @@ span {
     float: right;
 }
 
+#new {
+    width: 70px;
+    font-size: 18px;
+    background-color: #e8cf8b;
+}
+
 .rad {
     display:inline-block;
     text-align: center;
