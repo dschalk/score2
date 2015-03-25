@@ -29,25 +29,28 @@ type Group = Text
 type Client = (Name, Score, Group, WS.Connection)
 type ServerState = [Client] 
 
-fw :: [String] -> Text 
-fw [_,b,_] = T.pack b
-fw [_,b,_,_] = T.pack b
-fw [_,b,_,_,_,_,_,_] = T.pack b 
-fw [_,b,_,_,_,_,_] = T.pack b
-fw _ = T.pack "fw malfunctioned"
+fw :: [String] -> Text
+fw x = case x of 
+    [_,b,_] -> T.pack b
+    [_,b,_,_] -> T.pack b
+    [_,b,_,_,_,_,_,_] -> T.pack b 
+    [_,b,_,_,_,_,_] -> T.pack b
+    _ -> T.pack "fw malfunctioned"
 
 fx :: [String] -> Text 
-fx [_,_,c] = T.pack c
-fx [_,_,c,_] = T.pack c 
-fx [_,_,c,_,_,_,_,_] = T.pack c
-fx [_,_,c,_,_,_,_] = T.pack c
-fx _ = T.pack "fx malfunctioned"
+fx x = case x of 
+    [_,_,c] -> T.pack c
+    [_,_,c,_] -> T.pack c 
+    [_,_,c,_,_,_,_,_] -> T.pack c 
+    [_,_,c,_,_,_,_] -> T.pack c 
+    _ -> T.pack "fx malfunctioned"
 
 fy :: [String] -> Text
-fy [_,_,_,d] = T.pack d 
-fy [_,_,_,d,_,_,_,_] = T.pack d
-fy [_,_,_,d,_,_,_] = T.pack d
-fy _ = T.pack "fy malfunctioned"
+fy x = case x of 
+    [_,_,_,d] -> T.pack d 
+    [_,_,_,d,_,_,_,_] -> T.pack d
+    [_,_,_,d,_,_,_] -> T.pack d
+    _ -> T.pack "fy malfunctioned"
 
 froll :: [String] -> [Double]
 froll [_,_,_,a,b,c,d,e] = map read [a, b, c, d, e]

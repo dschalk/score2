@@ -363,7 +363,7 @@ $(document).ready(function () {
 
                 case "CZ#$42":
                     $("#show").prepend("<br>" + extra);
-                    $("#a2").prepend(sender + " clicked SOLUTIONS.<br><br>");
+                    $("#a2").html(sender + " clicked SOLUTIONS.<br><br>");
                 break;
 
                 case "EE#$42":

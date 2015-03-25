@@ -11,7 +11,7 @@ rM :: Int -> IO Int
 rM x = getStdRandom (System.Random.randomR ((1,x) :: (Int,Int)))
 
 start :: Int -> Int -> Int -> Int -> IO [Int]
-start ax bx cx dx = do 
+start ax bx cx dx = do
     a <- rM ax
     b <- rM bx
     c <- rM cx
@@ -24,13 +24,13 @@ rollFunc _ = "Problem in rollFunc"
 
 
 rollT :: Int -> Int -> Int -> Int -> IO T.Text
-rollT ax bx cx dx = do 
+rollT ax bx cx dx = do
     x <- start ax bx cx dx
     let y = (map show x)
     return $ rollFunc y
 
 roll :: Int -> Int -> Int -> Int -> IO [Double]
-roll ax bx cx dx = do 
+roll ax bx cx dx = do
     x <- start ax bx cx dx
     return $ map toDouble x
 
@@ -70,7 +70,7 @@ scoreDiv az bz  | bz == 0  = 99999
                 | otherwise = (/) az bz
 
 ops :: [Double -> Double -> Double]
-ops =  [cat, (+), (-), (*), scoreDiv] 
+ops =  [cat, (+), (-), (*), scoreDiv]
 
 calc :: Double -> Double -> Double -> Double -> Double -> [(String, String, String, String, String, String)]
 calc a b c d e = [(f a', g op1, f b', g op2, f c', show e) |
@@ -105,7 +105,7 @@ calc4 a b c d e = [(f a', g op1, f b', g op3, f c', g op2, f d', show e) |
 calc5 :: Double
            -> Double
            -> Double
-           -> Double 
+           -> Double
            -> Double
            -> [(String, String, String, String, String, String, String, String)]
 calc5 a b c d e = [(f a', g op1, f b', g op3, f c', g op2, f d', show e) |
@@ -179,25 +179,25 @@ pim' x  | null x  = [" -- There are no solutions in this category"]
 ca :: [Double] -> [String]
 ca [a, b, c, d, e] = ["Using the result from two numbers left of a third.<br>"] ++
     map h (calc a b c d e) ++
-    pim' (calc a b c d e) ++ 
-    ["<br><br>Using a number left of the result obtained from two other numbers.<br>"] ++ 
-    map h2 (calc2 a b c d e) ++ 
-    pim' (calc2 a b c d e) ++ 
-    ["<br><br>Using two numbers and then the remaining two numbers - then using those results.<br>"] ++ 
-    map h3 (calc3 a b c d e) ++ 
-    pim (calc3 a b c d e) ++ 
-    ["<br><br>Using the result from two numbers left of a third - then that result left of the remaining number.<br>"] ++ 
-    map h4 (calc4 a b c d e) ++ 
-    pim (calc4 a b c d e) ++ 
-    ["<br><br>Using the third number left of the result obtained from the first two - then that result left of the fourth number.<br>"] ++ 
-    map h5 (calc5 a b c d e) ++ 
-    pim (calc5 a b c d e) ++ 
-    ["<br><br>Using the the remaining number to the left of the result of using the result of two numbers' left of another.<br>"] ++ 
-    map h6 (calc6 a b c d e) ++ 
-    pim (calc6 a b c d e) ++ 
-    ["<br><br>Using the remaining number to the left of the result from using the a number left of the result from two others.<br>"] ++ 
-    map h7 (calc7 a b c d e) ++ 
-    pim (calc7 a b c d e) 
+    pim' (calc a b c d e) ++
+    ["<br><br>Using a number left of the result obtained from two other numbers.<br>"] ++
+    map h2 (calc2 a b c d e) ++
+    pim' (calc2 a b c d e) ++
+    ["<br><br>Using two numbers and then the remaining two numbers - then using those results.<br>"] ++
+    map h3 (calc3 a b c d e) ++
+    pim (calc3 a b c d e) ++
+    ["<br><br>Using the result from two numbers left of a third - then that result left of the remaining number.<br>"] ++
+    map h4 (calc4 a b c d e) ++
+    pim (calc4 a b c d e) ++
+    ["<br><br>Using the third number left of the result obtained from the first two - then that result left of the fourth number.<br>"] ++
+    map h5 (calc5 a b c d e) ++
+    pim (calc5 a b c d e) ++
+    ["<br><br>Using the the remaining number to the left of the result of using the result of two numbers' left of another.<br>"] ++
+    map h6 (calc6 a b c d e) ++
+    pim (calc6 a b c d e) ++
+    ["<br><br>Using the remaining number to the left of the result from using the a number left of the result from two others.<br>"] ++
+    map h7 (calc7 a b c d e) ++
+    pim (calc7 a b c d e)
 ca _ = ["What?"]
 
 cars :: [Double] -> [Char]
@@ -208,25 +208,21 @@ tru :: T.Text -> [Double]
 tru x = map read (map T.unpack (T.split (==',') x))
 
 truck :: [Double] -> IO String
-truck x = do 
+truck x = do
     let y = map round x
     let z = show (y !! 0) ++ " " ++ show (y !! 1) ++ " " ++ show (y !! 2) ++ " " ++  show (y !! 3) ++ "<br><br>"
-    let a = (" " ++ z ++ (cars x) ++ "<br>") :: String 
+    let a = (" " ++ z ++ (cars x) ++ "<br>") :: String
     return a
 
 arg :: [Double]
 arg = [1,1,1,1,42]
 
 rText :: [Int] -> IO T.Text
-rText [a,b,c,d] = do 
+rText [a,b,c,d] = do
     x <- roll a b c d
     return $ rollFunc $ map show $ map round x
 rText _ = return $ T.pack "String"
 
 main :: IO ()
-main = do 
+main = do
     rText [111,111,111,111] >>= print
-
-
-
-
