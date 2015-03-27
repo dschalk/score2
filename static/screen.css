@@ -69,7 +69,7 @@ span {
     margin: 15px;
 }
 
-.radfocus {
+.rad:focus {
     display:inline-block;
     text-align: center;
     vertical-align: middle;
@@ -78,6 +78,39 @@ span {
     font-weight: 6;
     width: 65px;
     float: left;
+    font-size: 45px;
+    color: #68f2ad;
+    background: #000;
+    text-align: center;
+    padding-top: 10px;
+    margin: 15px;
+}
+
+.rad2 {
+    display:inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    width: 30px;
+    padding: 5px;
+    float: right;
+    font-size: 20px;
+    color: #000;
+    background: #B1C771;
+    text-align: center;
+    padding-top: 10px;
+    margin: 15px;
+}
+
+.rad2:focus {
+    display:inline-block;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    padding: 5px;
+    font-weight: 6;
+    width: 65px;
+    float: right;
     font-size: 45px;
     color: #68f2ad;
     background: #000;

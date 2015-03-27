@@ -158,8 +158,10 @@ refresh = function() {
     $(".drop2").show();
 };
 
-$(document).ready(function () {
+$(document).ready(function () { 
     $(".extra").hide();
+    $("#expand").hide();
+    $("#contract").hide();
     $(".rad").hide();
     $("#new").hide();
     function assign (a, b, c, d, e, f) { 
@@ -202,6 +204,8 @@ $(document).ready(function () {
         var ext7 = gameArray[7];
         var ext8 = gameArray[8];
         console.log(gameArray);
+        console.log((groupM.val[3] === gameArray[1]) && (groupM.val[3] !== "private"));
+        console.log(playerM.val[0] === sender);
         var p = $(document.createElement('p')).text(event.data);
         if (((groupM.val[3] === gameArray[1]) && (groupM.val[3] !== "private")) || (playerM.val[0] === sender)) {   
             switch (d2) {
@@ -228,7 +232,7 @@ $(document).ready(function () {
                 break;
 
                 case "CB#$42":
-                    $("#users").html(event.data.substring(6));    // Refresh browser with server state.
+                    $("#users").html(extra);    // Refresh browser with server state.
                 break;
 
                 case "CC#$42":
@@ -319,9 +323,6 @@ $(document).ready(function () {
                     $("#stop60").triggerHandler('click');
                 break;
 
-
-
-
                 case "CS#$42":
                     $("#a2").append("The goal is " + extra);
                     goalM = newgoal(extra);
@@ -333,11 +334,6 @@ $(document).ready(function () {
                         $("#show2").prepend(extra);
                     }
                 break;                                                            
-
-
-
-
-
 
                 case "CM#$42":
                     $("#a2").prepend("<br>Time's up and nobody found a solution");
@@ -359,8 +355,6 @@ $(document).ready(function () {
                     refresh();
                 break;
 
-
-
                 case "CZ#$42":
                     $("#show").prepend("<br>" + extra);
                     $("#a2").html(sender + " clicked SOLUTIONS.<br><br>");
@@ -371,19 +365,10 @@ $(document).ready(function () {
                 break;
 
                 default:
-                    $('#messages').append(p);
+                    $('#messages').append(extra + "<br>");
                     $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
                 break;
             }
-        }
-
-        else if (d2 === "CB#$42") {
-            $("#users").html(event.data.substring(6));
-        }
-
-        else if (d3 !== "#$42") {
-            $('#messages').append(p);
-            $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
         }
     }
 
@@ -481,6 +466,26 @@ $(document).ready(function () {
     var erase1Sub = erase1Src.subscribe( function () {
         $("#show").html("");
         $(".erase1").hide();
+    });
+
+    var expand = $('#expand');
+    var expandSrc = Rx.Observable.fromEvent(expand, 'click');
+    var expandSub = expandSrc.subscribe( function () {
+        $("#left").hide();
+        $("#right").css("width", "90%");
+        $("#main").css("width", "90%");
+        $("#contract").show();
+        $("#expand").hide();
+    });
+
+    var contract = $('#contract');
+    var contractSrc = Rx.Observable.fromEvent(contract, 'click');
+    var contractSub = contractSrc.subscribe( function () {
+        $("#left").show();
+        $("#right").css("width", "40%");
+        $("#main").css("width", "600px");
+        $("#expand").show();
+        $("#contract").hide();
     });
 
     var erase2 = $('.erase2');
@@ -791,6 +796,7 @@ $(document).ready(function () {
         };
         ws.onmessage = function(event) {
             if(event.data === "CC#$42") {
+                $("#expand").show();
                 dM = newd(-1);
                 createDom();
                 createOperators();
@@ -822,8 +828,8 @@ $(document).ready(function () {
                 $(".drop2x").hide();
                 ws.onmessage = onMessage;
                 $('#message-form').submit(function () {
-                    var text = $('#text').val();
-                    ws.send(text);
+                    var text = $('#text').val(); 
+                    ws.send("CU#$42," + groupM.val[3] + "," + playerM.val[0] + "," + text);
                     $('#text').val('');
                     return false;
                 });
