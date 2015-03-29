@@ -1,8 +1,7 @@
-##The Game of Score
-####*An extension of github.com/jaspervdj/websockets as implemented by yesodweb/wai/wai-websockets*
+# The Game of Score
+_An extension of github.com/jaspervdj/websockets as implemented by yesodweb/wai/wai-websockets_
 
-####Rules of "Score"
-
+## Rules of "Score"
 Four dice are rolled. The default die are two six-sided, one twelve-sided, and one twenty-sided die. The goal is to make the number "20" in two or three steps using addition, subtraction, multiplication, division, and/or concatenation.
 
 If a player calls out "Score!", or clicks "SCORE" in the computer version, he or she must quickly demonstrate how to make the number "20". Failure to do so loses the player one point; success gains a point. Clicking "SCORE" starts a countdown which currently allows 30 seconds, which is more than enough time if you already know a solution.
@@ -13,22 +12,21 @@ In order to gain a point by making the number "20", a player must use a number g
 
 Players start out in solitaire mode. Clicking "Group A" or "Group B" puts a player in competition with any other players who made the same choice. Clicking "Player Created" allows a player to start a new group, or to join one that another player created. Players can communicate by exchanging text messages in the chat box. Players can return to solitaire play by clicking "Go Private".
 
-Students and anyone who wants to brush up on arithmetic are encouraged to look for mistakes in the computer generated lists of solutions. Does 15-(-5)=20 look right?. What about 2+(3*(4/(2/3)))=20? They are both correct. 4/(2/3) = 4*3/2 = 12/2 = 6; 3*6 = 18; and 18+2 = 20. You have to solve the innermost equations first, methodically working your way out
+Students and anyone who wants to brush up on arithmetic are encouraged to look for mistakes in the computer generated lists of solutions. Does 15-(-5)=20 look right?. What about 2+(3_(4/(2/3)))=20? They are both correct. 4/(2/3) = 4_3/2 = 12/2 = 6; 3*6 = 18; and 18+2 = 20. You have to solve the innermost equations first, methodically working your way out
 
 Players can easily change the dice and/or the goal. There is also a place to experiment. See how you can make '20' with 9, 9, 9, and 9.
 
-###How The Game Was Developed
+## How The Game Was Developed
 by David Schalk
 
-I started with the chat example at github.com/wai/wai-websockets. It is Jasper Van der Jeugt 's websockets adapted to the warp web server. The routine work of the chat server is receiving messages from individual browsers and broadcasting them to all participants. The server also parses sign-in messages to make sure the format is correct and there are no duplicate player names. The server keeps a list of participants in a Haskelll programming language container called an 'MVar', and replaces the list with a new, up-to-date list whenever there is a disconnect, score change, group membership change, or a new sign-in.
+I started with the chat example at github.com/wai/wai-websockets. It is Jasper Van der Jeugt 's websockets adapted to the warp web server. The routine work of the chat server is receiving messages from individual browsers and broadcasting them to all participants. The server also parses sign-in messages to make sure the format is correct and there are no duplicate player names. The server keeps a list of participants in a Haskell programming language container called an 'MVar', and replaces the list with a new, up-to-date list whenever there is a disconnect, score change, group membership change, or a new sign-in.
 
-I modified the wai-websockets chat application's participant list to include scores and group affiliations in addition to names. Whenever the list is replaced, the server broadcasts a line of text interspersed with 'br' in brackets and the prefix 'CB#$42'. The browsers intercept these messages and divert them away from the chat message section and into the scoreboard. 
+I modified the wai-websockets chat application's participant list to include scores and group affiliations in addition to names. Whenever the list is replaced, the server broadcasts a line of text interspersed with 'br' in brackets and the prefix 'CB#$42'. The browsers intercept these messages and divert them away from the chat message section and into the scoreboard.
 
-Message prefixes are in the format 'Cx#42' where 'x' is some capital letter. None of these go into the chat message section. They contain data and instructions controlling the flow of the game. Application messages are either Javascript strings or Haskell Text. Browsers split comma-separated strings arriving at the browser into an array named "gameArray", and distribute the elements according to their prefixes. The prefix is the first item in gameArray; i.e., gameArray[0]. gameArray[1] is the name of the sender's group, and gameArray[2] is the sender's name. The other array items vary according to the purpose of the message. Scoreboard messages, which are prefixed by 'CB#$42', contain items separated by HTML line break code rather tham commas. Everything after the prefix is formatted HTML, ready for insertion in the scrore board display, so there is no need for the gameArray list corresponding to prefix 'CB#$42'.
+Message prefixes are in the format 'Cx#42' where 'x' is some capital letter. None of these go into the chat message section. They contain data and instructions controlling the flow of the game. Application messages are either Javascript strings or Haskell Text. Browsers split comma-separated strings arriving at the browser into an array named "gameArray", and distribute the elements according to their prefixes. The prefix is the first item in gameArray; i.e., gameArray[0]. gameArray[1] is the name of the sender's group, and gameArray[2] is the sender's name. The other array items vary according to the purpose of the message. Scoreboard messages, which are prefixed by 'CB#$42', contain items separated by HTML line break code rather tham commas. Everything after the prefix is formatted HTML, ready for insertion in the score board display, so there is no need for the gameArray list corresponding to prefix 'CB#$42'.
 
-####Initiation Stage
-
-The game interface in the browsers responds to invisible text messages transmitted by the server. Javascript interprets these as strings, and the strings it sends become text before they are used in the server application. Chat messages sent to the server are broadcast to all participating browsers. Game constrol messages cause the server to broadcast messages, but not necessarily the messages that were received. For example, messages prefixed by 'CA#$42' prompt the server to broadcast a random dice roll. These are screened by the browser to make sure they are displayed browsers of players belonging to the group of the sender, and ignored by the others.
+### Initiation Stage
+The game interface in the browsers responds to invisible text messages transmitted by the server. Javascript interprets these as strings, and the strings it sends become text before they are used in the server application. Chat messages sent to the server are broadcast to all participating browsers. Game control messages cause the server to broadcast messages, but not necessarily the messages that were received. For example, messages prefixed by 'CA#$42' prompt the server to broadcast a random dice roll. These are screened by the browser to make sure they are displayed browsers of players belonging to the group of the sender, and ignored by the others.
 
 A player joins the game by entering a name in a form. Here is the Javascript form code:
 
@@ -56,6 +54,7 @@ liftIO $ modifyMVar_ state $ \s -> do
     broadcast ("CB#$42" `mappend` T.concat(intersperse (T.pack "<br>") (map tr s'))) s'
     return s'
 ```
+
 The message prefixed by "CB#$42" is processed in the browsers as follows:
 
 ```javascript
@@ -63,6 +62,7 @@ case "CB#$42":
   $("#users").html(event.data.substring(6));
 break;
 ```
+
 The message 'CC#$42', received from the server, is processed in the 'ws.onmessage' section under the sign-in form.
 
 ```javascript
@@ -122,6 +122,7 @@ The message 'CC#$42', received from the server, is processed in the 'ws.onmessag
     $('#join-form').destroy();
 });
 ```
+
 After it initiates the player interface, 'ws.onmessage = onMessage' de-references the anonymous function and re-assignes the variable 'ws.onmessage' to onMessage. The entire 'join-form' section becomes eligible for garbage collection after the final line,' delete $('#join-form');'.
 
 When current players receive "CC#$42" prefixed messages from new sign-ins, these messages do not make it to the chat message section. They hit a dead end in the 'onMessage' section.
@@ -132,8 +133,7 @@ case "CC#$42":
 break;
 ```
 
-####State And Its MVar
-
+### State And Its MVar
 I have mentioned a ServerState list of clients and an MVar that holds the current state of the game. Here is how that game state is defined:
 
 ```haskell
@@ -146,6 +146,7 @@ type ServerState = [Client]
 newServerState :: ServerState
 newServerState = []
 ```
+
 The game state is placed in an MVar as follows:
 
 ```haskell
@@ -173,15 +174,14 @@ else if "CG#$42" `T.isPrefixOf` msg
         putMVar state new
         broadcast msg new
         broadcast ("CB#$42" `mappend` T.concat (intersperse "<br>" (map tr new))) new
-
 ```
+
 The 'msg' being broadcast is just the unaltered message that was received, prefixed by 'CG#$42' and containing the sender's name, among other things. The 'CB#$42' prefixed message updates the browser scoreboards.
 
-####Organization of Game Data
-
+### Organization of Game Data
 I believe the most efficient way to organize game data and avoid global name clashes is to put the game data in a simple Javascript object. I don't think anything would be gained by using getter and setter functions. Values can be set by code such as 'object.name = some_value', and can be obtained by 'some_variable = object.name'.
 
-But this project is mainly for fun, and I had fun playing with various ways of organizing the data. At the time of this writing, some data is in an object named DS_ob, and most of it is in Javascript monads. I patterned the monads after Douglas Crockford's example at https://github.com/douglascrockford/monad. I removed the parts I didn't need, and used only functions in the form 'a -> Monad b' in the monad bind function. This conforms with the Haskell definition of a monad.
+But this project is mainly for fun, and I had fun playing with various ways of organizing the data. At the time of this writing, some data is in an object named DS_ob, and most of it is in Javascript monads. I patterned the monads after Douglas Crockford's example at [https://github.com/douglascrockford/monad](https://github.com/douglascrockford/monad). I removed the parts I didn't need, and used only functions in the form 'a -> Monad b' in the monad bind function. This conforms with the Haskell definition of a monad.
 
 I don't see any practical advantage in using monads. Value are extracted from monads willy-nilly, making their use akin to using unsafePerformIO and unsafeCoerce in Haskell. I do see a resemblance to the MVar code used in the server.
 
@@ -211,7 +211,7 @@ function MONAD() {
 
 var newData = function newData(x,y,z) {
   newVal = x;
-  newVal[z] = y; 
+  newVal[z] = y;
   this.val = identity(newVal);
   return this;
 }
@@ -219,42 +219,42 @@ var newData = function newData(x,y,z) {
 var identity = MONAD();
 var monad = identity([0,0,0,0,0,0,0,0,0,0,0]);
 
-function newplayer(name) { 
+function newplayer(name) {
     return monad.bind(newData, [name, 0]).val;
 }
 playerM = newplayer("Jack of Hearts");
 
-function newimpossibleClicker(name) { 
+function newimpossibleClicker(name) {
     return monad.bind(newData, [name, 1]).val;
 }
 impossibleClickerM = newimpossibleClicker("King of Diamonds");
 
-function newscoreClicker(name) { 
+function newscoreClicker(name) {
     return monad.bind(newData, [name, 2]).val;
 }
 scoreClickerM = newscoreClicker("Ace of Spades");
 // scoreClicker = scoreClickerM.val[2];
 
 
-function newgroup(name) { 
+function newgroup(name) {
     return monad.bind(newData, [name, 3]).val;
 }
 groupM = newgroup("private");
 
 
-function newrollText(name) { 
+function newrollText(name) {
     return monad.bind(newData, [name, 4]).val;
 }
 rollTextM = newrollText("1,1,1,1,42");
 
 
-function newd(num) { 
+function newd(num) {
     return monad.bind(newData, [num, 5]).val;
 }
 dM = newd(-1);
 
 
-function newgame(toggle) { 
+function newgame(toggle) {
     return monad.bind(newData, [toggle, 6]).val;
 }
 gameM = newgame("off");
@@ -275,18 +275,16 @@ function MakeDS_ob() {
     }
 }
 var DS_ob = new MakeDS_ob();
-
 ```
 
 The use of new in the last line sets the context of DS_ob in concrete, but that isn't necessary. It would have sufficed to just define DS_ob as a simple object rather than the result of invoking a constructor. Wrapping the game variables in a closure wouldn't serve any useful purpose. And the monads. Well, they were just my idea of fun. I set values and get values as follows:
 
 ```Javascript
-function newimpossibleClicker(name) { 
+function newimpossibleClicker(name) {
     return monad.bind(newData, [name, 1]).val;
 }
 impossibleClickerM = newimpossibleClicker(new name);
 some_variable = impossibleClickerM.val[1];
-
 ```
 
 **Screening Massages Arriving At The Browsers**
@@ -322,7 +320,9 @@ The first stage of processing messages coming into the browsers is as follows:
                 case "CA#$42":
                 . . .
 ```
+
 This is information already in the browser:
+
 ```Javascript
         var game = gameM.val[6];
         var impX = impossibleClickerM.val[1];
@@ -330,11 +330,14 @@ This is information already in the browser:
         var scX = scoreClickerM.val[2];
         var prX = groupM.val[3];
 ```
+
 The gameArray data is what the server sent.
 
-Time control is facilitated by the Rx.js package. https://github.com/Reactive-Extensions/RxJS. The Microsoft corporation can join the human race and do good things when it wants to. It seems to want to more and more lately, and I am very pleased. The open source movement is a tremendous breakthrough in cooperative creation and innovation, but the open source repository sites are cluttered with half-baked, abandoned projects, and untested undocumented code. Microsoft open source, which is what Reactive-Extensions is, represents the best of two worlds. 
+Time control is facilitated by the Rx.js package. [https://github.com/Reactive-Extensions/RxJS](https://github.com/Reactive-Extensions/RxJS). The Microsoft corporation can join the human race and do good things when it wants to. It seems to want to more and more lately, and I am very pleased. The open source movement is a tremendous breakthrough in cooperative creation and innovation, but the open source repository sites are cluttered with half-baked, abandoned projects, and untested undocumented code. Microsoft open source, which is what Reactive-Extensions is, represents the best of two worlds.
 
+### The Timer
 Here is the timer code:
+
 ```Javascript
     var source1 = Rx.Observable.timer(
         0,
@@ -408,19 +411,21 @@ Here is the timer code:
       });
     });
 ```
-###### It is easy to start and stop the timer. For example, if a player clickes 'SCORE' and uses up all the dice without making the number '20', there is no need to let the 30-second clock run down. '$("#stop30").triggerHandler('click');' shuts it down. Or, if a player clickes 'IMPOSSIBLE', starting a 60-second countdown, and another player clicks 'SCORE' starting a 30-second countdown, the following code takes care of the timers:
+
+It is easy to start and stop the timer. For example, if a player clicks 'SCORE' and uses up all the dice without making the number '20', there is no need to let the 30-second clock run down. '$("#stop30").triggerHandler('click');' shuts it down. Or, if a player clicks 'IMPOSSIBLE', starting a 60-second countdown, and another player clicks 'SCORE' starting a 30-second countdown, the following code takes care of the timers:
+
 ```Javascript
 $('#go30').triggerHandler('click');
 
 $("#stop0").triggerHandler('click');6
 ```
+
 There is undoubtedly a more elegant way to trigger the starting and stopping of the clock, but JQuery , triggerHandler, and dummy elements seem so rock solid and reliable in all browsers that I am in no hurry to experiment with less elaborate event listeners.
 
-*To be continued*
-##APPENDIX
+_To be continued_
 
-####IMPOSSIBLES
-
+# APPENDIX
+## IMPOSSIBLES
 The essence of the Score calculation algorythm in the module Fm is contained in the "impossibles.hs" file. Fm has much formatting code, which is a distraction when evaluating the algorythm.
 
 impossibles.hs computes all dice combinations which cannot be made into the number "20" in two or three stages, as required by the game. In 1.5 seconds, it finds all 104 such combinations using a list comprehension on the seven list comprehensions which cover all possible computations. The five operations are defined as follows:
@@ -450,7 +455,8 @@ scoreDiv az bz  | bz == 0  = 99999
 
 ops =  [cat, (+), (-), (*), scoreDiv]
 ```
-The seven algorythms necessary to perform every possible computation are:
+
+The seven algorithms necessary to perform every possible computation are:
 
 ```haskell
 calc :: Double -> Double -> Double -> Double -> [(Double, Double, Double, Double)]
@@ -506,6 +512,7 @@ calc7 a b c d = [ (a',b',c',d') |
 ```
 
 It is easy to see that there are seven ways to order two or three sequential computations on four numbers. They can be represented by
+
 ```javascript
 a bc
 ab c
@@ -515,7 +522,8 @@ ab cd
 a(b cd)
 a(bc d)
 ```
-Those are the combinations used in the seven calc functions. The list comprehension works on all permutations of the order of the four numbers in receives, so c ba is covered by a bc. Next, I wanted to find out if all seven algorythms are necessary to find at least one solution, so I wrote this:
+
+Those are the combinations used in the seven calc functions. The list comprehension works on all permutations of the order of the four numbers in receives, so c ba is covered by a bc. Next, I wanted to find out if all seven algorithms are necessary to find at least one solution, so I wrote this:
 
 ```haskell
 {-# LANGUAGE OverloadedStrings #-}
@@ -671,6 +679,7 @@ main = do
     print t
     print " "
 ```
+
 Here is what I got:
 
 ```javascript
@@ -728,7 +737,8 @@ e@e:~/b0$ ./analysis_A
 8.27113
 " "
 ```
-###### This shows that there is no solution that only calc2, only calc6, or only calc7 can find. Next, I checkes all combinations of these three:
+
+This shows that there is no solution that only calc2, only calc6, or only calc7 can find. Next, I checked all combinations of these three:
 
 ```javascript
 {-# LANGUAGE OverloadedStrings #-}
@@ -851,8 +861,8 @@ main = do
     t2 <- getCPUTime
     let t = fromIntegral (t2-t1) * 1e-12
     print t
-
 ```
+
 And here is what I got:
 
 ```javascript
@@ -867,7 +877,84 @@ And here is what I got:
 [2.0,5.0,12.0,12.0]
 3.385727
 ```
-###### There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the algorythms (calc, calc3, calc4, and calc5) which uniquely solve some rolls. Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corrolary is that if calc, calc2, calc3, calc4, and calc5 can't find a solution, calc6 and calc7 won't either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds.
 
-The module Fm uses the seven algorythms to find solutions to random rolls or numbers entered by Score players. It massages the output into a single line of Text with solutions separated by "br" in <> brackets. The browsers receive the Text as a Javascript string which, when appended to a div, displays the solutions neatly in a column.
+There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the other algorithms (calc, calc3, calc4, and calc5). Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corollary is that if calc, calc2, calc3, calc4, and calc5 can't find a solution, calc6 and calc7 won't either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds. The module Fm uses the seven algorithms to find solutions to random rolls or numbers entered by Score players. It massages the output into a single line of Text with solutions separated by "br" in <> brackets. The browsers receive the Text as a Javascript string which, when appended to a div, displays the solutions neatly in a column.
 
+## All 104 Impossible Roles
+Here is the code for impossibles2.hs:
+
+```haskell
+{-# LANGUAGE OverloadedStrings #-}
+
+import Data.List
+import System.CPUTime
+
+notWhole :: Double -> Bool
+notWhole x = fromIntegral (round x) /= x
+
+cat :: Double -> Double -> Double
+cat l m   | m < 0  = 3.1
+          | l == 0  = 3.1
+          | notWhole l  = 3.1
+          | notWhole m  = 3.1
+          | otherwise  = read (show (round l) ++ show (round m))
+
+f :: Double -> String
+f x = show (round x)
+
+scoreDiv :: Double -> Double -> Double
+scoreDiv az bz  | bz == 0  = 99999
+                | otherwise = (/) az bz
+
+ops :: [Double -> Double -> Double]
+ops =  [cat, (+), (-), (*), scoreDiv]
+
+calc :: Double -> Double -> Double -> Double -> [(Double, Double, Double, Double)]
+calc a b c d = [ (a',b',c',d') |
+                        [a',b',c',d'] <- nub(permutations [a,b,c,d]),
+                            op1 <- ops,
+                            op2 <- ops,
+                            op2 (op1 a' b') c' == 20]
+
+calc2 :: Double -> Double -> Double -> Double -> [(Double, Double, Double, Double)]
+calc2 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d'] <- nub(permutations [a,b,c,d]),
+                            op1 <- ops,
+                            op2 <- ops,
+                            op2 a' (op1 b' c') == 20]
+
+calc3 :: Double -> Double -> Double -> Double -> [(Double, Double, Double, Double)]
+calc3 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d'] <- nub(permutations [a,b,c,d]),
+                            op1 <- ops,
+                            op2 <- ops,
+                            op3 <- ops,
+                            op3 (op1 a' b') (op2 c' d') == 20]
+
+calc4 :: Double -> Double -> Double -> Double -> [(Double, Double, Double, Double)]
+calc4 a b c d = [ (a',b',c',d')  |
+                        [a',b',c',d'] <- nub(permutations [a,b,c,d]),
+                            op1 <- ops,
+                            op2 <- ops,
+                            op3 <- ops,
+                            op3 (op2 (op1 a' b') c') d' == 20]
+
+calc5 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d'] <- nub(permutations [a,b,c,d]),
+                            op1 <- ops,
+                            op2 <- ops,
+                            op3 <- ops,
+                            op3 (op2 a' (op1 b' c')) d' == 20]
+
+impossibles = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20],
+                     a <= b, b <= c, c <= d,
+                     null $ calc a b c d, null $ calc2 a b c d, null $ calc3 a b c d,
+                     null $ calc4 a b c d, null $ calc5 a b c d ]
+
+main = do
+    t1 <- getCPUTime
+    mapM_ print impossibles
+    t2 <- getCPUTime
+    let t = fromIntegral (t2-t1) * 1e-12
+    print t
+```

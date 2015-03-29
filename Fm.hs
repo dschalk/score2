@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Fm where
-import Data.List
-import System.Random
-import qualified Data.Text as T
+import           Data.List
+import qualified Data.Text     as T
+import           System.Random
 
 toDouble :: Int -> Double
 toDouble x = (read (show x)) :: Double
@@ -26,7 +26,7 @@ rollFunc _ = "Problem in rollFunc"
 rollT :: Int -> Int -> Int -> Int -> IO T.Text
 rollT ax bx cx dx = do
     x <- start ax bx cx dx
-    let y = (map show x)
+    let y = map show x
     return $ rollFunc y
 
 roll :: Int -> Int -> Int -> Int -> IO [Double]
@@ -40,12 +40,13 @@ computation a b c  | b == "+"   = (+) a c
                    | b == "*"   = (*) a c
                    | b == "/"   = scoreDiv a c
                    | b == "Concatenate"  = cat a c
+                   | otherwise = 5000
 
 fRound :: Double -> Int
-fRound x = round x
+fRound = round
 
 notWhole :: Double -> Bool
-notWhole x = (toDouble (fRound x)) /= x
+notWhole x = toDouble (fRound x) /= x
 
 cat :: Double -> Double -> Double
 cat l m   | m < 0  = 3.1
@@ -65,7 +66,7 @@ g x         | x 3 2 == 5 = " + "
 f :: Double -> String
 f x = show (fRound x)
 
-scoreDiv :: (Eq a, Fractional a) => a -> a -> a
+scoreDiv :: Double -> Double -> Double
 scoreDiv az bz  | bz == 0  = 99999
                 | otherwise = (/) az bz
 
@@ -200,7 +201,7 @@ ca [a, b, c, d, e] = ["Using the result from two numbers left of a third.<br>"] 
     pim (calc7 a b c d e)
 ca _ = ["What?"]
 
-cars :: [Double] -> [Char]
+cars :: [Double] -> String
 cars [a,b,c,d,e] = concat $ ca [a,b,c,d,e]
 cars _ = []
 
@@ -224,5 +225,4 @@ rText [a,b,c,d] = do
 rText _ = return $ T.pack "String"
 
 main :: IO ()
-main = do
-    rText [111,111,111,111] >>= print
+main = rText [111,111,111,111] >>= print

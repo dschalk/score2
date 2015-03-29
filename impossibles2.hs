@@ -16,10 +16,11 @@ cat l m   | m < 0  = 3.1
 f :: Double -> String
 f x = show (round x)
 
-scoreDiv :: (Eq a, Fractional a) => a -> a -> a
+scoreDiv :: Double -> Double -> Double
 scoreDiv az bz  | bz == 0  = 99999
                 | otherwise = (/) az bz
 
+ops :: [Double -> Double -> Double]
 ops =  [cat, (+), (-), (*), scoreDiv] 
 
 calc :: Double -> Double -> Double -> Double -> [(Double, Double, Double, Double)]
