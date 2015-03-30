@@ -1,3 +1,12 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [This shows that there is no solution that only calc2, only calc6, or only calc7 can find. Next, I checkes all combinations of these three:](#this-shows-that-there-is-no-solution-that-only-calc2-only-calc6-or-only-calc7-can-find-next-i-checkes-all-combinations-of-these-three)
+- [There are rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the algorythms (calc, calc3, calc4, and calc5) which uniquely solve some rolls. Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corrolary is that if calc, calc2, calc3, calc4, and calc5 can't find a solution, calc6 and calc7 won't either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds.](#there-are-rolls-of-the-dice-that-can-be-found-only-by-some-pair-of-these-functions-and-251212-is-the-only-roll-that-can-be-found-by-all-three-but-none-of-the-algorythms-calc-calc3-calc4-and-calc5-which-uniquely-solve-some-rolls-those-four-along-with-any-one-of-calc2-calc6-or-calc7-are-sufficient-to-find-at-least-one-solution-if-a-roll-is-solvable-a-corrolary-is-that-if-calc-calc2-calc3-calc4-and-calc5-cant-find-a-solution-calc6-and-calc7-wont-either-i-tested-this-by-removing-calc6-and-calc7-from-impossibleshs-and-renaming-it-impossibles2hs-like-impossibleshs-it-found-the-104-impossible-rolls-only-in-133-instead-of-150-seconds)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 **IMPOSSIBLES**
 
 The essence of the Score calculation algorythm in the module Fm is contained in the "impossibles.hs" file. Fm has much formatting code, which is a distraction when evaluating the algorythm.

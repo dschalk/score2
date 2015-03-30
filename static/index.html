@@ -11,10 +11,17 @@
         <link rel="stylesheet" type="text/css" href="screen.css"></script>
     </head>
     <body>
+      <div class="spacer">
+      <button id="showRules" type="submit">RULES AND CODE ANALYSIS</button>
+      <button id="hideRules" type="submit" class="fixed">HIDE RULES</button>
+      <br><br>
+      <button id="top" type="submit" class="fixed2">TOP</button>
+      </div>
+
+        <div id="rules"></div>
+      </div>
+
       <div class="spacer" id="left">
-        <div class="spacer" id="readme">
-            <a href="http://dschalk.github.io/score2/">Rules and game code analysis</a>
-        </div>
         <div class="spacer">
             <button id="private">Private Play</button>
             <button id="publicA">Group A</button>
@@ -25,15 +32,15 @@
         </div>
         <div id="a0"></div>
         <div id="a2"></div>
-        <div id="countdown"></div> 
+        <div id="countdown"></div>
         <div id="a4"></div>
         <div id="a3">
             <button id="rollA", type="submit" >ROLL</button>
             <button type="submit" id="newDisplay" >REFRESH</button>
         </div>
         <div id="a1"></div>
-        <div class="spacer">       
-            <button id="scoreF" type="submit" >SCORE</button>      
+        <div class="spacer">
+            <button id="scoreF" type="submit" >SCORE</button>
             <button id="impossibleJ" type="submit" >IMPOSSIBLE</button>
             <div id="info1"></div>
             <br><br>
@@ -44,27 +51,30 @@
             <button class="erase">ERASE</button>
             <div id="show"></div>
         </div>
+
+
+
         <div class="spacer">
             <button class="erase">ERASE</button>
         </div>
-
-
-
-
-
         <div class="spacer">
             <div id="goal" type="submit" class="extra">GOAL</div>
-            <input type="text" id="goal2" class="rad" > 
+            <input type="text" id="goal2" class="rad" >
         </div>
 
         <div>
-            <div id="sides" type="submit" class="extra">RANGES</div>  
-            <input type="text" id="x20" class="rad" >   
-            <input type="text" id="x21" class="rad" >    
-            <input type="text" id="x22" class="rad" > 
-            <input type="text" id="x23" class="rad" > 
+            <div id="sides" type="submit" class="extra">RANGES</div>
+            <input type="text" id="x20" class="rad" >
+            <input type="text" id="x21" class="rad" >
+            <input type="text" id="x22" class="rad" >
+            <input type="text" id="x23" class="rad" >
         </div>
       </div>
+
+
+
+
+
       <div class="spacer" id="right"><h1><span></span></h1>
         <div id="main">
             <button id="expand">EXPAND CHAT WINDOW</button>
@@ -94,13 +104,13 @@
                 </form>
             </div>
         </div>
-        <div class="spacer" id="experiment">       
+        <div class="spacer" id="experiment">
             <button id="solutions2" type="submit">CALCULATE</button>  S
 
-            <input type="text" id="x30" class="rad2" > 
-            <input type="text" id="x31" class="rad2" > 
-            <input type="text" id="x32" class="rad2" > 
-            <input type="text" id="x33" class="rad2" > 
+            <input type="text" id="x30" class="rad2" >
+            <input type="text" id="x31" class="rad2" >
+            <input type="text" id="x32" class="rad2" >
+            <input type="text" id="x33" class="rad2" >
 
             <div class="spacer">
                 <button class="erase2">ERASE</button>
@@ -112,7 +122,7 @@
         </div>
         <div class="spacer2">
           <div id="goal3" type="submit" class="extra">GOAL</div>
-        <input type="text" id="goal4" class="rad" > 
+        <input type="text" id="goal4" class="rad" >
       </div>
       </div>
       <div id="go30"></div>

@@ -48,7 +48,7 @@ function MONAD() {
 
 var newData = function newData(x,y,z) {
   newVal = x;
-  newVal[z] = y;
+  newVal[z] = y; 
   this.val = identity(newVal);
   return this;
 }
@@ -56,53 +56,53 @@ var newData = function newData(x,y,z) {
 var identity = MONAD();
 var monad = identity([0,1,2,3,4,5,6,7,8,9,10,11,12]);
 
-function newroll(name) {
+function newroll(name) { 
     return monad.bind(newData, [name, 10]).val;
 }
 rollM = newroll("6,6,12,20");
 
-function newplayer(name) {
+function newplayer(name) { 
     return monad.bind(newData, [name, 0]).val;
 }
 playerM = newplayer("Jack of Hearts");
 
-function newimpossibleClicker(name) {
+function newimpossibleClicker(name) { 
     return monad.bind(newData, [name, 1]).val;
 }
 impossibleClickerM = newimpossibleClicker("a@F$Uy&impossible");
 
-function newscoreClicker(name) {
+function newscoreClicker(name) { 
     return monad.bind(newData, [name, 2]).val;
 }
 scoreClickerM = newscoreClicker("a@F$Uy&score");
 // scoreClicker = scoreClickerM.val[2];
 
-function newgroup(name) {
+function newgroup(name) { 
     return monad.bind(newData, [name, 3]).val;
 }
 groupM = newgroup("private");
 
-function newrollText(name) {
+function newrollText(name) { 
     return monad.bind(newData, [name, 4]).val;
 }
 rollTextM = newrollText("1,1,1,1");
 
-function newd(num) {
+function newd(num) { 
     return monad.bind(newData, [num, 5]).val;
 }
 dM = newd(-1);
 
-function newgame(toggle) {
+function newgame(toggle) { 
     return monad.bind(newData, [toggle, 6]).val;
 }
 gameM = newgame("off");
 
-function newgoal(name) {
+function newgoal(name) { 
     return monad.bind(newData, [name, 7]).val;
 }
 goalM = newgoal(20);
 
-function newgoal32(name) {
+function newgoal32(name) { 
     return monad.bind(newData, [name, 11]).val;
 }
 goal32M = newgoal32(20);
@@ -130,7 +130,7 @@ refresh = function() {
     gameM = newgame("off");
     dM = newd(-1);
     impossibleClickerM = newimpossibleClicker("a@F$Uy&impossible");
-    scoreClickerM = newscoreClicker("a@F$Uy&score");
+    scoreClickerM = newscoreClicker("a@F$Uy&score");   
     DS_ob.ar = [];
     DS_ob.bool = [];
     $("#a0").html("");
@@ -158,16 +158,14 @@ refresh = function() {
     $(".drop2").show();
 };
 
-$(document).ready(function () {
-    $("#top").hide();
-    $("#table").hide();
+$(document).ready(function () { 
     $("#hideRules").hide();
     $(".extra").hide();
     $("#expand").hide();
     $("#contract").hide();
     $(".rad").hide();
     $("#new").hide();
-    function assign (a, b, c, d, e, f) {
+    function assign (a, b, c, d, e, f) { 
         var res;
         $("#"+d).hide();
         $("#"+e).hide();
@@ -210,7 +208,7 @@ $(document).ready(function () {
         console.log((groupM.val[3] === gameArray[1]) && (groupM.val[3] !== "private"));
         console.log(playerM.val[0] === sender);
         var p = $(document.createElement('p')).text(event.data);
-        if (((groupM.val[3] === gameArray[1]) && (groupM.val[3] !== "private")) || (playerM.val[0] === sender)) {
+        if (((groupM.val[3] === gameArray[1]) && (groupM.val[3] !== "private")) || (playerM.val[0] === sender)) {   
             switch (d2) {
                 case "CA#$42":               // Set up the next round of play.
                     refresh();
@@ -336,14 +334,14 @@ $(document).ready(function () {
                     if ( sender == playerM.val[0] ) {
                         $("#show2").prepend(extra);
                     }
-                break;
+                break;                                                            
 
                 case "CM#$42":
                     $("#a2").prepend("<br>Time's up and nobody found a solution");
                     $("#newDisplay").show();
                 break;
 
-                case "CQ#$42":
+                case "CQ#$42": 
                     rollM = newroll(extra + "," + ext4 + "," + ext5 + "," + ext6);
                 break;
 
@@ -474,12 +472,11 @@ $(document).ready(function () {
     var showRules = $('#showRules');
     var showRulesSrc = Rx.Observable.fromEvent(showRules, 'click');
     var showRulesSub = showRulesSrc.subscribe( function () {
-        $("#rules").load("README.html");
+        $("#rules").load("Score2.html");
         $("#showRules").hide();
         $("#hideRules").show();
         $("#left").hide();
         $("#right").hide();
-        $("#top").show();
     });
 
     var hideRules = $('#hideRules');
@@ -490,13 +487,6 @@ $(document).ready(function () {
         $("#showRules").show();
         $("#left").show();
         $("#right").show();
-        $("#top").hide();
-    });
-
-    var top = $('#top');
-    var topSrc = Rx.Observable.fromEvent(top, 'click');
-    var topSub = topSrc.subscribe( function () {
-      $('html,body').animate({scrollTop:$("#topofRules").offset().top}, 'slow');
     });
 
     var expand = $('#expand');
@@ -654,7 +644,7 @@ $(document).ready(function () {
             alert(" Please enter a number. ");
             return;
         }
-        else {
+        else {        
             ws.send("CS#$42," + groupM.val[3] + "," + playerM.val[0] + "," + x );
             $('#goal').removeClass('extra').addClass('focus');
             $('#goal2').removeClass('rad').addClass('radfocus');
@@ -673,7 +663,7 @@ $(document).ready(function () {
             alert(" Please enter a number. ");
             return;
         }
-        else {
+        else {        
             goal32M = newgoal32(x);
             $('#goal3').removeClass('extra').addClass('focus');
             $('#goal4').removeClass('rad').addClass('radfocus');
@@ -712,9 +702,9 @@ $(document).ready(function () {
     var newGSrc = Rx.Observable.fromEvent(newG, 'keydown');
     var newGSub = newGSrc.subscribe( function (e) {
     $("#ng").show();
-    if (e.which === 13) {
+    if (e.which === 13) { 
         var name = $("#new").val();
-        if (name !== "") {
+        if (name !== "") { 
             groupM = newgroup(name);
             ws.send("CO#$42," + name + "," + playerM.val[0]);
             $("#b0").html("Now in group " + name);
@@ -859,7 +849,7 @@ $(document).ready(function () {
                 $(".drop2x").hide();
                 ws.onmessage = onMessage;
                 $('#message-form').submit(function () {
-                    var text = $('#text').val();
+                    var text = $('#text').val(); 
                     ws.send("CU#$42," + groupM.val[3] + "," + playerM.val[0] + "," + text);
                     $('#text').val('');
                     return false;
@@ -909,14 +899,14 @@ calc = function (ax,b,cx,bb) {
         break;
     }
 
-    if (d === 0) {
+    if (d === 0) { 
         console.log(goalM.val[7]);
         $("#result1").show().html(res);
         ws.send("CE#$42," + group + "," + player + "," + "<br>" + a + " " + b + " " + c + " = " + res + "<br>");
     }
 
     if (d === 1) {
-        ws.send("CE#$42," + group + "," + player + "," + a + " " +
+        ws.send("CE#$42," + group + "," + player + "," + a + " " + 
             b + " " + c + " = " + res + "<br>");
         if (res == goal && bb)   {
             $("#newDisplay").show();

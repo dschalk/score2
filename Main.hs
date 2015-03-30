@@ -19,6 +19,7 @@ import Data.List (intersperse, map, filter)
 import Control.Exception.Base (mask_)
 import Data.List.Split (splitOn)
 import System.Environment (getEnv)
+import Network.HTTP.Types
 
 go :: Text
 go = T.pack "GO"

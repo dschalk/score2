@@ -4,18 +4,25 @@ body {
 }
 
 a {
-    font-size: 30px;
-    float:left;
-    color: #f7096c;
+  color: #8fb3ea;
 }
 
-a:hover {
-    color: #ea2aaa;
+.fixed {
+position: fixed;
+top: 0;
+right: 0;
+bottom: 95%;
+left: 0;
+z-index: 0;
 }
 
-span {
-    color: #ff0000; 
-    font-size: 24px;
+.fixed2 {
+position: fixed;
+top: 10%;
+right: 0;
+bottom: 85%;
+left: 0;
+z-index: 0;
 }
 
 #show {
@@ -139,7 +146,7 @@ span {
     color: #ff0000;
 }
 
-.focus { 
+.focus {
     display:inline-block;
     text-align: center;
     vertical-align: middle;
@@ -155,7 +162,7 @@ span {
     background: #000;
  }
 
-.focus:hover { 
+.focus:hover {
     color: #f00;
  }
 
@@ -254,11 +261,17 @@ span {
     float: left;
 }
 
-h3 {
-    width: 100%;
-    float: left;
-    font-size: 38px;
-    color: #68f2ad;
+#showRules {
+  float: left;
+}
+
+#hideRules {
+  float: left;
+}
+
+article {
+  margin: 5px;
+  padding: 5px;
 }
 
 .spacer {
@@ -283,11 +296,11 @@ h3 {
     float: right;
 }
 
-.drag { 
-    width: 110px; 
-    height: 90px; 
+.drag {
+    width: 110px;
+    height: 90px;
     float: left;
-    margin: 0px 5px 0px 0; 
+    margin: 0px 5px 0px 0;
     background-color:#000;
     font-size: 65px;
     text-align: center;
@@ -297,11 +310,11 @@ h3 {
     overflow: hidden;
 }
 
-.dragNew { 
-    width: 110px; 
-    height: 90px; 
+.dragNew {
+    width: 110px;
+    height: 90px;
     float: left;
-    margin: 0px 5px 0px 0; 
+    margin: 0px 5px 0px 0;
     background-color:#000;
     font-size: 65px;
     text-align: center;
@@ -311,25 +324,25 @@ h3 {
     overflow: hidden;
 }
 
-.drag2 { 
-    color: #68f2ad; 
-    background-color: #000; 
-    width: 110px; 
-    height: 90px; 
+.drag2 {
+    color: #68f2ad;
+    background-color: #000;
+    width: 110px;
+    height: 90px;
     float: left;
     font-size: 65px;
     text-align: center;
     padding-top: 50px;
 }
 
-.drop { 
-    border-width: 2px; 
-    border-style: solid; 
+.drop {
+    border-width: 2px;
+    border-style: solid;
     border-color: #ff0000;
-    width: 210px; 
+    width: 210px;
     height: 115px;
-    float: left; 
-    margin: 20px; 
+    float: left;
+    margin: 20px;
     background-color:#000;
     font-size: 60px;
     text-align: center;
@@ -339,14 +352,14 @@ h3 {
     overflow: hidden;
 }
 
-.drop2 { 
-    border-width: 2px; 
-    border-style: solid; 
+.drop2 {
+    border-width: 2px;
+    border-style: solid;
     border-color: #ff0000;
-    width: 210px; 
+    width: 210px;
     height: 115px;
-    float: left; 
-    margin: 20px;  
+    float: left;
+    margin: 20px;
     background-color:#000;
     font-size: 60px;
     text-align: center;
@@ -354,14 +367,14 @@ h3 {
     color: #68f2ad;
 }
 
-.dropx { 
-    border-width: 2px; 
-    border-style: solid; 
+.dropx {
+    border-width: 2px;
+    border-style: solid;
     border-color: #ff0000;
-    width: 210px; 
+    width: 210px;
     height: 115px;
-    float: left; 
-    margin: 20px; 
+    float: left;
+    margin: 20px;
     background-color:#000;
     font-size: 60px;
     text-align: center;
@@ -371,14 +384,14 @@ h3 {
     overflow: hidden;
 }
 
-.drop2x { 
-    border-width: 2px; 
-    border-style: solid; 
+.drop2x {
+    border-width: 2px;
+    border-style: solid;
     border-color: #ff0000;
-    width: 210px; 
+    width: 210px;
     height: 115px;
-    float: left; 
-    margin: 20px;  
+    float: left;
+    margin: 20px;
     background-color:#000;
     font-size: 60px;
     text-align: center;
@@ -432,8 +445,8 @@ div#main {
     padding: 0px;
     background-color: #000;
     height: 460px;
-    border-width: 2px; 
-    border-style: solid; 
+    border-width: 2px;
+    border-style: solid;
     border-color: #ff0000;
     color: #68f2ad;
     font-size: 22px;

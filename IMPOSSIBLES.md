@@ -29,6 +29,7 @@ scoreDiv az bz  | bz == 0  = 99999
 
 ops =  [cat, (+), (-), (*), scoreDiv]
 ```
+
 The seven algorythms necessary to perform every possible computation are:
 
 ```haskell
@@ -85,6 +86,7 @@ calc7 a b c d = [ (a',b',c',d') |
 ```
 
 It is easy to see that there are seven ways to order two or three sequential computations on four numbers. They can be represented by 
+
 ```javascript
 a bc
 ab c
@@ -94,6 +96,7 @@ ab cd
 a(b cd)
 a(bc d)
 ```
+
 Those are the combinations used in the seven calc functions. The list comprehension works on all permutations of the order of the four numbers in receives, so c ba is covered by a bc. Next, I wanted to find out if all seven algorythms are necessary to find at least one solution, so I wrote this:
 
 ```haskell
@@ -250,6 +253,7 @@ main = do
     print t
     print " "
 ```
+
 Here is what I got:
 
 ```javascript
@@ -307,7 +311,8 @@ e@e:~/b0$ ./analysis_A
 8.27113
 " "
 ```
-###### This shows that there is no solution that only calc2, only calc6, or only calc7 can find. Next, I checkes all combinations of these three:
+
+# This shows that there is no solution that only calc2, only calc6, or only calc7 can find. Next, I checkes all combinations of these three:
 
 ```javascript
 {-# LANGUAGE OverloadedStrings #-}
@@ -430,8 +435,8 @@ main = do
     t2 <- getCPUTime
     let t = fromIntegral (t2-t1) * 1e-12
     print t
-
 ```
+
 And here is what I got:
 
 ```javascript
@@ -446,22 +451,6 @@ And here is what I got:
 [2.0,5.0,12.0,12.0]
 3.385727
 ```
-###### There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the algorythms (calc, calc3, calc4, and calc5) which uniquely solve some rolls. Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corrolary is that if calc, calc2, calc3, calc4, and calc5 can't find a solution, calc6 and calc7 won't either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds.
 
+# There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the algorythms (calc, calc3, calc4, and calc5) which uniquely solve some rolls. Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corrolary is that if calc, calc2, calc3, calc4, and calc5 can't find a solution, calc6 and calc7 won't either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds.
 The module Fm uses the seven algorythms to find solutions to random rolls or numbers entered by Score players. It massages the output into a single line of Text with solutions separated by "<br>". The browsers receive the Text as a Javascript string which, when appended to a div, displays the solutions neatly in a column.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

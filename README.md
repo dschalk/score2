@@ -1,3 +1,20 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [The Game of Score](#the-game-of-score)
+  - [Rules of "Score"](#rules-of-score)
+  - [How The Game Was Developed](#how-the-game-was-developed)
+    - [Initiation Stage](#initiation-stage)
+    - [State And Its MVar](#state-and-its-mvar)
+    - [Organization of Game Data](#organization-of-game-data)
+    - [The Timer](#the-timer)
+- [APPENDIX](#appendix)
+  - [IMPOSSIBLES](#impossibles)
+  - [All 104 Impossible Rolls](#all-104-impossible-rolls)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # The Game of Score
 _An extension of github.com/jaspervdj/websockets as implemented by yesodweb/wai/wai-websockets_
 
@@ -181,9 +198,9 @@ The 'msg' being broadcast is just the unaltered message that was received, prefi
 ### Organization of Game Data
 I believe the most efficient way to organize game data and avoid global name clashes is to put the game data in a simple Javascript object. I don't think anything would be gained by using getter and setter functions. Values can be set by code such as 'object.name = some_value', and can be obtained by 'some_variable = object.name'.
 
-But this project is mainly for fun, and I had fun playing with various ways of organizing the data. At the time of this writing, some data is in an object named DS_ob, and most of it is in Javascript monads. I patterned the monads after Douglas Crockford's example at [https://github.com/douglascrockford/monad](https://github.com/douglascrockford/monad). I removed the parts I didn't need, and used only functions in the form 'a -> Monad b' in the monad bind function. This conforms with the Haskell definition of a monad.
+But this project is mainly for fun, and I had fun playing with various ways of organizing the data. At the time of this writing, some data is in an object named DS_ob, and most of it is in Javascript monads. I patterned the monads after Douglas Crockford's example at [https://github.com/douglascrockford/monad](https://github.com/douglascrockford/monad). I removed the parts I didn't need, and used only functions of the form 'a -> Monad b' in the monad bind function. This conforms with the Haskell definition of a monad.
 
-I don't see any practical advantage in using monads. Value are extracted from monads willy-nilly, making their use akin to using unsafePerformIO and unsafeCoerce in Haskell. I do see a resemblance to the MVar code used in the server.
+I don't see any practical advantage in using monads. Values are extracted from monads willy-nilly, making their use akin to using unsafePerformIO and unsafeCoerce in Haskell. I do see a resemblance to the MVar code used in the server.
 
 The state MVar gets defined once and only its contents change as the game goes on. The same is true for the elements of DS_ob and for monads. Just for fun, I avoided mutating variables in the monad code. Old lists of game data are removed and discarded, to be replaced by newly created ones.
 
