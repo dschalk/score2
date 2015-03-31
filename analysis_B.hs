@@ -100,20 +100,20 @@ only_calc2_or_6_or_7 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], 
                      not (null $ calc7 a b c d )]
 
 main = do 
-    print "*****************************___only_calc2_or_6"
+    print "*****************************___only_calc2_and_6"
     t1 <- getCPUTime
     mapM_ print only_calc2_or_6
     print " "
 
-    print "*****************************___only_calc2_or_7"
+    print "*****************************___only_calc2_and_7"
     mapM_ print only_calc2_or_7
     print " "
 
-    print "*****************************___only_calc6_or_7"
+    print "*****************************___only_calc6_and_7"
     mapM_ print only_calc6_or_7
     print " "
 
-    print "*****************************___only_calc2_or_6_or_7"
+    print "*****************************___only_calc2_and_6_and_7"
     mapM_ print only_calc2_or_6_or_7
     t2 <- getCPUTime
     let t = fromIntegral (t2-t1) * 1e-12

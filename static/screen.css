@@ -25,6 +25,24 @@ left: 0;
 z-index: 0;
 }
 
+.fixed3 {
+position: fixed;
+top: 20%;
+right: 0;
+bottom: 75%;
+left: 0;
+z-index: 0;
+}
+
+.fixed4 {
+position: fixed;
+top: 30%;
+right: 0;
+bottom: 65%;
+left: 0;
+z-index: 0;
+}
+
 #show {
     color: #F8E839;
     width: 100%;

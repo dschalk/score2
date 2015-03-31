@@ -159,6 +159,8 @@ refresh = function() {
 };
 
 $(document).ready(function () {
+    $("#algorithm").hide();
+    $("#rul").hide();
     $("#top").hide();
     $("#table").hide();
     $("#hideRules").hide();
@@ -480,6 +482,8 @@ $(document).ready(function () {
         $("#left").hide();
         $("#right").hide();
         $("#top").show();
+        $("#algorithm").show();
+        $("#rul").show();
     });
 
     var hideRules = $('#hideRules');
@@ -491,6 +495,22 @@ $(document).ready(function () {
         $("#left").show();
         $("#right").show();
         $("#top").hide();
+        $("#algorithm").hide();
+        $("#rul").hide();
+    });
+
+    var algorithm = $('#algorithm');
+    var algorithmSrc = Rx.Observable.fromEvent(algorithm, 'click');
+    var algorithmSub = algorithmSrc.subscribe( function () { 
+        $("#rules").html("");
+        $("#rules").load("IMPOSSIBLES.html");
+    });
+
+    var rul = $('#rul');
+    var rulSrc = Rx.Observable.fromEvent(rul, 'click');
+    var rulSub = rulSrc.subscribe( function () { 
+        $("#rules").html("");
+        $("#rules").load("README.html");
     });
 
     var top = $('#top');

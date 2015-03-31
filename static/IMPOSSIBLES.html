@@ -1,0 +1,440 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+    <title>This shows that there is no solution that only calc2, only calc6, or only calc7 can find. Next, I checkes all combinations of these three:</title>
+    <link rel="stylesheet" type="text/css" href="./Score2_files/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="./Score2_files/pygment_trac.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="./Score2_files/print.css" media="print">
+    <style>
+      body {
+        min-width: 200px;
+        max-width: 790px;
+        margin: 0 auto;
+        padding: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <article class="markdown-body"><p><strong>IMPOSSIBLES</strong></p>
+<p>The essence of the Score calculation algorythm in the module Fm is contained in the &quot;impossibles.hs&quot; file. Fm has much formatting code, which is a distraction when evaluating the algorythm.</p>
+<p>impossibles.hs computes all dice combinations which cannot be made into the number &quot;20&quot; in two or three stages. In 1.5 seconds, it finds all 104 such combinations using a list comprehension on the seven list comprehensions which cover all possible computations. The five operations are defined as follows:</p>
+<pre class="hljs"><code>{-# LANGUAGE OverloadedStrings #-}
+
+import Data.<span class="hljs-keyword">List</span>
+import System.CPUTime
+
+notWhole :: Double -&gt; Bool
+notWhole x = fromIntegral (round x) /= x
+
+<span class="hljs-keyword">cat</span> :: Double -&gt; Double -&gt; Double
+<span class="hljs-keyword">cat</span> <span class="hljs-keyword">l</span> <span class="hljs-keyword">m</span>   | <span class="hljs-keyword">m</span> &lt; 0  = 3.1
+          | <span class="hljs-keyword">l</span> == 0  = 3.1
+          | notWhole <span class="hljs-keyword">l</span>  = 3.1
+          | notWhole <span class="hljs-keyword">m</span>  = 3.1
+          | otherwise  = <span class="hljs-keyword">read</span> (show (round <span class="hljs-keyword">l</span>) ++ show (round <span class="hljs-keyword">m</span>))
+
+f :: Double -&gt; <span class="hljs-literal">String</span>
+f x = show (round x)
+
+scoreDiv :: (<span class="hljs-keyword">Eq</span> a, Fractional a) =&gt; a -&gt; a -&gt; a
+scoreDiv az bz  | bz == 0  = 99999
+                | otherwise = (/) az bz
+
+ops =  [<span class="hljs-keyword">cat</span>, (+), (-), (*), scoreDiv]</code></pre><p>The seven algorythms necessary to perform every possible computation are:</p>
+<pre class="hljs"><code>calc :: <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; [(<span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>)]
+calc a b c d = [ (a',b',c',d') |
+                        [a',b',c',d'] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op2 (op1 a' b') c' == <span class="hljs-number">20</span>]
+
+calc2 :: <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; [(<span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>)]
+calc2 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d'] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op2 a' (op1 b' c') == <span class="hljs-number">20</span>]
+
+calc3 :: <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; [(<span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>)]
+calc3 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d'] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op1 a' b') (op2 c' d') == <span class="hljs-number">20</span>]
+
+calc4 :: <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; <span class="hljs-type">Double</span> -&gt; [(<span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>, <span class="hljs-type">Double</span>)]
+calc4 a b c d = [ (a',b',c',d')  |
+                        [a',b',c',d'] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op2 (op1 a' b') c') d' == <span class="hljs-number">20</span>]
+
+calc5 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d'] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op2 a' (op1 b' c')) d' == <span class="hljs-number">20</span>]
+
+calc6 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d'] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 a' (op2 (op1 b' c') d') == <span class="hljs-number">20</span>]
+
+calc7 a b c d = [ (a',b',c',d') |
+                        [a',b',c',d'] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 a' (op2 b' (op1 c' d')) == <span class="hljs-number">20</span>]</code></pre><p>It is easy to see that there are seven ways to order two or three sequential computations on four numbers. They can be represented by </p>
+<pre class="hljs"><code><span class="hljs-tag">a</span> bc
+ab c
+ab cd
+(<span class="hljs-tag">a</span> bc)d
+(ab c)d
+<span class="hljs-function"><span class="hljs-title">a</span><span class="hljs-params">(b cd)</span></span>
+<span class="hljs-function"><span class="hljs-title">a</span><span class="hljs-params">(bc d)</span></span></code></pre><p>Those are the combinations used in the seven calc functions. The list comprehension works on all permutations of the order of the four numbers in receives, so c ba is covered by a bc. Next, I wanted to find out if all seven algorythms are necessary to find at least one solution, so I wrote this:</p>
+<pre class="hljs"><code>{-<span class="hljs-comment"># LANGUAGE OverloadedStrings #-}</span>
+
+<span class="hljs-keyword">import</span> Data.List
+<span class="hljs-keyword">import</span> System.CPUTime
+
+notWhole :: Double<span class="hljs-function"> -&gt;</span> Bool
+notWhole x = fromIntegral (round x) /= x
+
+cat :: Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double
+cat l m   | m &lt; <span class="hljs-number">0</span>  = <span class="hljs-number">3.1</span>
+          | l == <span class="hljs-number">0</span>  = <span class="hljs-number">3.1</span>
+          | notWhole l  = <span class="hljs-number">3.1</span>
+          | notWhole m  = <span class="hljs-number">3.1</span>
+          | <span class="hljs-keyword">otherwise</span>  = read (show (round l) ++ show (round m))
+
+f :: Double<span class="hljs-function"> -&gt;</span> String
+f x = show (round x)
+
+scoreDiv :: (Eq a, Fractional a) =&gt; a<span class="hljs-function"> -&gt;</span> a<span class="hljs-function"> -&gt;</span> a
+scoreDiv az bz  | bz == <span class="hljs-number">0</span>  = <span class="hljs-number">99999</span>
+                | <span class="hljs-keyword">otherwise</span> = (/) az bz
+
+ops =  [cat, (+), (-), (*), scoreDiv] 
+
+calc :: Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> [(Double, Double, Double, Double)]
+calc a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>) |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op2 (op1 a<span class="hljs-string">' b'</span>) c<span class="hljs-string">' == 20]
+
+calc2 :: Double -&gt; Double -&gt; Double -&gt; Double -&gt; [(Double, Double, Double, Double)]
+calc2 a b c d = [ (a'</span>,b<span class="hljs-string">',c'</span>,d<span class="hljs-string">') |
+                        [a'</span>,b<span class="hljs-string">',c'</span>,d<span class="hljs-string">'] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op2 a'</span> (op1 b<span class="hljs-string">' c'</span>) == <span class="hljs-number">20</span>]
+
+calc3 :: Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> [(Double, Double, Double, Double)]
+calc3 a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>) |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op1 a<span class="hljs-string">' b'</span>) (op2 c<span class="hljs-string">' d'</span>) == <span class="hljs-number">20</span>]
+
+calc4 :: Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> [(Double, Double, Double, Double)]
+calc4 a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>)  |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op2 (op1 a<span class="hljs-string">' b'</span>) c<span class="hljs-string">') d'</span> == <span class="hljs-number">20</span>]
+
+calc5 a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>) |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op2 a<span class="hljs-string">' (op1 b'</span> c<span class="hljs-string">')) d'</span> == <span class="hljs-number">20</span>]
+
+calc6 a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>) |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 a<span class="hljs-string">' (op2 (op1 b'</span> c<span class="hljs-string">') d'</span>) == <span class="hljs-number">20</span>]
+
+calc7 a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>) |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 a<span class="hljs-string">' (op2 b'</span> (op1 c<span class="hljs-string">' d'</span>)) == <span class="hljs-number">20</span>]
+
+
+
+only_calc = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], b &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], c &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">12</span>], d &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc a b c d), <span class="hljs-literal">null</span> $ calc2 a b c d, <span class="hljs-literal">null</span> $ calc3 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc4 a b c d, <span class="hljs-literal">null</span> $ calc5 a b c d, <span class="hljs-literal">null</span> $ calc6 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc7 a b c d ]
+
+
+only_calc2 = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], b &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], c &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">12</span>], d &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="hljs-literal">null</span> $ calc a b c d, <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc2 a b c d), <span class="hljs-literal">null</span> $ calc3 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc4 a b c d, <span class="hljs-literal">null</span> $ calc5 a b c d, <span class="hljs-literal">null</span> $ calc6 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc7 a b c d ]
+
+only_calc3 = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], b &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], c &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">12</span>], d &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="hljs-literal">null</span> $ calc a b c d, <span class="hljs-literal">null</span> $ calc2 a b c d, <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc3 a b c d), 
+                     <span class="hljs-literal">null</span> $ calc4 a b c d, <span class="hljs-literal">null</span> $ calc5 a b c d, <span class="hljs-literal">null</span> $ calc6 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc7 a b c d ]
+
+only_calc4 = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], b &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], c &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">12</span>], d &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="hljs-literal">null</span> $ calc a b c d, <span class="hljs-literal">null</span> $ calc2 a b c d, <span class="hljs-literal">null</span> $ calc3 a b c d, 
+                     <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc4 a b c d), <span class="hljs-literal">null</span> $ calc5 a b c d, <span class="hljs-literal">null</span> $ calc6 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc7 a b c d ]
+
+only_calc5 = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], b &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], c &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">12</span>], d &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="hljs-literal">null</span> $ calc a b c d, <span class="hljs-literal">null</span> $ calc2 a b c d, <span class="hljs-literal">null</span> $ calc3 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc4 a b c d, <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc5 a b c d), <span class="hljs-literal">null</span> $ calc6 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc7 a b c d ]
+
+only_calc6 = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], b &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], c &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">12</span>], d &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="hljs-literal">null</span> $ calc a b c d, <span class="hljs-literal">null</span> $ calc2 a b c d, <span class="hljs-literal">null</span> $ calc3 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc4 a b c d, <span class="hljs-literal">null</span> $ calc5 a b c d, <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc6 a b c d),
+                     <span class="hljs-literal">null</span> $ calc7 a b c d ]
+
+only_calc7 = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], b &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], c &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">12</span>], d &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="hljs-literal">null</span> $ calc a b c d, <span class="hljs-literal">null</span> $ calc2 a b c d, <span class="hljs-literal">null</span> $ calc3 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc4 a b c d, <span class="hljs-literal">null</span> $ calc5 a b c d, <span class="hljs-literal">null</span> $ calc6 a b c d, 
+                     <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc7 a b c d )]
+
+main = <span class="hljs-keyword">do</span> 
+    <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc"</span>
+    t1 &lt;- getCPUTime
+    mapM_ <span class="hljs-built_in">print</span> only_calc
+    <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
+
+    <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc2"</span>
+    mapM_ <span class="hljs-built_in">print</span> only_calc2
+    <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
+
+    <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc3"</span>
+    mapM_ <span class="hljs-built_in">print</span> only_calc3
+    <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
+
+    <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc4"</span>
+    mapM_ <span class="hljs-built_in">print</span> only_calc4
+    <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
+
+    <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc5"</span>
+    mapM_ <span class="hljs-built_in">print</span> only_calc5
+    <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
+
+    <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc6"</span>
+    mapM_ <span class="hljs-built_in">print</span> only_calc6
+    <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
+
+    <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc7"</span>
+    mapM_ <span class="hljs-built_in">print</span> only_calc7
+    t2 &lt;- getCPUTime
+    <span class="hljs-keyword">let</span> t = fromIntegral (t2-t1) * <span class="hljs-number">1e-12</span>
+    <span class="hljs-built_in">print</span> t
+    <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span></code></pre><p>Here is what I got:</p>
+<pre class="hljs"><code>e@e:~/b0$ ./analysis_A
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc"
+[1.0,3.0,11.0,15.0]
+[1.0,3.0,11.0,19.0]
+[1.0,6.0,9.0,20.0]
+[1.0,6.0,10.0,20.0]
+[1.0,6.0,11.0,20.0]
+[2.0,2.0,11.0,15.0]
+[2.0,2.0,11.0,17.0]
+[3.0,3.0,3.0,13.0]
+[3.0,3.0,7.0,17.0]
+[3.0,4.0,9.0,16.0]
+[3.0,4.0,11.0,14.0]
+[4.0,4.0,6.0,17.0]
+[5.0,5.0,5.0,11.0]
+[5.0,5.0,5.0,13.0]
+[5.0,5.0,5.0,17.0]
+" "
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc2"
+" "
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc3"
+[1.0,1.0,1.0,11.0]
+[1.0,1.0,7.0,17.0]
+[1.0,1.0,12.0,12.0]
+[1.0,6.0,6.0,6.0]
+[1.0,6.0,9.0,9.0]
+[3.0,3.0,6.0,6.0]
+[3.0,4.0,7.0,18.0]
+[3.0,6.0,7.0,14.0]
+[5.0,5.0,6.0,17.0]
+[5.0,6.0,6.0,6.0]
+" "
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc4"
+[1.0,1.0,4.0,11.0]
+[1.0,4.0,9.0,9.0]
+[1.0,4.0,9.0,19.0]
+[1.0,5.0,11.0,11.0]
+[1.0,6.0,6.0,12.0]
+[1.0,6.0,11.0,11.0]
+[3.0,6.0,9.0,12.0]
+[6.0,6.0,7.0,18.0]
+[6.0,6.0,9.0,14.0]
+" "
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc5"
+[1.0,3.0,8.0,20.0]
+[3.0,3.0,10.0,17.0]
+[3.0,4.0,10.0,16.0]
+" "
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc6"
+" "
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc7"
+8.27113
+" "</code></pre><h1 id="this-shows-that-there-is-no-solution-that-only-calc2-only-calc6-or-only-calc7-can-find-next-i-checkes-all-combinations-of-these-three-">This shows that there is no solution that only calc2, only calc6, or only calc7 can find. Next, I checkes all combinations of these three:</h1>
+<pre class="hljs"><code>{-<span class="hljs-comment"># LANGUAGE OverloadedStrings #-}</span>
+
+<span class="hljs-keyword">import</span> Data.List
+<span class="hljs-keyword">import</span> System.CPUTime
+
+notWhole :: Double<span class="hljs-function"> -&gt;</span> Bool
+notWhole x = fromIntegral (round x) /= x
+
+cat :: Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double
+cat l m   | m &lt; <span class="hljs-number">0</span>  = <span class="hljs-number">3.1</span>
+          | l == <span class="hljs-number">0</span>  = <span class="hljs-number">3.1</span>
+          | notWhole l  = <span class="hljs-number">3.1</span>
+          | notWhole m  = <span class="hljs-number">3.1</span>
+          | <span class="hljs-keyword">otherwise</span>  = read (show (round l) ++ show (round m))
+
+f :: Double<span class="hljs-function"> -&gt;</span> String
+f x = show (round x)
+
+scoreDiv :: (Eq a, Fractional a) =&gt; a<span class="hljs-function"> -&gt;</span> a<span class="hljs-function"> -&gt;</span> a
+scoreDiv az bz  | bz == <span class="hljs-number">0</span>  = <span class="hljs-number">99999</span>
+                | <span class="hljs-keyword">otherwise</span> = (/) az bz
+
+ops =  [cat, (+), (-), (*), scoreDiv] 
+
+calc :: Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> [(Double, Double, Double, Double)]
+calc a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>) |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op2 (op1 a<span class="hljs-string">' b'</span>) c<span class="hljs-string">' == 20]
+
+calc2 :: Double -&gt; Double -&gt; Double -&gt; Double -&gt; [(Double, Double, Double, Double)]
+calc2 a b c d = [ (a'</span>,b<span class="hljs-string">',c'</span>,d<span class="hljs-string">') |
+                        [a'</span>,b<span class="hljs-string">',c'</span>,d<span class="hljs-string">'] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op2 a'</span> (op1 b<span class="hljs-string">' c'</span>) == <span class="hljs-number">20</span>]
+
+calc3 :: Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> [(Double, Double, Double, Double)]
+calc3 a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>) |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op1 a<span class="hljs-string">' b'</span>) (op2 c<span class="hljs-string">' d'</span>) == <span class="hljs-number">20</span>]
+
+calc4 :: Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> Double<span class="hljs-function"> -&gt;</span> [(Double, Double, Double, Double)]
+calc4 a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>)  |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op2 (op1 a<span class="hljs-string">' b'</span>) c<span class="hljs-string">') d'</span> == <span class="hljs-number">20</span>]
+
+calc5 a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>) |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 (op2 a<span class="hljs-string">' (op1 b'</span> c<span class="hljs-string">')) d'</span> == <span class="hljs-number">20</span>]
+
+calc6 a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>) |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 a<span class="hljs-string">' (op2 (op1 b'</span> c<span class="hljs-string">') d'</span>) == <span class="hljs-number">20</span>]
+
+calc7 a b c d = [ (a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>) |
+                        [a<span class="hljs-string">',b'</span>,c<span class="hljs-string">',d'</span>] &lt;- nub(permutations [a,b,c,d]),
+                            op1 &lt;- ops,
+                            op2 &lt;- ops,
+                            op3 &lt;- ops,
+                            op3 a<span class="hljs-string">' (op2 b'</span> (op1 c<span class="hljs-string">' d'</span>)) == <span class="hljs-number">20</span>]
+
+only_calc2_or_6 = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], b &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], c &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">12</span>], d &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="hljs-literal">null</span> $ calc a b c d, <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc2 a b c d), <span class="hljs-literal">null</span> $ calc3 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc4 a b c d, <span class="hljs-literal">null</span> $ calc5 a b c d, <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc6 a b c d), 
+                     <span class="hljs-literal">null</span> $ calc7 a b c d ]
+
+only_calc2_or_7 = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], b &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], c &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">12</span>], d &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="hljs-literal">null</span> $ calc a b c d, <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc2 a b c d), <span class="hljs-literal">null</span> $ calc3 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc4 a b c d, <span class="hljs-literal">null</span> $ calc5 a b c d, <span class="hljs-literal">null</span> $ calc6 a b c d, 
+                     <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc7 a b c d) ]
+
+only_calc6_or_7 = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], b &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], c &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">12</span>], d &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="hljs-literal">null</span> $ calc a b c d, <span class="hljs-literal">null</span> $ calc2 a b c d, <span class="hljs-literal">null</span> $ calc3 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc4 a b c d, <span class="hljs-literal">null</span> $ calc5 a b c d, <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc6 a b c d), 
+                     <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc7 a b c d )]
+
+
+only_calc2_or_6_or_7 = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], b &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>], c &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">12</span>], d &lt;- [<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>], 
+                     a &lt;= b, b &lt;= c, c &lt;= d,
+                     <span class="hljs-literal">null</span> $ calc a b c d, <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc2 a b c d), <span class="hljs-literal">null</span> $ calc3 a b c d, 
+                     <span class="hljs-literal">null</span> $ calc4 a b c d, <span class="hljs-literal">null</span> $ calc5 a b c d, <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc6 a b c d), 
+                     <span class="hljs-keyword">not</span> (<span class="hljs-literal">null</span> $ calc7 a b c d )]
+
+main = <span class="hljs-keyword">do</span> 
+    <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc2_and_6"</span>
+    t1 &lt;- getCPUTime
+    mapM_ <span class="hljs-built_in">print</span> only_calc2_or_6
+    <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
+
+    <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc2_and_7"</span>
+    mapM_ <span class="hljs-built_in">print</span> only_calc2_or_7
+    <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
+
+    <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc6_and_7"</span>
+    mapM_ <span class="hljs-built_in">print</span> only_calc6_or_7
+    <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
+
+    <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc2_and_6_and_7"</span>
+    mapM_ <span class="hljs-built_in">print</span> only_calc2_or_6_or_7
+    t2 &lt;- getCPUTime
+    <span class="hljs-keyword">let</span> t = fromIntegral (t2-t1) * <span class="hljs-number">1e-12</span>
+    <span class="hljs-built_in">print</span> t</code></pre><p>And here is what I got:</p>
+<pre class="hljs"><code><span class="hljs-code">    e@e:~/b0$ ./analysis_B</span>
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc2<span class="hljs-emphasis">_and_</span>6"
+" "
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc2<span class="hljs-emphasis">_and_</span>7"
+" "
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc6<span class="hljs-emphasis">_and_</span>7"
+" "
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc2<span class="hljs-emphasis">_and_</span>6<span class="hljs-emphasis">_and_</span>7"
+[2.0,5.0,12.0,12.0]
+3.385727</code></pre><h1 id="there-are-no-rolls-of-the-dice-that-can-be-found-only-by-some-pair-of-these-functions-and-2-5-12-12-is-the-only-roll-that-can-be-found-by-all-three-but-none-of-the-other-algorythms-calc-calc3-calc4-and-calc5-those-four-along-with-any-one-of-calc2-calc6-or-calc7-are-sufficient-to-find-at-least-one-solution-if-a-roll-is-solvable-a-corrolary-is-that-if-calc-calc2-calc3-calc4-and-calc5-can-t-find-a-solution-calc6-and-calc7-won-t-either-i-tested-this-by-removing-calc6-and-calc7-from-impossibles-hs-and-renaming-it-impossibles2-hs-like-impossibles-hs-it-found-the-104-impossible-rolls-only-in-1-33-instead-of-1-50-seconds-">There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the other algorythms (calc, calc3, calc4, and calc5). Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corrolary is that if calc, calc2, calc3, calc4, and calc5 can&#39;t find a solution, calc6 and calc7 won&#39;t either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds.</h1>
+<p>The module Fm uses the seven algorythms to find solutions to random rolls or numbers entered by Score players. It massages the output into a single line of Text with solutions separated by &quot;<br>&quot;. The browsers receive the Text as a Javascript string which, when appended to a div, displays the solutions neatly in a column.</p>
+    </article>
+  </body>
+</html>

@@ -390,7 +390,6 @@ calc7 a b c d = [ (a',b',c',d') |
                             op3 <- ops,
                             op3 a' (op2 b' (op1 c' d')) == 20]
 
-
 only_calc2_or_6 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], d <- [1..20], 
                      a <= b, b <= c, c <= d,
                      null $ calc a b c d, not (null $ calc2 a b c d), null $ calc3 a b c d, 
@@ -417,20 +416,20 @@ only_calc2_or_6_or_7 = [ [a, b, c, d] | a <- [1..6], b <- [1..6], c <- [1..12], 
                      not (null $ calc7 a b c d )]
 
 main = do 
-    print "*****************************___only_calc2_or_6"
+    print "*****************************___only_calc2_and_6"
     t1 <- getCPUTime
     mapM_ print only_calc2_or_6
     print " "
 
-    print "*****************************___only_calc2_or_7"
+    print "*****************************___only_calc2_and_7"
     mapM_ print only_calc2_or_7
     print " "
 
-    print "*****************************___only_calc6_or_7"
+    print "*****************************___only_calc6_and_7"
     mapM_ print only_calc6_or_7
     print " "
 
-    print "*****************************___only_calc2_or_6_or_7"
+    print "*****************************___only_calc2_and_6_and_7"
     mapM_ print only_calc2_or_6_or_7
     t2 <- getCPUTime
     let t = fromIntegral (t2-t1) * 1e-12
@@ -441,16 +440,16 @@ And here is what I got:
 
 ```javascript
     e@e:~/b0$ ./analysis_B
-"*****************************___only_calc2_or_6"
+"*****************************___only_calc2_and_6"
 " "
-"*****************************___only_calc2_or_7"
+"*****************************___only_calc2_and_7"
 " "
-"*****************************___only_calc6_or_7"
+"*****************************___only_calc6_and_7"
 " "
-"*****************************___only_calc2_or_6_or_7"
+"*****************************___only_calc2_and_6_and_7"
 [2.0,5.0,12.0,12.0]
 3.385727
 ```
 
-# There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the algorythms (calc, calc3, calc4, and calc5) which uniquely solve some rolls. Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corrolary is that if calc, calc2, calc3, calc4, and calc5 can't find a solution, calc6 and calc7 won't either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds.
+# There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the other algorythms (calc, calc3, calc4, and calc5). Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corrolary is that if calc, calc2, calc3, calc4, and calc5 can't find a solution, calc6 and calc7 won't either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds.
 The module Fm uses the seven algorythms to find solutions to random rolls or numbers entered by Score players. It massages the output into a single line of Text with solutions separated by "<br>". The browsers receive the Text as a Javascript string which, when appended to a div, displays the solutions neatly in a column.

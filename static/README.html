@@ -764,30 +764,30 @@ only_calc2_or_6_or_7 = [ [a, b, c, d] | a &lt;- [<span class="hljs-number">1.</s
 main = <span class="hljs-keyword">do</span>
     <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc2_or_6"</span>
     t1 &lt;- getCPUTime
-    mapM_ <span class="hljs-built_in">print</span> only_calc2_or_6
+    mapM_ <span class="hljs-built_in">print</span> only_calc2_and_6
     <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
 
     <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc2_or_7"</span>
-    mapM_ <span class="hljs-built_in">print</span> only_calc2_or_7
+    mapM_ <span class="hljs-built_in">print</span> only_calc2_and_7
     <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
 
     <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc6_or_7"</span>
-    mapM_ <span class="hljs-built_in">print</span> only_calc6_or_7
+    mapM_ <span class="hljs-built_in">print</span> only_calc6_and_7
     <span class="hljs-built_in">print</span> <span class="hljs-string">" "</span>
 
     <span class="hljs-built_in">print</span> <span class="hljs-string">"*****************************___only_calc2_or_6_or_7"</span>
-    mapM_ <span class="hljs-built_in">print</span> only_calc2_or_6_or_7
+    mapM_ <span class="hljs-built_in">print</span> only_calc2_and_6_and_7
     t2 &lt;- getCPUTime
     <span class="hljs-keyword">let</span> t = fromIntegral (t2-t1) * <span class="hljs-number">1e-12</span>
     <span class="hljs-built_in">print</span> t</code></pre><p>And here is what I got:</p>
 <pre class="hljs"><code><span class="hljs-code">    e@e:~/b0$ ./analysis_B</span>
-"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc2<span class="hljs-emphasis">_or_</span>6"
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc2<span class="hljs-emphasis">_and_</span>6"
 " "
-"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc2<span class="hljs-emphasis">_or_</span>7"
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc2<span class="hljs-emphasis">_and_</span>7"
 " "
-"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc6<span class="hljs-emphasis">_or_</span>7"
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc6<span class="hljs-emphasis">_and_</span>7"
 " "
-"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc2<span class="hljs-emphasis">_or_</span>6<span class="hljs-emphasis">_or_</span>7"
+"<span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">*****</span><span class="hljs-strong">****_</span><span class="hljs-emphasis">__only_</span>calc2<span class="hljs-emphasis">_and_</span>6<span class="hljs-emphasis">_and_</span>7"
 [2.0,5.0,12.0,12.0]
 3.385727</code></pre><p>There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the other algorithms (calc, calc3, calc4, and calc5). Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corollary is that if calc, calc2, calc3, calc4, and calc5 can&#39;t find a solution, calc6 and calc7 won&#39;t either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds. The module Fm uses the seven algorithms to find solutions to random rolls or numbers entered by Score players. It massages the output into a single line of Text with solutions separated by &quot;br&quot; in &lt;&gt; brackets. The browsers receive the Text as a Javascript string which, when appended to a div, displays the solutions neatly in a column.</p>
 <h2 id="all-104-impossible-rolls">All 104 Impossible Rolls</h2>
