@@ -370,7 +370,7 @@ $(document).ready(function () {
                 break;
 
                 default:
-                    $('#messages').append(extra + "<br>");
+                    $('#messages').append(sender + ": " + extra + "<br>");
                     $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
                 break;
             }
