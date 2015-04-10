@@ -95,20 +95,11 @@ z-index: 0;
 }
 
 .rad:focus {
-    display:inline-block;
-    text-align: center;
-    vertical-align: middle;
-    cursor: pointer;
-    padding: 5px;
     font-weight: 6;
     width: 65px;
-    float: left;
     font-size: 45px;
     color: #68f2ad;
     background: #000;
-    text-align: center;
-    padding-top: 10px;
-    margin: 15px;
 }
 
 .rad2 {
@@ -128,20 +119,11 @@ z-index: 0;
 }
 
 .rad2:focus {
-    display:inline-block;
-    text-align: center;
-    vertical-align: middle;
-    cursor: pointer;
-    padding: 5px;
     font-weight: 6;
     width: 65px;
-    float: right;
     font-size: 45px;
     color: #68f2ad;
     background: #000;
-    text-align: center;
-    padding-top: 10px;
-    margin: 15px;
 }
 
 .extra {
@@ -162,42 +144,6 @@ z-index: 0;
 
 .extra:hover {
     color: #ff0000;
-}
-
-.focus {
-    display:inline-block;
-    text-align: center;
-    vertical-align: middle;
-    cursor: pointer;
-    padding-right: 42px;
-    float: left;
-    font-size: 35px;
-    background: #B1C771;
-    text-align: center;
-    padding-top: 10px;
-    margin: 5px;
-    color: #c3ff00;
-    background: #000;
- }
-
-.focus:hover {
-    color: #f00;
- }
-
-.extrafucus {
-    display:inline-block;
-    text-align: center;
-    vertical-align: middle;
-    cursor: pointer;
-    width: 50px;
-    padding: 5px;
-    float: left;
-    font-size: 35px;
-    color: #f00;
-    background: #000;
-    text-align: center;
-    padding-top: 10px;
-    margin: 15px;
 }
 
 .range {

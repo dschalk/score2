@@ -27,30 +27,6 @@ var populate;
 var refresh;
 var calc;
 var DS_T = -1;
-var DS_ar = [];
-var rollM = "6,6,12,20";
-var playerM = "Jack of Hearts";
-var impossibleClickerM = "a@F$Uy&impossible";
-var scoreClickerM = "a@F$Uy&score";
-var groupM = "private";
-var rollTextM = "1,1,1,1";
-var dM = -1;
-var gameM = "off";
-var goalM = 20;
-var goal32M = 20;
-var DS_ob = {};
-DS_ob.ar = [];
-DS_ob.bool = [];
-DS_obscoreFunc = function() { 
-        $("#countdown").html("");
-        $("#a0").html("");
-        if (playerM === scoreClickerM) {
-            ws.send("CL#$42," + groupM + "," + playerM + "," + "place holder");
-        }
-        if ( playerM === impossibleClickerM) {
-            ws.send("CM#$42,"+ groupM + "," + playerM + "," + "place holder");
-        }
-    };
 
 setInterval( function () {
   if (DS_T == 0) {
@@ -63,13 +39,105 @@ setInterval( function () {
   if (DS_T == -1) $("#countdown").html("");
 },1000 );
 
+function MONAD() {
+    'use strict';
+    var prototype = Object.create(null);
+    function unit(value) {
+        var monad = Object.create(prototype);
+        monad.val = value;
+        monad.bind = function (func, args) {
+            return func.apply(
+                undefined,
+                [value].concat(Array.prototype.slice.apply(args || []))
+            );
+        };
+        return monad;
+    }
+    return unit;
+}
 
+var newData = function newData(x,y,z) {
+  newVal = x;
+  newVal[z] = y;
+  this.val = identity(newVal);
+  return this;
+}
+
+var identity = MONAD();
+var monad = identity([0,1,2,3,4,5,6,7,8,9,10,11,12]);
+
+function newroll(roll) {
+    return monad.bind(newData, [roll, 10]).val;
+}
+rollM = newroll("6,6,12,20");
+
+function newplayer(name) {
+    return monad.bind(newData, [name, 0]).val;
+}
+playerM = newplayer("Jack of Hearts");
+
+function newimpossibleClicker(name) {
+    return monad.bind(newData, [name, 1]).val;
+}
+impossibleClickerM = newimpossibleClicker("a@F$Uy&impossible");
+
+function newscoreClicker(name) {
+    return monad.bind(newData, [name, 2]).val;
+}
+scoreClickerM = newscoreClicker("a@F$Uy&score");
+// scoreClicker = scoreClickerM.val[2];
+
+function newgroup(group) {
+    return monad.bind(newData, [group, 3]).val;
+}
+groupM = newgroup("private");
+
+function newrollText(name) {
+    return monad.bind(newData, [name, 4]).val;
+}
+rollTextM = newrollText("1,1,1,1");
+
+function newd(num) {
+    return monad.bind(newData, [num, 5]).val;
+}
+dM = newd(-1);
+
+function newgame(toggle) {
+    return monad.bind(newData, [toggle, 6]).val;
+}
+gameM = newgame("off");
+
+function newgoal(num) {
+    return monad.bind(newData, [num, 7]).val;
+}
+goalM = newgoal(20);
+
+function newgoal32(num) {
+    return monad.bind(newData, [num, 11]).val;
+}
+goal32M = newgoal32(20);
+
+function MakeDS_ob() {
+    this.ar = [];
+    this.bool = [];
+    this.scoreFunc = function() {
+        $("#countdown").html("");
+        $("#a0").html("");
+        if (playerM.val[0] === scoreClickerM.val[2]) {
+            ws.send("CL#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "place holder");
+        }
+        if ( playerM.val[0] === impossibleClickerM.val[1]) {
+            ws.send("CM#$42,"+ groupM.val[3] + "," + playerM.val[0] + "," + "place holder");
+        }
+    };
+};
+var DS_ob = new MakeDS_ob();
 
 refresh = function() {
-    gameM = "off";
-    dM = -1;
-    impossibleClickerM = "a@F$Uy&impossible";
-    scoreClickerM = "a@F$Uy&score";
+    gameM = newgame("off");
+    dM = newd(-1);
+    impossibleClickerM = newimpossibleClicker("a@F$Uy&impossible");
+    scoreClickerM = newscoreClicker("a@F$Uy&score");
     DS_ob.ar = [];
     DS_ob.bool = [];
     $("#a0").html("");
@@ -137,16 +205,17 @@ $(document).ready(function () {
         var sendersGroup= gameArray[1];   // The sender's group.
         var sender = gameArray[2];
         var extra = gameArray[3];
+        console.log(rollM.val[10])
         var ext4= gameArray[4];
         var ext5 = gameArray[5];
         var ext6 = gameArray[6];
         var ext7 = gameArray[7];
         var ext8 = gameArray[8];
         console.log(gameArray);
-        console.log((groupM === gameArray[1]) && (groupM !== "private"));
-        console.log(playerM === sender);
+        console.log((groupM.val[3] === gameArray[1]) && (groupM.val[3] !== "private"));
+        console.log(playerM.val[0] === sender);
         var p = $(document.createElement('p')).text(event.data);
-        if (((groupM === gameArray[1]) && (groupM !== "private")) || (playerM === sender)) {
+        if (((groupM.val[3] === gameArray[1]) && (groupM.val[3] !== "private")) || (playerM.val[0] === sender)) {
             switch (d2) {
                 case "CA#$42":               // Set up the next round of play.
                     refresh();
@@ -162,8 +231,9 @@ $(document).ready(function () {
                     $("#solutions").show();
                     $("#iutions2").show();
                     $("#a0").html("");
-                    rollTextM = extra + "," + ext4 + "," + ext5 + "," + ext6;
-                    dM = -1;
+                    var r = extra + "," + ext4 + "," + ext5 + "," + ext6;
+                    rollTextM = newrollText(r);
+                    dM = newd(-1);
                     populate(extra,ext4,ext5,ext6);
                     $("#a4").html(extra + " " + ext4 +  " " + ext5 + " " + ext6);
                 break;
@@ -177,7 +247,7 @@ $(document).ready(function () {
                 break;
 
                 case "CD#$42":       // Prevent new player login data from displaying as a chat message.
-                    if (sender !== playerM) {
+                    if (sender !== playerM.val[0]) {
                         $("#" + gameArray[3]).hide();
                         $("#" + gameArray[5]).val(gameArray[4]);
                         $("#" + gameArray[5]).html(gameArray[4]);
@@ -191,7 +261,7 @@ $(document).ready(function () {
                 break;
 
                 case "CF#$42":
-                    gameM = "on";
+                    gameM = newgame("on");
                     $("#a2").append("<br>" + sender + " clicked 'SCORE'");
                     DS_ob.ar = [];
                     $("#rollA").hide();
@@ -199,9 +269,9 @@ $(document).ready(function () {
                     $("#impossibleJ").hide();
                     $("#scoreF").hide();
                     DS_T = 30;
-                    if (playerM !==  scoreClickerM) {
+                    if (playerM.val[0] !==  scoreClickerM.val[2]) {
                         $("#a0").append(sender + " clicked SCORE and must make the " +
-                            "number " + goalM + " before time runs out.</h3>");
+                            "number " + goalM.val[7] + " before time runs out.</h3>");
                         $(".dropx").show();
                         $(".drop2x").show();
                         $(".drop").hide();
@@ -220,14 +290,14 @@ $(document).ready(function () {
                 break;
 
                 case "CH#$42":
-                    if (playerM !== sender && gameM === "on") {
+                    if (playerM.val[0] !== sender && gameM.val[6] === "on") {
                         assign (extra, ext4, ext5, ext6, ext7, ext8);
                     }
 
                 break;
 
                 case "CK#$42":       // Prevent new player login data from displaying as a chat message.
-                    if (sender !== playerM) {
+                    if (sender !== playerM.val[0]) {
                         $("#" + gameArray[3]).hide();
                         $("#1").val(gameArray[4]);
                         $("#1").html(gameArray[4]);
@@ -249,7 +319,7 @@ $(document).ready(function () {
 
                 case "CJ#$42":
                     $("#impossibleJ").hide();
-                    impossibleClickerM = sender;
+                    impossibleClickerM.val[1] = sender;
                     $("#a2").prepend("<br>" + sender + " clicked 'IMPOSSIBLE'");
                     DS_T = 60;
                 break;
@@ -263,12 +333,12 @@ $(document).ready(function () {
                 case "CS#$42":
                     $("#a1").append("<br> The goal is now " + extra);
                     $("#show").append("<br> The goal is now " + extra);
-                    goalM = extra;
-                    ws.send("CA#$42," + groupM + "," + playerM + "," + rollM);
+                    goalM = newgoal(extra);
+                    ws.send("CA#$42," + groupM.val[3] + "," + playerM.val[0] + "," + rollM.val[10]);
                 break;
 
                 case "CW#$42":
-                    if ( sender == playerM ) {
+                    if ( sender == playerM.val[0] ) {
                         $("#show2").prepend(extra);
                     }
                 break;
@@ -279,13 +349,13 @@ $(document).ready(function () {
                 break;
 
                 case "CQ#$42":
-                    rollM = extra + "," + ext4 + "," + ext5 + "," + ext6;
+                    rollM = newroll(extra + "," + ext4 + "," + ext5 + "," + ext6);
                     $("#show").prepend("The ranges are now " + extra + "," + ext4 + "," + ext5 + "," + ext6 + "<br>");
                 break;
 
                 case "CN#$42":
                     DS_T = -1;
-                    $("#a2").append("<br>deduct two points from " + impossibleClickerM +
+                    $("#a2").append("<br>deduct two points from " + impossibleClickerM.val[1] +
                         "'s score. <br>A solution was found before 60 seconds had passed.");
                     $("#newDisplay").show();
                 break;
@@ -355,8 +425,8 @@ $(document).ready(function () {
             hoverClass: 'active',
             accept: ".drag, .dragNew",
             drop: function(e, ui) {
-                var status = groupM;
-                var player = playerM;
+                var status = groupM.val[3];
+                var player = playerM.val[0];
                 var ar = DS_ob.ar;
                 var bool = DS_ob.bool;
                 var dropID = $(this).attr( 'id' );
@@ -370,9 +440,9 @@ $(document).ready(function () {
                 bb = (bool.indexOf("new") !== -1); // Did the player use a number generated by a previous computation?
                 if (ar[0] !== undefined && ar[1] !== undefined && ar[2] !== undefined) {
                     calc(ar[0], ar[1], ar[2], bb);
-                    ws.send("CH#$42," + status + "," + playerM + "," +
+                    ws.send("CH#$42," + status + "," + playerM.val[0] + "," +
                         ar[0] + "," + ar[1] + "," + ar[2] + "," + ar[3] + "," +
-                        ar[5] + "," + (dM + 1));
+                        ar[5] + "," + (dM.val[5] + 1));
                     refreshDropboxes();
                }
             }
@@ -465,12 +535,12 @@ $(document).ready(function () {
 
     $( "#rollA" ).click(function( event ) {
       bool = [];
-      dM = -1;
-      ws.send("CA#$42," + groupM + "," + playerM + "," + rollM);
+      dM = newd(-1);
+      ws.send("CA#$42," + groupM.val[3] + "," + playerM.val[0] + "," + rollM.val[10]);
     });
 
     $( "#solutions" ).click(function( event ) {
-      var x = "CZ#$42," + groupM + "," + playerM + "," + rollTextM + "," + goalM;
+      var x = "CZ#$42," + groupM.val[3] + "," + playerM.val[0] + "," + rollTextM.val[4] + "," + goalM.val[7];
       ws.send(x);
     });
 
@@ -495,12 +565,12 @@ $(document).ready(function () {
           alert(d3 + " is not a number.");
           return;
       }
-      var e = a3 + "," + b3 + "," + c3 + "," + d3 + "," + goal32M
+      var e = a3 + "," + b3 + "," + c3 + "," + d3 + "," + goal32M.val[11]
       $("#x30").val("");
       $("#x31").val("");
       $("#x32").val("");
       $("#x33").val("");
-      ws.send("CW#$42," + groupM + "," + playerM  + "," + e);
+      ws.send("CW#$42," + groupM.val[3] + "," + playerM.val[0]  + "," + e);
       $('#computations').show();
       $(".erase2").show();
       $("#show2").show();
@@ -528,23 +598,23 @@ $(document).ready(function () {
           return;
       }
       var e = a2 + "," + b2 + "," + c2 + "," + d2
-      ws.send("CQ#$42," + groupM + "," + playerM  + "," + a2 + "," + b2 + "," + c2 + "," + d2);
+      ws.send("CQ#$42," + groupM.val[3] + "," + playerM.val[0]  + "," + a2 + "," + b2 + "," + c2 + "," + d2);
     });
 
     $( "#scoreF" ).click(function( event ) {
       $("#scoreF").hide();
-      scoreClickerM = playerM;
+      scoreClickerM = newscoreClicker(playerM.val[0]);
       $("#impossibleJ").hide();
-      ws.send("CF#$42," + groupM + "," + playerM + "," + "place holder");
+      ws.send("CF#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "place holder");
     });
 
     $( "#impossibleJ" ).click(function( event ) {
-      impossibleClickerM = playerM;
-      ws.send("CJ#$42," + groupM + "," + playerM + "," + "place holder");
+      impossibleClickerM = newimpossibleClicker(playerM.val[0]);
+      ws.send("CJ#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "place holder");
     });
 
     $( "#newDisplay" ).click(function( event ) {
-      ws.send("CR#$42," + groupM + "," + playerM + "," + "place holder");
+      ws.send("CR#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "place holder");
     });
 
     populate = function(a,b,c,d) {
@@ -572,7 +642,7 @@ $(document).ready(function () {
           return;
       }
       else {
-          ws.send("CS#$42," + groupM + "," + playerM + "," + x );
+          ws.send("CS#$42," + groupM.val[3] + "," + playerM.val[0] + "," + x );
       }
     });
 
@@ -591,27 +661,27 @@ $(document).ready(function () {
           return;
       }
       else {
-          goal32M = x;
+          goal32M = newgoal32(x);
       }
     });
 
     $( "#private" ).click(function( event ) {
-      groupM = "private";
-      ws.send("CO#$42," + "private" + "," + playerM);
+      groupM = newgroup("private");
+      ws.send("CO#$42," + "private" + "," + playerM.val[0]);
       $("#b0").html("Solitaire mode. Your actions do not affect other players.")
     });
 
     $( "#publicA" ).click(function( event ) {
-      groupM = "pubA";
-      ws.send("CO#$42," + "pubA" + "," + playerM);
+      groupM = newgroup("pubA");
+      ws.send("CO#$42," + "pubA" + "," + playerM.val[0]);
       $("#b0").html("You are now in Group A. Be careful." +
           " Clicking 'ROLL' inserts the roll numbers in all" +
           " Group A browsers.");
     });
 
     $( "#publicB" ).click(function( event ) {
-      groupM = "pubB";
-      ws.send("CO#$42," + "pubB" + "," + playerM);
+      groupM = newgroup("pubB");
+      ws.send("CO#$42," + "pubB" + "," + playerM.val[0]);
       $("#b0").html("Now in group B. Be careful." +
           " Clicking 'ROLL' inserts the roll numbers in all" +
           " group B browsers.");
@@ -620,8 +690,8 @@ $(document).ready(function () {
     $( "#newG" ).click(function( event ) {
       var name = $("#new").val();
       if (name !== "") {
-          groupM = name;
-          ws.send("CO#$42," + name + "," + playerM);
+          groupM = newgroup(name);
+          ws.send("CO#$42," + name + "," + playerM.val[0]);
           $("#b0").html("Now in group " + name);
           $("#new").val("");
       }
@@ -651,7 +721,7 @@ $(document).ready(function () {
     $('#join-form').submit(function () {
         $('#warnings').html('');
         var user = $('#user').val();
-        playerM = user;
+        playerM = newplayer(user);
         ws = createWebSocket('/');
         ws.onopen = function() {
             ws.send("CC#$42" + user);
@@ -659,7 +729,7 @@ $(document).ready(function () {
         ws.onmessage = function(event) {
             if(event.data === "CC#$42") {
                 $("#expand").show();
-                dM = -1;
+                dM = newd(-1);
                 createDom();
                 createOperators();
                 createDropboxes();
@@ -691,7 +761,7 @@ $(document).ready(function () {
                 ws.onmessage = onMessage;
                 $('#message-form').submit(function () {
                     var text = $('#text').val();
-                    ws.send("CU#$42," + groupM + "," + playerM + "," + text);
+                    ws.send("CU#$42," + groupM.val[3] + "," + playerM.val[0] + "," + text);
                     $('#text').val('');
                     return false;
                 });
@@ -711,17 +781,17 @@ $(document).ready(function () {
 });
 
 calc = function (ax,b,cx,bb) {
-    var d = dM
+    var d = dM.val[5]
     var t = DS_T;
-    var goal = (goalM)*1;
-    var goal2 = goalM+"";
-    var impossibleClicker = impossibleClickerM;
-    var player = playerM;
-    var scoreClicker = scoreClickerM;
-    var group = groupM;
-    var ddd = dM + 1;
+    var goal = (goalM.val[7])*1;
+    var goal2 = goalM.val[7]+"";
+    var impossibleClicker = impossibleClickerM.val[1];
+    var player = playerM.val[0];
+    var scoreClicker = scoreClickerM.val[2];
+    var group = groupM.val[3];
+    var ddd = dM.val[5] + 1;
     var d = ddd;
-    dM = ddd
+    dM = newd(ddd)
     DS_ob.ar = [];
     DS_ob.bool = [];
     var res;

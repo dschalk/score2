@@ -4,9 +4,7 @@
         <meta charset="utf-8">
         <script src="scripts/jquery.js"></script>
         <script src="scripts/jquery-ui.js"></script>
-        <script src="scripts/rx.all.js"></script>
-        <script src="scripts/rx.time.js"></script>
-        <script src="scripts/socket.js"></script>
+        <script src="scripts/socket.io.js"></script>
         <script type="text/JavaScript" src="client.js"></script>
         <link rel="stylesheet" type="text/css" href="screen.css"></script>
     </head>
@@ -19,7 +17,6 @@
       <button id="algorithm" type="submit" class="fixed3">ALGORITHM</button>
       <button id="rul" type="submit" class="fixed4">RULES</button>
       </div>
-
         <div id="rules"></div>
       </div>
 
@@ -50,32 +47,25 @@
         </div>
         <div class="spacer">
             <button id="solutions" type="submit">SOLUTIONS</button>
+            <br><br>
             <button class="erase">ERASE</button>
-            <div id="show"></div>
-        </div>
-
-
-
-        <div class="spacer">
-            <button class="erase">ERASE</button>
-        </div>
-        <div class="spacer">
-            <div id="goal" type="submit" class="extra">GOAL</div>
-            <input type="text" id="goal2" class="rad" >
-        </div>
-
-        <div>
-            <div id="sides" type="submit" class="extra">RANGES</div>
+            <br><br><br>
+            <div id="goal" class="extra">GOAL</div>
+            <input type="text" id="goalval" class="rad" >
+            <br><br><br><br>
+            <div id="sides" class="extra">RANGES</div>
             <input type="text" id="x20" class="rad" >
             <input type="text" id="x21" class="rad" >
             <input type="text" id="x22" class="rad" >
             <input type="text" id="x23" class="rad" >
+            <div id="show"></div>
+            <button class="erase">ERASE</button>
+        </div>
+
+        <div>
+
         </div>
       </div>
-
-
-
-
 
       <div class="spacer" id="right"><h1><span></span></h1>
         <div id="main">
@@ -122,10 +112,8 @@
         <div class="spacer2">
             <button class="erase2">ERASE</button>
         </div>
-        <div class="spacer2">
-          <div id="goal3" type="submit" class="extra">GOAL</div>
+        <div id="goal3" type="submit" class="extra">GOAL</div>
         <input type="text" id="goal4" class="rad" >
-      </div>
       </div>
       <div id="go30"></div>
       <div id="go60"></div>
