@@ -187,10 +187,10 @@ application state pending = do
          where
                 prefix     = "CC#$42"
                 client     = (T.drop (T.length prefix) msg, 0, T.pack "private", conn)
-                disconnect = do
-                  s <- modifyMVar state $ \s ->
-                     let s' = removeClient client s in return (s', s')
-                  broadcast (getName client `mappend` " disconnected") s
+                disconnect = modifyMVar state $ \s ->
+                     let s' = removeClient client s in return (s', s') 
+
+
 talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
 talk conn state (user, _, _, _) = forever $ do
     msg <- WS.receiveData conn
@@ -217,7 +217,7 @@ talk conn state (user, _, _, _) = forever $ do
                 st <- readMVar state
                 z <- rText range
                 broadcast ("CA#$42," `mappend` group4 `mappend` ","
-                    `mappend` player4 `mappend` "," `mappend` z) st
+                    `mappend` player4 `mappend` "," `mappend` z) st 
 
     else if "CZ#$42" `T.isPrefixOf` msg
             then do

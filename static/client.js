@@ -134,7 +134,7 @@ $(document).ready(function () {
         var gameArray = event.data.split(",");
         var d2 = event.data.substring(0,6);
         var d3 = event.data.substring(2,6);
-        var sendersGroup= gameArray[1];   // The sender's group.
+        var sendersGroup = gameArray[1];   // The sender's group.
         var sender = gameArray[2];
         var extra = gameArray[3];
         var ext4= gameArray[4];
@@ -145,6 +145,7 @@ $(document).ready(function () {
         console.log(gameArray);
         console.log((groupM === gameArray[1]) && (groupM !== "private"));
         console.log(playerM === sender);
+        console.log("sendersGroup is " + sendersGroup);
         var p = $(document.createElement('p')).text(event.data);
         if (((groupM === gameArray[1]) && (groupM !== "private")) || (playerM === sender)) {
             switch (d2) {
@@ -168,8 +169,8 @@ $(document).ready(function () {
                     $("#a4").html(extra + " " + ext4 +  " " + ext5 + " " + ext6);
                 break;
 
-                case "CB#$42":
-                    $("#users").html(extra);    // Refresh browser with server state.
+                case "CB#$42": 
+                    if ("private" !== sendersGroup ) $("#users").html(extra);  // Refresh scoreboards.
                 break;
 
                 case "CC#$42":
@@ -236,6 +237,7 @@ $(document).ready(function () {
 
                 case "CO#$42":
                     $("#b0").html(sender + " is now in group " + sendersGroup);
+                    if (sendersGroup == "private") $("#users").html("");
                 break;
 
                 case "CP#$42":
@@ -597,13 +599,13 @@ $(document).ready(function () {
 
     $( "#private" ).click(function( event ) {
       groupM = "private";
-      ws.send("CO#$42," + "private" + "," + playerM);
+      ws.send("CO#$42," + "private" + "," + playerM + "," + "placeholder");
       $("#b0").html("Solitaire mode. Your actions do not affect other players.")
     });
 
     $( "#publicA" ).click(function( event ) {
       groupM = "pubA";
-      ws.send("CO#$42," + "pubA" + "," + playerM);
+      ws.send("CO#$42," + "pubA" + "," + playerM + "," + "placeholder");
       $("#b0").html("You are now in Group A. Be careful." +
           " Clicking 'ROLL' inserts the roll numbers in all" +
           " Group A browsers.");
@@ -611,7 +613,7 @@ $(document).ready(function () {
 
     $( "#publicB" ).click(function( event ) {
       groupM = "pubB";
-      ws.send("CO#$42," + "pubB" + "," + playerM);
+      ws.send("CO#$42," + "pubB" + "," + playerM + "," + "placeholder");
       $("#b0").html("Now in group B. Be careful." +
           " Clicking 'ROLL' inserts the roll numbers in all" +
           " group B browsers.");
@@ -621,10 +623,14 @@ $(document).ready(function () {
       var name = $("#new").val();
       if (name !== "") {
           groupM = name;
-          ws.send("CO#$42," + name + "," + playerM);
+          ws.send("CO#$42," + name + "," + playerM + "," + "placeholder");
           $("#b0").html("Now in group " + name);
           $("#new").val("");
       }
+    });
+
+    $( "#new" ).keydown(function( ev ) {
+        if(ev.keyCode == 13) $('#newG').triggerHandler('click');
     });
 
     $("#b0").html("");
