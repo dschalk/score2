@@ -59,6 +59,15 @@ z-index: 0;
   font-size: 30px;
 }
 
+#show4 {
+  font-size: 28px;
+  color: #f0f0f0;
+}
+
+#show3 {
+  font-size: 24px;
+  color: #f00;
+}
 
 #show {
     color: #F8E839;

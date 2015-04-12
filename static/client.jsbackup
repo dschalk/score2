@@ -206,7 +206,7 @@ $(document).ready(function () {
         var sender = gameArray[2];
         var extra = gameArray[3];
         console.log(rollM.val[10])
-        var ext4= gameArray[4];
+        var ext4 = gameArray[4];
         var ext5 = gameArray[5];
         var ext6 = gameArray[6];
         var ext7 = gameArray[7];
@@ -215,7 +215,7 @@ $(document).ready(function () {
         console.log((groupM.val[3] === gameArray[1]) && (groupM.val[3] !== "private"));
         console.log(playerM.val[0] === sender);
         var p = $(document.createElement('p')).text(event.data);
-        if (((groupM.val[3] === gameArray[1]) && (groupM.val[3] !== "private")) || (playerM.val[0] === sender)) {
+        if (((groupM.val[3] === sendersGroup) && (groupM.val[3] !== "private")) || (playerM.val[0] === sender) || sendersGroup === "pass") {
             switch (d2) {
                 case "CA#$42":               // Set up the next round of play.
                     refresh();
@@ -239,7 +239,11 @@ $(document).ready(function () {
                 break;
 
                 case "CB#$42":
-                    $("#users").html(extra);    // Refresh browser with server state.
+                    $("#users").html(extra); // Refresh scoreboard.
+                break;
+
+                case "DB#$42":
+                    $("#show3").html(extra);  // Refresh groups.
                 break;
 
                 case "CC#$42":

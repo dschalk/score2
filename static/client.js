@@ -135,17 +135,20 @@ $(document).ready(function () {
         var sendersGroup = gameArray[1];   // The sender's group.
         var sender = gameArray[2];
         var extra = gameArray[3];
-        var ext4= gameArray[4];
+        var ext4 = gameArray[4];
         var ext5 = gameArray[5];
         var ext6 = gameArray[6];
         var ext7 = gameArray[7];
         var ext8 = gameArray[8];
+        console.log("******************* gameArray *********");
+        console.log(gameArray);
+        console.log("***********************************");
         console.log(gameArray);
         console.log((groupM === gameArray[1]) && (groupM !== "private"));
         console.log(playerM === sender);
         console.log("sendersGroup is " + sendersGroup);
         var p = $(document.createElement('p')).text(event.data);
-        if (((groupM === gameArray[1]) && (groupM !== "private")) || (playerM === sender)) {
+        if (((groupM === gameArray[1]) && (groupM !== "private")) || (playerM === sender) || sendersGroup === "pass") {
             switch (d2) {
                 case "CA#$42":               // Set up the next round of play.
                     refresh();
@@ -165,14 +168,22 @@ $(document).ready(function () {
                     dM = -1;
                     populate(extra,ext4,ext5,ext6);
                     $("#a4").html(extra + " " + ext4 +  " " + ext5 + " " + ext6);
+                    ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
                 break;
 
                 case "CB#$42":
-                    if ("private" !== sendersGroup ) $("#users").html(extra);  // Refresh scoreboards.
+                    if ("private" !== sendersGroup ) { 
+                      $("#users").html(extra);  // Refresh scoreboards.
+                      ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
+                    }
+                break;
+
+                case "DB#$42":
+                      $("#show3").html(extra);
                 break;
 
                 case "CC#$42":
-                    // Prevents new player login data from defaulting to a chat message.
+                    ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
                 break;
 
                 case "CD#$42":       // Prevent new player login data from displaying as a chat message.
@@ -216,6 +227,7 @@ $(document).ready(function () {
                         "Score!</span>");
                     $("#newDisplay").show();
                     $("#countdown").html("");
+                    ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
                 break;
 
                 case "CH#$42":
@@ -236,6 +248,7 @@ $(document).ready(function () {
                 case "CO#$42":
                     $("#b0").html(sender + " is now in group " + sendersGroup);
                     if (sendersGroup == "private") $("#users").html("");
+                    ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
                 break;
 
                 case "CP#$42":
