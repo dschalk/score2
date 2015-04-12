@@ -43,6 +43,23 @@ left: 0;
 z-index: 0;
 }
 
+.messages {
+  background: #B1C771;
+}
+
+.messages:hover {
+  background: #000;
+  color: #f00;
+  font-size: 30px;
+}
+
+.messages:focus {
+  background: #000;
+  color: #f00;
+  font-size: 30px;
+}
+
+
 #show {
     color: #F8E839;
     width: 100%;

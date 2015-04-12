@@ -41,7 +41,7 @@ var goal32M = 20;
 var DS_ob = {};
 DS_ob.ar = [];
 DS_ob.bool = [];
-DS_obscoreFunc = function() { 
+DS_ob.scoreFunc = function() {
         $("#countdown").html("");
         $("#a0").html("");
         if (playerM === scoreClickerM) {
@@ -62,8 +62,6 @@ setInterval( function () {
   }
   if (DS_T == -1) $("#countdown").html("");
 },1000 );
-
-
 
 refresh = function() {
     gameM = "off";
@@ -169,7 +167,7 @@ $(document).ready(function () {
                     $("#a4").html(extra + " " + ext4 +  " " + ext5 + " " + ext6);
                 break;
 
-                case "CB#$42": 
+                case "CB#$42":
                     if ("private" !== sendersGroup ) $("#users").html(extra);  // Refresh scoreboards.
                 break;
 
@@ -306,8 +304,12 @@ $(document).ready(function () {
                 break;
 
                 default:
+                    if (sendersGroup == "private") {
+                      $("#messages").html("Join a group in order to exchange messages");
+                    } else {
                     $('#messages').append(sender + ": " + extra + "<br>");
                     $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
+                  }
                 break;
             }
         }
@@ -609,6 +611,7 @@ $(document).ready(function () {
       $("#b0").html("You are now in Group A. Be careful." +
           " Clicking 'ROLL' inserts the roll numbers in all" +
           " Group A browsers.");
+      $("#messages").html("");
     });
 
     $( "#publicB" ).click(function( event ) {
@@ -617,6 +620,7 @@ $(document).ready(function () {
       $("#b0").html("Now in group B. Be careful." +
           " Clicking 'ROLL' inserts the roll numbers in all" +
           " group B browsers.");
+      $("#messages").html("");
     });
 
     $( "#newG" ).click(function( event ) {
@@ -626,11 +630,16 @@ $(document).ready(function () {
           ws.send("CO#$42," + name + "," + playerM + "," + "placeholder");
           $("#b0").html("Now in group " + name);
           $("#new").val("");
+      $("#messages").html("");
       }
     });
 
     $( "#new" ).keydown(function( ev ) {
         if(ev.keyCode == 13) $('#newG').triggerHandler('click');
+    });
+
+    $( "#clear" ).click(function( event ) {
+      $("#messages").html("");
     });
 
     $("#b0").html("");
