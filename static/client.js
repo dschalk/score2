@@ -168,13 +168,11 @@ $(document).ready(function () {
                     dM = -1;
                     populate(extra,ext4,ext5,ext6);
                     $("#a4").html(extra + " " + ext4 +  " " + ext5 + " " + ext6);
-                    ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
                 break;
 
                 case "CB#$42":
                     if ("private" !== sendersGroup ) { 
                       $("#users").html(extra);  // Refresh scoreboards.
-                      ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
                     }
                 break;
 
@@ -182,8 +180,13 @@ $(document).ready(function () {
                       $("#show3").html(extra);
                 break;
 
+                case "CO#$42":
+                    $("#b0").html(sender + "'s group status is now' " + sendersGroup);
+                    if (sendersGroup == "private") $("#users").html("");
+                break;
+
                 case "CC#$42":
-                    ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
+                    
                 break;
 
                 case "CD#$42":       // Prevent new player login data from displaying as a chat message.
@@ -227,7 +230,6 @@ $(document).ready(function () {
                         "Score!</span>");
                     $("#newDisplay").show();
                     $("#countdown").html("");
-                    ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
                 break;
 
                 case "CH#$42":
@@ -243,12 +245,6 @@ $(document).ready(function () {
                         $("#1").val(gameArray[4]);
                         $("#1").html(gameArray[4]);
                     }
-                break;
-
-                case "CO#$42":
-                    $("#b0").html(sender + " is now in group " + sendersGroup);
-                    if (sendersGroup == "private") $("#users").html("");
-                    ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
                 break;
 
                 case "CP#$42":
@@ -312,17 +308,22 @@ $(document).ready(function () {
                     $("#a2").html(sender + " clicked SOLUTIONS.<br><br>");
                 break;
 
-                case "EE#$42":
-
-                break;
-
-                default:
+                case "DU#$42":
                     if (sendersGroup == "private") {
                       $("#messages").html("Join a group in order to exchange messages");
                     } else {
                     $('#messages').append(sender + ": " + extra + "<br>");
-                    $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
+                    // $('#messages').animate({scrollTop: $('#messages')[0].scrollHeight});
                   }
+                break;
+
+                case "EE#$42":
+
+                break;
+
+                default: 
+                    console.log(msg + " fell through to default");
+
                 break;
             }
         }
@@ -597,6 +598,17 @@ $(document).ready(function () {
       if(ev.keyCode == 13) $('#goal').triggerHandler('click');
     });
 
+    $( "#sendMessage" ).click(function( event ) {
+        var text = $('#text').val();
+        ws.send("SU#$42," + groupM + "," + playerM + "," + text);
+        $('#text').val('');
+        return false;
+    });
+
+    $('#text').keydown(function(ev){
+      if(ev.keyCode == 13) $('#sendMessage').triggerHandler('click');
+    });
+
     $( "#goal3" ).click(function( event ) {
       var x = $("#goal4").val()
       if (isNaN(x)) {
@@ -616,7 +628,6 @@ $(document).ready(function () {
       groupM = "private";
       ws.send("CO#$42," + "private" + "," + playerM + "," + "placeholder");
       $("#b0").html("Solitaire mode. Your actions do not affect other players.")
-      ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
     });
 
     $( "#publicA" ).click(function( event ) {
@@ -626,7 +637,6 @@ $(document).ready(function () {
           " Clicking 'ROLL' inserts the roll numbers in all" +
           " Group A browsers.");
       $("#messages").html("");
-      ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
     });
 
     $( "#publicB" ).click(function( event ) {
@@ -636,7 +646,6 @@ $(document).ready(function () {
           " Clicking 'ROLL' inserts the roll numbers in all" +
           " group B browsers.");
       $("#messages").html("");
-      ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
     });
 
     $( "#newG" ).click(function( event ) {
@@ -648,7 +657,6 @@ $(document).ready(function () {
           $("#new").val("");
       $("#messages").html("");
       }
-      ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
     });
 
     $( "#new" ).keydown(function( ev ) {
@@ -691,7 +699,7 @@ $(document).ready(function () {
         };
         ws.onmessage = function(event) {
             if(event.data === "CC#$42") {
-                ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
+                ws.send("CO#$42," + "private" + "," + playerM + "," + "placeholder");
                 $("#expand").show();
                 dM = -1;
                 createDom();
@@ -723,12 +731,6 @@ $(document).ready(function () {
                 $(".dropx").hide();
                 $(".drop2x").hide();
                 ws.onmessage = onMessage;
-                $('#message-form').submit(function () {
-                    var text = $('#text').val();
-                    ws.send("CU#$42," + groupM + "," + playerM + "," + text);
-                    $('#text').val('');
-                    return false;
-                });
                 $('#join-form').remove();
                 delete $('#join-form');
             } else {

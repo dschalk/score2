@@ -15,13 +15,10 @@ import qualified Network.Wai.Handler.WebSockets as WaiWS
 import qualified Network.Wai.Application.Static as Static
 import Data.FileEmbed (embedDir)
 import Fm hiding (main)
-import Data.List (intersperse, map, filter)
+import Data.List (intersperse)
 import Control.Exception.Base (mask_)
 import Data.List.Split (splitOn)
 import System.Environment (getEnv)
-
-go :: Text
-go = T.pack "GO"
 
 type Name = Text
 type Score = Int
@@ -57,6 +54,9 @@ allGroups (x:xs)  | null xs      = ""
                   | getName x == "blank" = allGroups xs
                   | otherwise    = ((getGroup x) `mappend` "<br>") `mappend` (allGroups xs)
 
+removeBlank :: ServerState -> ServerState
+removeBlank (x:xs) = filter (\x -> getName x == "blank") (x:xs)
+
 froll :: [String] -> [Double]
 froll [_,_,_,a,b,c,d,e] = map read [a, b, c, d, e]
 froll _ = [1.0,2.0,3.0,4.0]
@@ -84,9 +84,6 @@ get4Player _ = "get4Player error"
 getName :: Client -> Name
 getName (a,_,_,_) = a
 
-getScore :: Client -> Score
-getScore (_,b,_,_) = b
-
 getGroup :: Client -> Text
 getGroup (_,_,c,_) = c
 
@@ -94,19 +91,12 @@ filterGroup :: Text -> ServerState -> [Text]
 filterGroup group s = [ a `mappend` " _ " `mappend` T.pack (show b)
     `mappend` " _ " `mappend` c | (a,b,c,d) <- s, group == c]
 
-tr :: Client -> Text
-tr x = getName x `mappend` T.pack " _ " `mappend` T.pack (show (getScore x))
-    `mappend` T.pack " _ " `mappend` getGroup x
-
 newGroup :: Text -> Text -> Client -> Client
 newGroup name group (a, b, c, d)   | name == a  = (a, b, group, d)
                                    | otherwise = (a, b, c, d)
 
 changeGroup :: Text -> Text -> ServerState -> ServerState
 changeGroup name group = map (newGroup name group)
-
-filterClient :: Name -> Client -> Bool
-filterClient name (a,b,c,d) = name == a
 
 incFunc :: Text -> Client -> Client
 incFunc x (a, b, c, d)   | x == a   = (a, b + 1, c, d)
@@ -135,8 +125,8 @@ newServerState = []
 matches :: Text -> ServerState -> [Client]
 matches a ss = [ x | x <- ss, getName x == a]
 
-tint :: Text -> Int
-tint x = read $ T.unpack x
+notMatches :: Text -> ServerState -> ServerState
+notMatches a ss = [ x | x <- ss, getName x /= a]
 
 clientExists :: Text -> ServerState -> Bool
 clientExists a ss  | null (matches a ss)   = False
@@ -145,16 +135,13 @@ clientExists a ss  | null (matches a ss)   = False
 addClient :: Client -> ServerState -> ServerState
 addClient client clients = client : clients
 
-removeClient :: Client -> ServerState -> [Client]
+removeClient :: Client -> ServerState -> ServerState
 removeClient client = filter ((/= getName client) . getName)
 
 broadcast :: Text -> ServerState -> IO ()
 broadcast message clients = do
     T.putStrLn message
     forM_ clients $ \(_ , _, _, conn) -> WS.sendTextData conn message
-
-getConn :: (t0, t1, t2, WS.Connection) -> WS.Connection
-getConn (a,b,c,d) = d
 
 main :: IO ()
 main = do
@@ -171,9 +158,9 @@ application :: MVar ServerState -> WS.ServerApp
 application state pending = do
     conn <- WS.acceptRequest pending
     msg <- WS.receiveData conn
-    let blankClient = ("blank", 0, "blank", conn) :: Client
-    sta <- takeMVar state
-    putMVar state ([blankClient] ++ sta)
+    -- let blankClient = ("blank", 0, "blank", conn) :: Client
+    -- sta <- takeMVar state
+    -- putMVar state ([blankClient] ++ sta)
     clients <- liftIO $ readMVar state
     case msg of
         _   | not (prefix `T.isPrefixOf` msg) ->
@@ -217,7 +204,6 @@ talk conn state (user, _, _, _) = forever $ do
 
     print "****************************msgArray next: "
     mapM_ print msgArray
-    mapM_ print $ froll msgArray
     print "****************************That was msgArray"
     if "CA#$42" `T.isPrefixOf` msg
         then
@@ -229,9 +215,7 @@ talk conn state (user, _, _, _) = forever $ do
 
     else if "CZ#$42" `T.isPrefixOf` msg
             then do
-                print msgArray
                 y <- liftIO $ truck $ froll msgArray
-                print y
                 let yzz = T.pack y
                 st <- readMVar state
                 broadcast ("CZ#$42," `mappend` group3 `mappend` ","
@@ -295,11 +279,12 @@ talk conn state (user, _, _, _) = forever $ do
                 broadcast ("CB#$42," `mappend` group `mappend` ","
                     `mappend` sender `mappend` "," `mappend` T.concat (intersperse "<br>" (filterGroup group st2))) st2
 
-    else if "DC#$42" `T.isPrefixOf` msg
+    else if "DD#$42" `T.isPrefixOf` msg
         then
             do
-                s <- readMVar state
-                broadcast ("DB#$42," `mappend` "pass" `mappend` "," `mappend` sender `mappend` "," `mappend` (allGroups s)) s 
+                s <- takeMVar state
+                let new = removeBlank s
+                putMVar state new
 
     else if "CN#$42" `T.isPrefixOf` msg
         then
@@ -321,10 +306,19 @@ talk conn state (user, _, _, _) = forever $ do
                 broadcast ("CB#$42," `mappend` group `mappend` ","
                     `mappend` sender `mappend` "," `mappend` T.concat (intersperse "<br>" (filterGroup group new))) new
                 broadcast ("CO#$42," `mappend` group `mappend` ","
-                    `mappend` sender `mappend` "," `mappend` extra) new
+                    `mappend` sender `mappend` "," `mappend` extra) new 
+                broadcast ("DB#$42," `mappend` "pass" `mappend` "," `mappend` sender `mappend` "," `mappend` (allGroups new)) new
+
+
+    else if "SU#$42" `T.isPrefixOf` msg
+        then
+            do
+                st <- readMVar state
+                -- let new = notMatches "blank" st
+                -- putMVar state new
+                broadcast ("DU#$42," `mappend` group `mappend` ","
+                    `mappend` sender `mappend` "," `mappend` extra) st
 
     else
-            mask_ $ do
-                st <- readMVar state
-                broadcast ("CU#$42," `mappend` group `mappend` ","
-                    `mappend` sender `mappend` "," `mappend` extra) st
+            do
+                print "Hello Jackie"
