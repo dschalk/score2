@@ -616,6 +616,7 @@ $(document).ready(function () {
       groupM = "private";
       ws.send("CO#$42," + "private" + "," + playerM + "," + "placeholder");
       $("#b0").html("Solitaire mode. Your actions do not affect other players.")
+      ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
     });
 
     $( "#publicA" ).click(function( event ) {
@@ -625,6 +626,7 @@ $(document).ready(function () {
           " Clicking 'ROLL' inserts the roll numbers in all" +
           " Group A browsers.");
       $("#messages").html("");
+      ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
     });
 
     $( "#publicB" ).click(function( event ) {
@@ -634,6 +636,7 @@ $(document).ready(function () {
           " Clicking 'ROLL' inserts the roll numbers in all" +
           " group B browsers.");
       $("#messages").html("");
+      ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
     });
 
     $( "#newG" ).click(function( event ) {
@@ -645,6 +648,7 @@ $(document).ready(function () {
           $("#new").val("");
       $("#messages").html("");
       }
+      ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
     });
 
     $( "#new" ).keydown(function( ev ) {
@@ -680,12 +684,14 @@ $(document).ready(function () {
         $('#warnings').html('');
         var user = $('#user').val();
         playerM = user;
+        groupM = "private"
         ws = createWebSocket('/');
         ws.onopen = function() {
             ws.send("CC#$42" + user);
         };
         ws.onmessage = function(event) {
             if(event.data === "CC#$42") {
+                ws.send("DC#$42," + "blank" + "," + "blank" + "," + "and blank again");
                 $("#expand").show();
                 dM = -1;
                 createDom();

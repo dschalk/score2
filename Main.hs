@@ -53,8 +53,9 @@ fy x = case x of
     _ -> T.pack "fy malfunctioned"
 
 allGroups :: ServerState -> Text 
-allGroups (x:xs)  | null xs   = ""
-                  | otherwise = ((getGroup x) `mappend` "<br>") `mappend` (allGroups xs)
+allGroups (x:xs)  | null xs      = ""
+                  | getName x == "blank" = allGroups xs
+                  | otherwise    = ((getGroup x) `mappend` "<br>") `mappend` (allGroups xs)
 
 froll :: [String] -> [Double]
 froll [_,_,_,a,b,c,d,e] = map read [a, b, c, d, e]
@@ -152,11 +153,14 @@ broadcast message clients = do
     T.putStrLn message
     forM_ clients $ \(_ , _, _, conn) -> WS.sendTextData conn message
 
+getConn :: (t0, t1, t2, WS.Connection) -> WS.Connection
+getConn (a,b,c,d) = d
+
 main :: IO ()
 main = do
     por <- getEnv "PORT"
     let port = read por
-    state <- newMVar newServerState
+    state <- newMVar newServerState 
     Warp.runSettings Warp.defaultSettings
       { Warp.settingsTimeout = 36000,
         Warp.settingsPort = port
@@ -167,6 +171,9 @@ application :: MVar ServerState -> WS.ServerApp
 application state pending = do
     conn <- WS.acceptRequest pending
     msg <- WS.receiveData conn
+    let blankClient = ("blank", 0, "blank", conn) :: Client
+    sta <- takeMVar state
+    putMVar state ([blankClient] ++ sta)
     clients <- liftIO $ readMVar state
     case msg of
         _   | not (prefix `T.isPrefixOf` msg) ->
