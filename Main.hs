@@ -139,9 +139,10 @@ removeClient :: Client -> ServerState -> ServerState
 removeClient client = filter ((/= getName client) . getName)
 
 broadcast :: Text -> ServerState -> IO ()
-broadcast message clients = do
-    T.putStrLn message
-    forM_ clients $ \(_ , _, _, conn) -> WS.sendTextData conn message
+broadcast message clients = do 
+    let clients' = notMatches "blank" clients
+    T.putStrLn message 
+    forM_ clients' $ \(_ , _, _, conn) -> WS.sendTextData conn message
 
 main :: IO ()
 main = do
@@ -158,9 +159,13 @@ application :: MVar ServerState -> WS.ServerApp
 application state pending = do
     conn <- WS.acceptRequest pending
     msg <- WS.receiveData conn
-    -- let blankClient = ("blank", 0, "blank", conn) :: Client
-    -- sta <- takeMVar state
-    -- putMVar state ([blankClient] ++ sta)
+    let blankClient = ("blank", 0, "blank", conn) :: Client
+    stw <- readMVar state
+    if length stw < 1 
+        then do
+            sta <- takeMVar state 
+            putMVar state ([blankClient] ++ sta) 
+        else print "Mary"
     clients <- liftIO $ readMVar state
     case msg of
         _   | not (prefix `T.isPrefixOf` msg) ->
