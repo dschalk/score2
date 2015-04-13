@@ -49,13 +49,15 @@ fy x = case x of
     [_,_,_,d,_,_,_] -> T.pack d
     _ -> T.pack "fy malfunctioned"
 
-allGroups :: ServerState -> Text 
-allGroups (x:xs)  | null xs      = ""
-                  | getName x == "blank" = allGroups xs
-                  | otherwise    = ((getGroup x) `mappend` "<br>") `mappend` (allGroups xs)
+gG :: ServerState -> Group
+gG [a] = getGroup a
+gG _   = "Error Group"
 
-removeBlank :: ServerState -> ServerState
-removeBlank (x:xs) = filter (\x -> getName x == "blank") (x:xs)
+
+allGroups :: ServerState -> Text 
+allGroups (x:xs)  | length (x:xs) == 0  = "" 
+                  | length (x:xs) == 1  = gG (x:xs)
+                  | length (x:xs) > 1   = ((getGroup x) `mappend` "<br>") `mappend` (allGroups xs)
 
 froll :: [String] -> [Double]
 froll [_,_,_,a,b,c,d,e] = map read [a, b, c, d, e]
@@ -140,9 +142,8 @@ removeClient client = filter ((/= getName client) . getName)
 
 broadcast :: Text -> ServerState -> IO ()
 broadcast message clients = do 
-    let clients' = notMatches "blank" clients
     T.putStrLn message 
-    forM_ clients' $ \(_ , _, _, conn) -> WS.sendTextData conn message
+    forM_ clients $ \(_ , _, _, conn) -> WS.sendTextData conn message
 
 main :: IO ()
 main = do
@@ -159,13 +160,6 @@ application :: MVar ServerState -> WS.ServerApp
 application state pending = do
     conn <- WS.acceptRequest pending
     msg <- WS.receiveData conn
-    let blankClient = ("blank", 0, "blank", conn) :: Client
-    stw <- readMVar state
-    if length stw < 1 
-        then do
-            sta <- takeMVar state 
-            putMVar state ([blankClient] ++ sta) 
-        else print "Mary"
     clients <- liftIO $ readMVar state
     case msg of
         _   | not (prefix `T.isPrefixOf` msg) ->
@@ -284,13 +278,6 @@ talk conn state (user, _, _, _) = forever $ do
                 broadcast ("CB#$42," `mappend` group `mappend` ","
                     `mappend` sender `mappend` "," `mappend` T.concat (intersperse "<br>" (filterGroup group st2))) st2
 
-    else if "DD#$42" `T.isPrefixOf` msg
-        then
-            do
-                s <- takeMVar state
-                let new = removeBlank s
-                putMVar state new
-
     else if "CN#$42" `T.isPrefixOf` msg
         then
             mask_ $ do
@@ -319,8 +306,6 @@ talk conn state (user, _, _, _) = forever $ do
         then
             do
                 st <- readMVar state
-                -- let new = notMatches "blank" st
-                -- putMVar state new
                 broadcast ("DU#$42," `mappend` group `mappend` ","
                     `mappend` sender `mappend` "," `mappend` extra) st
 
