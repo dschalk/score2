@@ -18,7 +18,7 @@
 
 
 # The Game of Score
-_An extension of github.com/jaspervdj/websockets as implemented by yesodweb/wai/wai-websockets_
+_An extension of github.com/jaspervdj/websockets as implemented by yesodweb/wai/wai-websockets_ Running on a $5/month Digital Ocean droplet.[Digital Ocean](www.digitalocean.com/?refcode=1d035c466e8d)
 
 ## Rules of "Score"
 Four dice are rolled. The default die are two six-sided, one twelve-sided, and one twenty-sided die. The goal is to make the number "20" in two or three steps using addition, subtraction, multiplication, division, and/or concatenation.
@@ -45,6 +45,25 @@ I was curious about how many rolls actually were impossible to solve, so I wrote
 
 ### The Haskell Version
 I started with the chat example at github.com/wai/wai-websockets. It is Jasper Van der Jeugt 's websockets adapted to the warp web server. The routine work of the chat server is receiving messages from individual browsers and broadcasting them to all participants. The server also parses sign-in messages to make sure the format is correct and there are no duplicate player names. The server keeps a list of participants in a Haskell programming language container called an 'MVar', and replaces the list with a new, up-to-date list whenever there is a disconnect, score change, group membership change, or a new sign-in.
+
+Most hosting companies cannot host a Haskell website. I experimented with four prominent cloud hosting services and found Digital Ocean to be, by far, the easiest to use. Directing schalk.net to Digital Ocean was a breeze. Uploading the compiled binary of the Score application was easy. What I have is a virtual Ubuntu 14.04 box (called a "droplet") in the cloud. I can use it to serve traditional web pages with apache or nginx, or run compiled binary applications such as Score. After uploading the Score application, I easily ssh'd into my droplet and put a text file named "score.conf" in /etc/init. My application binary is named "server" and my home directory is /root. Here is score.conf:
+
+```
+env PORT=80
+start on startup 
+chdir /root
+start on runlevel [2345]
+exec /root/server
+```
+
+ssh logs you into /root. That is where I keep the Score binary. I entered
+
+```
+chmod +x server
+initctl start server
+```
+
+I logged out with the command "exit", and checked schalk.net in a browser. Sure enough, the application was up and running, as it has continued to do without interruption. You can judge its responsiveness for yourself, although it is hard to tell if latency stems from your browser or the server. Once Score loads into a browser, I have found it to be lightning fast. The droplet costs $5/month. You can get a two month free trial of a similar droplet by following this link: [Digital Ocean](www.digitalocean.com/?refcode=1d035c466e8d). I am closing my traditional web hosting account and running all of my applications in Digital Ocean droplets. It feels good to be in control with so many options.
 
 I modified the wai-websockets chat application's participant list to include scores and group affiliations in addition to names. Whenever the list is replaced, the server broadcasts a line of text interspersed with 'br' in brackets and the prefix 'CB#$42'. The browsers intercept these messages and divert them away from the chat message section and into the scoreboard div.
 

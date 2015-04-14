@@ -181,7 +181,7 @@ $(document).ready(function () {
                 break;
 
                 case "CO#$42":
-                    $("#b0").html(sender + "'s group status is now' " + sendersGroup);
+                    $("#b0").html(sender + "'s group status is now " + sendersGroup);
                     if (sendersGroup == "private") $("#users").html("");
                 break;
 
