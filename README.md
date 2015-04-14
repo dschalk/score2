@@ -1,7 +1,8 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+**Table of Contents**  _generated with [DocToc](https://github.com/thlorenz/doctoc)_
 - [The Game of Score](#the-game-of-score)
   - [Rules of "Score"](#rules-of-score)
   - [How The Game Was Developed](#how-the-game-was-developed)
@@ -9,11 +10,12 @@
     - [State And Its MVar](#state-and-its-mvar)
     - [Organization of Game Data](#organization-of-game-data)
     - [The Timer](#the-timer)
+
 - [APPENDIX](#appendix)
   - [IMPOSSIBLES](#impossibles)
   - [All 104 Impossible Rolls](#all-104-impossible-rolls)
+  - <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # The Game of Score
 _An extension of github.com/jaspervdj/websockets as implemented by yesodweb/wai/wai-websockets_
@@ -31,19 +33,27 @@ Players start out in solitaire mode. Clicking "Group A" or "Group B" puts a play
 
 Students and anyone who wants to brush up on arithmetic are encouraged to look for mistakes in the computer generated lists of solutions. Does 15-(-5)=20 look right?. What about 2+(3_(4/(2/3)))=20? They are both correct. 4/(2/3) = 4_3/2 = 12/2 = 6; 3*6 = 18; and 18+2 = 20. You have to solve the innermost equations first, methodically working your way out
 
-Players can easily change the dice and/or the goal. There is also a place to experiment. See how you can make '20' with 9, 9, 9, and 9.
+Players can easily change the dice and/or the goal. There is also a place to experiment. See how you can make '20' with 9, 9, 9, and 9 on the right side of the browser display, or click "CALCULATE" on the left side in order to see solutions to random rolls.
 
 ## How The Game Was Developed
 by David Schalk
 
+### Background
+My son Alexander (a/k/a "Alex") taught me the game of score when he was in the fifth grade. We used four dice - two six-sided, one twelve-sided, and one twenty-sided - and a one-minute hour glass. There were three ways to gain a point. One way was to be the first to call out "Score!" and then quickly show how the number "20" could be made in two or three steps using addition, subtraction, multiplication, division, and/or concatenation. Another way is to call out "Impossible!" and turn over the hour glass. If the sand runs out before anyone can show a solution, you gain one point. If someone finds a solution before the time is up, that player gains a point and the player who called "Impossible!" loses two points.
+
+I was curious about how many rolls actually were impossible to solve, so I wrote a PHP program to find them. Then I wrote a real time, multi-player Websockets version in Node.js. As I added features, I started seeing erratic performance due to events occurring out of order, but that was remedied by implementing promises. The server does not store data. The browsers keep score under the hood, periodically sending names and scores to the server which in turn broadcasts the scoreboard information to all players. I quit work on it when I decided to create a Haskell version, so it hasn't progressed past a beta version which is online at score.nodejitsu.com and available at github.com/dschalk/score.
+
+### The Haskell Version
 I started with the chat example at github.com/wai/wai-websockets. It is Jasper Van der Jeugt 's websockets adapted to the warp web server. The routine work of the chat server is receiving messages from individual browsers and broadcasting them to all participants. The server also parses sign-in messages to make sure the format is correct and there are no duplicate player names. The server keeps a list of participants in a Haskell programming language container called an 'MVar', and replaces the list with a new, up-to-date list whenever there is a disconnect, score change, group membership change, or a new sign-in.
 
-I modified the wai-websockets chat application's participant list to include scores and group affiliations in addition to names. Whenever the list is replaced, the server broadcasts a line of text interspersed with 'br' in brackets and the prefix 'CB#$42'. The browsers intercept these messages and divert them away from the chat message section and into the scoreboard.
+I modified the wai-websockets chat application's participant list to include scores and group affiliations in addition to names. Whenever the list is replaced, the server broadcasts a line of text interspersed with 'br' in brackets and the prefix 'CB#$42'. The browsers intercept these messages and divert them away from the chat message section and into the scoreboard div.
 
-Message prefixes are in the format 'Cx#42' where 'x' is some capital letter. None of these go into the chat message section. They contain data and instructions controlling the flow of the game. Application messages are either Javascript strings or Haskell Text. Browsers split comma-separated strings arriving at the browser into an array named "gameArray", and distribute the elements according to their prefixes. The prefix is the first item in gameArray; i.e., gameArray[0]. gameArray[1] is the name of the sender's group, and gameArray[2] is the sender's name. The other array items vary according to the purpose of the message. Scoreboard messages, which are prefixed by 'CB#$42', contain items separated by HTML line break code rather tham commas. Everything after the prefix is formatted HTML, ready for insertion in the score board display, so there is no need for the gameArray list corresponding to prefix 'CB#$42'.
+Message prefixes are in the format 'XY#42' where 'x' and 'y' are capital letters. None of these go into the chat message section. They contain data and instructions controlling the flow of the game. Websockets messages are either Javascript strings coming out of the browsers or Haskell Text coming out of the server. Browsers see the incoming messages as Strings, which they split into an array named "gameArray", and distribute according to their prefixes. Messages usually begin with a prefix, group, and name so they can be routed to the appropriate groups, sometimes with messages about who did what. After that, there might be new dice, a list of solution, a scorebeard update, or an active player groups update.
+
+The prefix is the first item in gameArray; i.e., gameArray[0]. gameArray[1] is the name of the sender's group, and gameArray[2] is the sender's name. gameArray[3] is named "extra". The content of extra and the other list items vary according to the purpose of the message. Scoreboard messages, which are prefixed by 'CB#$42', contain the usual group and name elements, and "extra" is a string of formatted HTML sent by the server, ready for insertion in the score board display.
 
 ### Initiation Stage
-The game interface in the browsers responds to invisible text messages transmitted by the server. Javascript interprets these as strings, and the strings it sends become text before they are used in the server application. Chat messages sent to the server are broadcast to all participating browsers. Game control messages cause the server to broadcast messages, but not necessarily the messages that were received. For example, messages prefixed by 'CA#$42' prompt the server to broadcast a random dice roll. These are screened by the browser to make sure they are displayed browsers of players belonging to the group of the sender, and ignored by the others.
+The game interface in the browsers responds to invisible Text messages transmitted by the server and received as Strings. Chat messages sent to the server are broadcast to all participating browsers which then filter them according to player groups. Game control messages prompt the server to broadcast messages, but unlike chat messages, the messages coming out of the server might not be the the unaltered message the server received. For example, messages prefixed by 'CA#$42' prompt the server to broadcast a random dice roll. These are screened by the browsers to make sure they are displayed only in the browsers of players belonging to the group of the sender, and ignored by other groups.
 
 A player joins the game by entering a name in a form. Here is the Javascript form code:
 
@@ -51,24 +61,23 @@ A player joins the game by entering a name in a form. Here is the Javascript for
 $('#join-form').submit(function () {
     $('#warnings').html('');
     var user = $('#user').val();
-    playerM = newplayer(user);
+    playerM = user;
+    groupM = "private"
     ws = createWebSocket('/');
     ws.onopen = function() {
         ws.send("CC#$42" + user);
     };
-}
 ```
 
-The server parses the message prefixed by CC#\$42 and, if the name is in the proper format and hasn't already been taken, the server (1) replaces ServerState list of Clients contained in the state MVar with with a ServerState list which includes the new player, (2) broadcasts an announcement for placement in the chat section of participating browsers, [3] broadcasts the updated state information for placement in the scoreboard section: and (4) sends the message "CC#$42" intended only for the new player.
+Notice that "CC#42" and the player's name are sent to the server. The server parses the message prefixed by CC#\$42 and, if the name is in the proper format and hasn't already been taken, the server (1) replaces ServerState list of Clients contained in the state MVar with with a ServerState list which includes the new player, (2) broadcasts an announcement for placement in the chat section of participating browsers, [3] broadcasts the updated state information for placement in the scoreboard section: and (4) sends the message "CC#$42" intended only for the new player.
 
 This is the server code:
 
 ```haskell
 liftIO $ modifyMVar_ state $ \s -> do
-    let s' = addClient client s  
+    let s' = addClient client s
     WS.sendTextData conn $ T.pack "CC#$42"
     broadcast (getName client `mappend` " joined") s'
-    broadcast ("CB#$42" `mappend` T.concat(intersperse (T.pack "<br>") (map tr s'))) s'
     return s'
 ```
 
@@ -76,77 +85,68 @@ The message prefixed by "CB#$42" is processed in the browsers as follows:
 
 ```javascript
 case "CB#$42":
-  $("#users").html(event.data.substring(6));
+    if ("private" !== sendersGroup ) {
+      $("#users").html(extra);  // Refresh scoreboards.
+    }
 break;
 ```
 
-The message 'CC#$42', received from the server, is processed in the 'ws.onmessage' section under the sign-in form.
+The "if" clause makes sure that players who have not joined a group are not distracted by these messages, and it ensures the privacy of private players who might not want other private players to see what they are doing. The application can be used as a chat room application with user defined rooms. The chat section can be expanded and contracted by means of a toggle button.
+
+After logging in, a player's browser receives the message 'CC#$42' from the server. It prompts initialization of the game interface, as shown in the following code:
 
 ```javascript
-    $('#join-form').submit(function () {
-        $('#warnings').html('');
-        var user = $('#user').val();
-        DS_ob.player = user;
-        ws = createWebSocket('/');
-        ws.onopen = function() {
-            ws.send("CC#$42" + user);
-        };
-        ws.onmessage = function(event) {
-            if(event.data === "CC#$42") {
-                DS_ob.d = -1;
-                createDom();
-                createOperators();
-                createDropboxes();
-                $('.drag').draggable({ revert: "invalid", zIndex: 2 });
-                $('.dragNew').draggable({ revert: "invalid", zIndex: 2 });
-                $('.drag2').draggable({ helper: "clone", revert: "invalid", zIndex: 2 });
-                createDrop1();
-                createDrop2();
-                $("#result1").hide();
-                $("#result2").hide();
-                $("#result3").hide();
-                $("#b0").show();
-                $("#experiment").show();
-                $("#public").show();
-                $("#b0").html("Solitaire mode. Click above to enable competition.")
-                $("#rollA").show();
-                $("#a1").show();
-                $('#join-section').hide();
-                $('#chat-section').show();
-                $('#users-section').show();
-                $("#messages").show();
-                $(".dropx").hide();
-                $(".drop2x").hide();
-                ws.onmessage = onMessage;
-                $('#message-form').submit(function () {
-                    var text = $('#text').val();
-                    ws.send(text);
-                    $('#text').val('');
-                    return false;
-                });
-            } else {
-                console.log("What?");
-                $('#warnings').append(event.data);
-                ws.close();
-                delete $('#join-form');
-            }
-        };
-
-        $('#join').append('Connecting...');
-
-        return false;
-    });
-    $('#join-form').destroy();
-});
+ws.onmessage = function(event) {
+    if(event.data === "CC#$42") {
+        ws.send("CO#$42," + "private" + "," + playerM + "," + "placeholder");
+        $("#expand").show();
+        dM = -1;
+        createDom();
+        createOperators();
+        createDropboxes();
+        $('.drag').draggable({ revert: "invalid", zIndex: 2 });
+        $('.dragNew').draggable({ revert: "invalid", zIndex: 2 });
+        $('.drag2').draggable({ helper: "clone", revert: "invalid", zIndex: 2 });
+        createDrop1();
+        createDrop2();
+        $("#result1").hide();
+        $("#result2").hide();
+        $("#result3").hide();
+        $(".extra").show();
+        $(".rad").show();
+        $("#new").show();
+        $("#experiment").show();
+        $("#private").show();
+        $("#publicA").show();
+        $("#publicB").show();
+        $("#publicNew").show();
+        $("#b0").html("Solitaire mode. Click above to enable competition.")
+        $("#rollA").show();
+        $("#a1").show();
+        $('#join-section').hide();
+        $('#chat-section').show();
+        $('#users-section').show();
+        $("#messages").show();
+        $(".dropx").hide();
+        $(".drop2x").hide();
+        ws.onmessage = onMessage;
+        $('#join-form').remove();
+        delete $('#join-form');
+    } else {
+        console.log("What?");
+        $('#warnings').append(event.data);
+        ws.close();
+    }
+};
 ```
 
-After it initiates the player interface, 'ws.onmessage = onMessage' de-references the anonymous function and re-assignes the variable 'ws.onmessage' to onMessage. The entire 'join-form' section becomes eligible for garbage collection after the final line,' delete $('#join-form');'.
+Notice that 'ws.onmessage = onMessage' de-references the anonymous function and re-assignes the variable 'ws.onmessage' to onMessage. The entire 'join-form' section becomes eligible for garbage collection after the final line: 'delete $('#join-form');'.
 
 When current players receive "CC#$42" prefixed messages from new sign-ins, these messages do not make it to the chat message section. They hit a dead end in the 'onMessage' section.
 
 ```javascript
 case "CC#$42":
-// Prevents new player login message from defaulting to a chat message.
+// Prevents new player login message from being displayed in the chat section.
 break;
 ```
 
@@ -196,113 +196,10 @@ else if "CG#$42" `T.isPrefixOf` msg
 The 'msg' being broadcast is just the unaltered message that was received, prefixed by 'CG#$42' and containing the sender's name, among other things. The 'CB#$42' prefixed message updates the browser scoreboards.
 
 ### Organization of Game Data
-I believe the most efficient way to organize game data and avoid global name clashes is to put the game data in a simple Javascript object. I don't think anything would be gained by using getter and setter functions. Values can be set by code such as 'object.name = some_value', and can be obtained by 'some_variable = object.name'.
+For a while I used monads and Microsoft's open source functional reactive programming library Rx.js in my Javascript code. I have no argument with Douglas Crockford and other "best practices" advocates who promote encapsulation and discourage the use of global variables. But there is a time and a place for just about anything, and when I observed that some browsers were having trouble with my code, I tore it down and made it as simple and browser friendly as I could. The timer no longer depends on elaborate Rx.js code. It is a simple "setInterval" function attuned to the global variable "DS_t". If a player clicks "SCORE" while the 60-second Impossible clock is counting down, "DS_t = 30" resets the countdown display at 30. If someone does three computations that don't result in "20", the clock is stopped with the instruction, "DS_t = -1". Those who slavishly adhere to "best practices" would find fault with this code, but to me it is elegant and beautiful. I don't have collaborators or advertisers who might inadvertently clobber "DS_t". There is no danger. But most importantly, all browsers understand "setInterval" and global variables, and they process them quickly and efficiently. So let me say, categorically and unequivocally, in some situations,
 
-But this project is mainly for fun, and I had fun playing with various ways of organizing the data. At the time of this writing, some data is in an object named DS_ob, and most of it is in Javascript monads. I patterned the monads after Douglas Crockford's example at [https://github.com/douglascrockford/monad](https://github.com/douglascrockford/monad). I removed the parts I didn't need, and used only functions of the form 'a -> Monad b' in the monad bind function. This conforms with the Haskell definition of a monad.
-
-I don't see any practical advantage in using monads. Values are extracted from monads willy-nilly, making their use akin to using unsafePerformIO and unsafeCoerce in Haskell. I do see a resemblance to the MVar code used in the server.
-
-The state MVar gets defined once and only its contents change as the game goes on. The same is true for the elements of DS_ob and for monads. Just for fun, I avoided mutating variables in the monad code. Old lists of game data are removed and discarded, to be replaced by newly created ones.
-
-Here is the code:
-
-```javascript
-
-function MONAD() {
-    'use strict';
-    var prototype = Object.create(null);
-    prototype.is_monad = true;
-    function unit(value) {
-        var monad = Object.create(prototype);
-        monad.val = value;
-        monad.bind = function (func, args) {
-            return func.apply(
-                undefined,
-                [value].concat(Array.prototype.slice.apply(args || []))
-            );
-        };
-        return monad;
-    }
-    return unit;
-}
-
-var newData = function newData(x,y,z) {
-  newVal = x;
-  newVal[z] = y;
-  this.val = identity(newVal);
-  return this;
-}
-
-var identity = MONAD();
-var monad = identity([0,0,0,0,0,0,0,0,0,0,0]);
-
-function newplayer(name) {
-    return monad.bind(newData, [name, 0]).val;
-}
-playerM = newplayer("Jack of Hearts");
-
-function newimpossibleClicker(name) {
-    return monad.bind(newData, [name, 1]).val;
-}
-impossibleClickerM = newimpossibleClicker("King of Diamonds");
-
-function newscoreClicker(name) {
-    return monad.bind(newData, [name, 2]).val;
-}
-scoreClickerM = newscoreClicker("Ace of Spades");
-// scoreClicker = scoreClickerM.val[2];
-
-
-function newgroup(name) {
-    return monad.bind(newData, [name, 3]).val;
-}
-groupM = newgroup("private");
-
-
-function newrollText(name) {
-    return monad.bind(newData, [name, 4]).val;
-}
-rollTextM = newrollText("1,1,1,1,42");
-
-
-function newd(num) {
-    return monad.bind(newData, [num, 5]).val;
-}
-dM = newd(-1);
-
-
-function newgame(toggle) {
-    return monad.bind(newData, [toggle, 6]).val;
-}
-gameM = newgame("off");
-
-function MakeDS_ob() {
-    this.t = -1,
-    this.ar = [];
-    this.bool = [];
-    this.scoreFunc = function() {
-        $("#countdown").html("");
-        $("#a0").html("");
-        if (playerM.val[0] === scoreClickerM.val[2]) {
-            ws.send("CL#$42," + groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
-        }
-        if ( playerM.val[0] === impossibleClickerM.val[1]) {
-            ws.send("CM#$42,"+ groupM.val[3] + "," + playerM.val[0] + "," + "dummy");
-        }
-    }
-}
-var DS_ob = new MakeDS_ob();
-```
-
-The use of new in the last line sets the context of DS_ob in concrete, but that isn't necessary. It would have sufficed to just define DS_ob as a simple object rather than the result of invoking a constructor. Wrapping the game variables in a closure wouldn't serve any useful purpose. And the monads. Well, they were just my idea of fun. I set values and get values as follows:
-
-```Javascript
-function newimpossibleClicker(name) {
-    return monad.bind(newData, [name, 1]).val;
-}
-impossibleClickerM = newimpossibleClicker(new name);
-some_variable = impossibleClickerM.val[1];
-```
+#### Global Variables Are Good!
+There. I said it. If anybody wants to see the abandoned monads, they are at github.com/dschalk/score2. The more efficient and browser-friendly code is  is at github.com/dschalk/score3. It is running online at schalk.net.
 
 **Screening Massages Arriving At The Browsers**
 
