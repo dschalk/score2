@@ -10,17 +10,12 @@ maintainer:          schalkbox@gmail.com
 -- copyright:
 category:            Concurrency
 build-type:          Simple
-extra-source-files:  README.md
-                     IMPOSSIBLES.md
-                     analysis_A.hs
-                     analysis_B.hs
-                     impossibles.hs
-                     impossibles2.hs
-                     allCombinations.hs
+
 cabal-version:       >=1.10
 
 executable server
   main-is:             Main.hs
+  Other-Modules:       Fm
   build-depends:       base >=4.7 && <4.8
                        , random >=1.0
                        , text >=1.1
