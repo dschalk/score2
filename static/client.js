@@ -96,6 +96,7 @@ refresh = function() {
 };
 
 $(document).ready(function () {
+    $("#newG").hide();
     $("#algorithm").hide();
     $("#rul").hide();
     $("#top").hide();
@@ -721,6 +722,7 @@ $(document).ready(function () {
                 $("#publicA").show();
                 $("#publicB").show();
                 $("#publicNew").show();
+                $("#newG").hide();
                 $("#b0").html("Solitaire mode. Click above to enable competition.")
                 $("#rollA").show();
                 $("#a1").show();
