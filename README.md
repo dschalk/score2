@@ -1,21 +1,24 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
-
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-**Table of Contents**  _generated with [DocToc](https://github.com/thlorenz/doctoc)_
 - [The Game of Score](#the-game-of-score)
   - [Rules of "Score"](#rules-of-score)
   - [How The Game Was Developed](#how-the-game-was-developed)
-    - [Initiation Stage](#initiation-stage)
-    - [State And Its MVar](#state-and-its-mvar)
-    - [Organization of Game Data](#organization-of-game-data)
-    - [The Timer](#the-timer)
+    - [Background](#background)
+    - [The Haskell Version](#the-haskell-version)
+      - [Hosting](#hosting)
+      - [Code](#code)
+        - [Initiation Stage](#initiation-stage)
+        - [State And Its MVar](#state-and-its-mvar)
+        - [Organization of Game Data](#organization-of-game-data)
+          - [Global Variables Are Good!](#global-variables-are-good)
+        - [The Timer](#the-timer)
+  - [APPENDIX](#appendix)
+    - [IMPOSSIBLES](#impossibles)
+    - [All 104 Impossible Rolls](#all-104-impossible-rolls)
 
-- [APPENDIX](#appendix)
-  - [IMPOSSIBLES](#impossibles)
-  - [All 104 Impossible Rolls](#all-104-impossible-rolls)
-  - <!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 # The Game of Score
 _An extension of github.com/jaspervdj/websockets as implemented by yesodweb/wai/wai-websockets_ Running on a $5/month Digital Ocean droplet.[Digital Ocean](www.digitalocean.com/?refcode=1d035c466e8d)
@@ -46,11 +49,12 @@ I was curious about how many rolls actually were impossible to solve, so I wrote
 ### The Haskell Version
 I started with the chat example at github.com/wai/wai-websockets. It is Jasper Van der Jeugt 's websockets adapted to the warp web server. The routine work of the chat server is receiving messages from individual browsers and broadcasting them to all participants. The server also parses sign-in messages to make sure the format is correct and there are no duplicate player names. The server keeps a list of participants in a Haskell programming language container called an 'MVar', and replaces the list with a new, up-to-date list whenever there is a disconnect, score change, group membership change, or a new sign-in.
 
-Most hosting companies cannot host a Haskell website. I experimented with four prominent cloud hosting services and found Digital Ocean to be, by far, the easiest to use. Directing schalk.net to Digital Ocean was a breeze. Uploading the compiled binary of the Score application was easy. What I have is a virtual Ubuntu 14.04 box (called a "droplet") in the cloud. I can use it to serve traditional web pages with apache or nginx, or run compiled binary applications such as Score. After uploading the Score application, I easily ssh'd into my droplet and put a text file named "score.conf" in /etc/init. My application binary is named "server" and my home directory is /root. Here is score.conf:
+#### Hosting
+Most hosting companies cannot host a Haskell website. I experimented with four prominent cloud hosting services and found Digital Ocean to be, by far, the easiest to use. Directing schalk.net to Digital Ocean was a breeze. Uploading the compiled binary of the Score application was easy. What I have is a virtual Ubuntu 14.04 box (called a "droplet") in the cloud. I can use it to serve traditional web pages with apache or nginx, or run compiled binary applications such as Score. After uploading the Score application, I installed public and private keys and easily ssh'd into my droplet without using a passwrod. I put a text file named "score.conf" in /etc/init, along with similar files for the other three domains being served by the droplet, domains belonging to me and my two sons. My application binary is named "server" and my home directory is /root. Here is score.conf:
 
 ```
-env PORT=80
-start on startup 
+env PORT=3000
+start on startup
 chdir /root
 start on runlevel [2345]
 exec /root/server
@@ -63,15 +67,41 @@ chmod +x server
 initctl start server
 ```
 
-I logged out with the command "exit", and checked schalk.net in a browser. Sure enough, the application was up and running, as it has continued to do without interruption. You can judge its responsiveness for yourself, although it is hard to tell if latency stems from your browser or the server. Once Score loads into a browser, I have found it to be lightning fast. The droplet costs $5/month. You can get a two month free trial of a similar droplet by following this link: [Digital Ocean](www.digitalocean.com/?refcode=1d035c466e8d). I am closing my traditional web hosting account and running all of my applications in Digital Ocean droplets. It feels good to be in control with so many options.
+I logged out with the command "exit", and checked schalk.net in a browser. Sure enough, the application was up and running. You can judge its responsiveness for yourself. The initial latency probably results from the size of the application javascript file and jquery-ui. Once Score loads into a browser, I have found response times to be nearly instantaneous. I can generate new rolls of the dice as fast as I can click, and the display of all solutions to a roll appears almost as fast. A $5/month droplet works for all four Haskell apps, but I expanded it to the 1 GB Ram $10/month version. There is planty of room on the 30 GB solid state hard drive. If you are inclined to try Digital Ocean, you can probably get a two month free trial of a $5/month droplet by following this link: [Digital Ocean](www.digitalocean.com/?refcode=1d035c466e8d). There is no promo code, but Digital Ocean says the link works. The monthly charge is prorated, so you can cancel a $5/month droplet well before you spend a dollar. The command ~$ cat /proc/cpuinfo yields information, including:
 
+```
+vendor_id    : GenuineIntel
+cpu family    : 6
+model        : 62
+model name    : Intel(R) Xeon(R) CPU E5-2630L v2 @ 2.40GHz
+stepping    : 4
+microcode    : 0x1
+cpu MHz        : 2399.998
+cache size    : 15360 KB
+```
+
+I am closing my traditional web hosting account and running all of my applications in Digital Ocean droplets. It feels good to be in control with so many options at my fingertips.
+
+The domains being served by my droplet are schalk.net, davidschalk.com, alexschalk.com, and bobschalk.com. They run on ports 3000, 3001, 3002, and 3003 respectively. Nginx runs on port 80. All nginx does is route request to small html files which redirect browsers to the appropriate applications. For example, a request for schalk.net causes nginx to load the following file:
+
+```
+
+<!doctype html>
+<html lang="en">   <head>     <meta charset="utf-8">     <script type="text/javascript">        window.location="[http://schalk.net:3000](http://schalk.net:3000)";     </script>   </head>   <body>   </body> </html>
+
+`
+```
+
+I could probably use an even smaller file, but some browsers might choke without the html and body tags. There are other ways to host multiple binary applications in one droplet, but I doubt that any are faster. I keep the droplet free of haskell code, doing the editing and compiling on my home Ubuntu 14.04 box, and uploading the compiled binaries when they are ready to go public.
+
+#### Code
 I modified the wai-websockets chat application's participant list to include scores and group affiliations in addition to names. Whenever the list is replaced, the server broadcasts a line of text interspersed with 'br' in brackets and the prefix 'CB#$42'. The browsers intercept these messages and divert them away from the chat message section and into the scoreboard div.
 
 Message prefixes are in the format 'XY#42' where 'x' and 'y' are capital letters. None of these go into the chat message section. They contain data and instructions controlling the flow of the game. Websockets messages are either Javascript strings coming out of the browsers or Haskell Text coming out of the server. Browsers see the incoming messages as Strings, which they split into an array named "gameArray", and distribute according to their prefixes. Messages usually begin with a prefix, group, and name so they can be routed to the appropriate groups, sometimes with messages about who did what. After that, there might be new dice, a list of solution, a scorebeard update, or an active player groups update.
 
 The prefix is the first item in gameArray; i.e., gameArray[0]. gameArray[1] is the name of the sender's group, and gameArray[2] is the sender's name. gameArray[3] is named "extra". The content of extra and the other list items vary according to the purpose of the message. Scoreboard messages, which are prefixed by 'CB#$42', contain the usual group and name elements, and "extra" is a string of formatted HTML sent by the server, ready for insertion in the score board display.
 
-### Initiation Stage
+##### Initiation Stage
 The game interface in the browsers responds to invisible Text messages transmitted by the server and received as Strings. Chat messages sent to the server are broadcast to all participating browsers which then filter them according to player groups. Game control messages prompt the server to broadcast messages, but unlike chat messages, the messages coming out of the server might not be the the unaltered message the server received. For example, messages prefixed by 'CA#$42' prompt the server to broadcast a random dice roll. These are screened by the browsers to make sure they are displayed only in the browsers of players belonging to the group of the sender, and ignored by other groups.
 
 A player joins the game by entering a name in a form. Here is the Javascript form code:
@@ -86,6 +116,7 @@ $('#join-form').submit(function () {
     ws.onopen = function() {
         ws.send("CC#$42" + user);
     };
+`
 ```
 
 Notice that "CC#42" and the player's name are sent to the server. The server parses the message prefixed by CC#\$42 and, if the name is in the proper format and hasn't already been taken, the server (1) replaces ServerState list of Clients contained in the state MVar with with a ServerState list which includes the new player, (2) broadcasts an announcement for placement in the chat section of participating browsers, [3] broadcasts the updated state information for placement in the scoreboard section: and (4) sends the message "CC#$42" intended only for the new player.
@@ -169,7 +200,7 @@ case "CC#$42":
 break;
 ```
 
-### State And Its MVar
+##### State And Its MVar
 I have mentioned a ServerState list of clients and an MVar that holds the current state of the game. Here is how that game state is defined:
 
 ```haskell
@@ -214,10 +245,10 @@ else if "CG#$42" `T.isPrefixOf` msg
 
 The 'msg' being broadcast is just the unaltered message that was received, prefixed by 'CG#$42' and containing the sender's name, among other things. The 'CB#$42' prefixed message updates the browser scoreboards.
 
-### Organization of Game Data
+##### Organization of Game Data
 For a while I used monads and Microsoft's open source functional reactive programming library Rx.js in my Javascript code. I have no argument with Douglas Crockford and other "best practices" advocates who promote encapsulation and discourage the use of global variables. But there is a time and a place for just about anything, and when I observed that some browsers were having trouble with my code, I tore it down and made it as simple and browser friendly as I could. The timer no longer depends on elaborate Rx.js code. It is a simple "setInterval" function attuned to the global variable "DS_t". If a player clicks "SCORE" while the 60-second Impossible clock is counting down, "DS_t = 30" resets the countdown display at 30. If someone does three computations that don't result in "20", the clock is stopped with the instruction, "DS_t = -1". Those who slavishly adhere to "best practices" would find fault with this code, but to me it is elegant and beautiful. I don't have collaborators or advertisers who might inadvertently clobber "DS_t". There is no danger. But most importantly, all browsers understand "setInterval" and global variables, and they process them quickly and efficiently. So let me say, categorically and unequivocally, in some situations,
 
-#### Global Variables Are Good!
+###### Global Variables Are Good!
 There. I said it. If anybody wants to see the abandoned monads, they are at github.com/dschalk/score2. The more efficient and browser-friendly code is  is at github.com/dschalk/score3. It is running online at schalk.net.
 
 **Screening Massages Arriving At The Browsers**
@@ -268,7 +299,7 @@ The gameArray data is what the server sent.
 
 Time control is facilitated by the Rx.js package. [https://github.com/Reactive-Extensions/RxJS](https://github.com/Reactive-Extensions/RxJS). The Microsoft corporation can join the human race and do good things when it wants to. It seems to want to more and more lately, and I am very pleased. The open source movement is a tremendous breakthrough in cooperative creation and innovation, but the open source repository sites are cluttered with half-baked, abandoned projects, and untested undocumented code. Microsoft open source, which is what Reactive-Extensions is, represents the best of two worlds.
 
-### The Timer
+##### The Timer
 Here is the timer code:
 
 ```Javascript
@@ -357,8 +388,8 @@ There is undoubtedly a more elegant way to trigger the starting and stopping of 
 
 _To be continued_
 
-# APPENDIX
-## IMPOSSIBLES
+## APPENDIX
+### IMPOSSIBLES
 The essence of the Score calculation algorythm in the module Fm is contained in the "impossibles.hs" file. Fm has much formatting code, which is a distraction when evaluating the algorythm.
 
 impossibles.hs computes all dice combinations which cannot be made into the number "20" in two or three stages, as required by the game. In 1.5 seconds, it finds all 104 such combinations using a list comprehension on the seven list comprehensions which cover all possible computations. The five operations are defined as follows:
@@ -813,7 +844,7 @@ And here is what I got:
 
 There are no rolls of the dice that can be found only by some pair of these functions, and (2,5,12,12) is the only roll that can be found by all three, but none of the other algorithms (calc, calc3, calc4, and calc5). Those four along with any one of calc2, calc6, or calc7, are sufficient to find at least one solution if a roll is solvable. A corollary is that if calc, calc2, calc3, calc4, and calc5 can't find a solution, calc6 and calc7 won't either. I tested this by removing calc6 and calc7 from impossibles.hs and renaming it impossibles2.hs. Like impossibles.hs, it found the 104 impossible rolls, only in 1.33 instead of 1.50 seconds. The module Fm uses the seven algorithms to find solutions to random rolls or numbers entered by Score players. It massages the output into a single line of Text with solutions separated by "br" in <> brackets. The browsers receive the Text as a Javascript string which, when appended to a div, displays the solutions neatly in a column.
 
-## All 104 Impossible Rolls
+### All 104 Impossible Rolls
 Here is the code for impossibles2.hs:
 
 ```haskell
