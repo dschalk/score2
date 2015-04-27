@@ -321,7 +321,11 @@ $(document).ready(function () {
                 case "EE#$42":
 
                 break;
-
+                    
+                case "SX#$42": 
+                    ws.send("SX#$42," + groupM + "," + playerM + "," + rollM);
+                break;
+                    
                 default: 
                     console.log(msg + " fell through to default");
 

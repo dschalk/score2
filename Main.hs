@@ -182,7 +182,7 @@ application state pending = do
                 prefix     = "CC#$42"
                 client     = (T.drop (T.length prefix) msg, 0, T.pack "private", conn)
                 disconnect = modifyMVar state $ \s ->
-                     let s' = removeClient client s in return (s', s') 
+                     let s' = removeClient client s in broadcast "SX#$42,pass,pass,pass" s' >> return (s', s')
 
 
 talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
@@ -300,7 +300,19 @@ talk conn state (user, _, _, _) = forever $ do
                 broadcast ("CO#$42," `mappend` group `mappend` ","
                     `mappend` sender `mappend` "," `mappend` extra) new 
                 broadcast ("DB#$42," `mappend` "pass" `mappend` "," `mappend` sender `mappend` "," `mappend` (allGroups new)) new
-
+                
+                
+                
+    else if "SX#$42" `T.isPrefixOf` msg
+        then
+            do
+                new <- readMVar state
+                broadcast ("CB#$42," `mappend` group `mappend` ","
+                    `mappend` sender `mappend` "," `mappend` T.concat (intersperse "<br>" (filterGroup group new))) new
+                broadcast ("DB#$42," `mappend` "pass" `mappend` "," `mappend` sender `mappend` "," `mappend` (allGroups new)) new
+                
+                
+                
 
     else if "SU#$42" `T.isPrefixOf` msg
         then
