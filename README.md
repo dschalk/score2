@@ -248,8 +248,7 @@ The 'msg' being broadcast is just the unaltered message that was received, prefi
 ##### Organization of Game Data
 For a while I used monads and Microsoft's open source functional reactive programming library Rx.js in my Javascript code. I have no argument with Douglas Crockford and other "best practices" advocates who promote encapsulation and discourage the use of global variables. But there is a time and a place for just about anything, and when I observed that some browsers were having trouble with my code, I tore it down and made it as simple and browser friendly as I could. The timer no longer depends on elaborate Rx.js code. It is a simple "setInterval" function attuned to the global variable "DS_t". If a player clicks "SCORE" while the 60-second Impossible clock is counting down, "DS_t = 30" resets the countdown display at 30. If someone does three computations that don't result in "20", the clock is stopped with the instruction, "DS_t = -1". Those who slavishly adhere to "best practices" would find fault with this code, but to me it is elegant and beautiful. I don't have collaborators or advertisers who might inadvertently clobber "DS_t". There is no danger. But most importantly, all browsers understand "setInterval" and global variables, and they process them quickly and efficiently. So let me say, categorically and unequivocally, in some situations,
 
-###### Global Variables Are Good!
-There. I said it. If anybody wants to see the abandoned monads, they are at github.com/dschalk/score2. The more efficient and browser-friendly code is  is at github.com/dschalk/score3. It is running online at schalk.net.
+###### Javascript Global Variables Are Great!
 
 **Screening Massages Arriving At The Browsers**
 
