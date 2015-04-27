@@ -18,7 +18,7 @@ import Fm hiding (main)
 import Data.List (intersperse)
 import Control.Exception.Base (mask_)
 import Data.List.Split (splitOn)
-import System.Environment (getEnv)
+-- import System.Environment (getEnv)
 
 type Name = Text
 type Score = Int
@@ -147,12 +147,12 @@ broadcast message clients = do
 
 main :: IO ()
 main = do
-    por <- getEnv "PORT"
-    let port = read por
+    -- por <- getEnv "PORT"
+    -- let port = read por
     state <- newMVar newServerState 
     Warp.runSettings Warp.defaultSettings
       { Warp.settingsTimeout = 36000,
-        Warp.settingsPort = port
+        Warp.settingsPort = 3000
       } $ WaiWS.websocketsOr WS.defaultConnectionOptions (application state) staticApp
 staticApp :: Network.Wai.Application
 staticApp = Static.staticApp $ Static.embeddedSettings $(embedDir "static")
