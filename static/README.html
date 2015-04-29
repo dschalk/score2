@@ -426,25 +426,9 @@ else if "CG#$42" `T.isPrefixOf` msg
    Organization of Game Data
   </h5>
   <p>
-   For a while I used monads and Microsoft’s open source functional reactive programming library Rx.js in my Javascript code. I have no argument with Douglas Crockford and other “best practices” advocates who promote encapsulation and discourage the use of global variables. But there is a time and a place for just about anything, and when I observed that some browsers were having trouble with my code, I tore it down and made it as simple and browser friendly as I could. The timer no longer depends on elaborate Rx.js code. It is a simple “setInterval” function attuned to the global variable “DS_t”. If a player clicks “SCORE” while the 60-second Impossible clock is counting down, “DS_t = 30” resets the countdown display at 30. If someone does three computations that don’t result in “20”, the clock is stopped with the instruction, “DS_t = -1”. Those who slavishly adhere to “best practices” would find fault with this code, but to me it is elegant and beautiful. I don’t have collaborators or advertisers who might inadvertently clobber “DS_t”. There is no danger. But most importantly, all browsers understand “setInterval” and global variables, and they process them quickly and efficiently. So let me say, categorically and unequivocally, in some situations,
-  </p>
-  <h6 id="global-variables-are-good">
-   Global Variables Are Good!
-  </h6>
-  <p>
-   There. I said it. If anybody wants to see the abandoned monads, they are at
-   <a href="http://github.com">
-    github.com
-   </a>
-   /dschalk/score2. The more efficient and browser-friendly code is  is at
-   <a href="http://github.com">
-    github.com
-   </a>
-   /dschalk/score3. It is running online at
-   <a href="http://schalk.net">
-    schalk.net
-   </a>
-   .
+   For a while I used monads and Microsoft’s open source functional reactive programming library Rx.js in my Javascript code. I have no argument with Douglas Crockford and other “best practices” advocates who promote encapsulation and discourage the use of global variables. But there is a time and a place for just about anything, and when I observed that some browsers were having trouble with my code, I tore it down and made it as simple and browser friendly as I could. The timer no longer depends on elaborate Rx.js code. It is a simple “setInterval” function attuned to the global variable “DS_t”. If a player clicks “SCORE” while the 60-second Impossible clock is counting down, “DS_t = 30” resets the countdown display at 30. If someone does three computations that don’t result in “20”, the clock is stopped with the instruction, “DS_t = -1”. Those who slavishly adhere to “best practices” would find fault with this code, but to me it is elegant and beautiful. I don’t have collaborators or advertisers who might inadvertently clobber “DS_t”. There is no danger. But most importantly, all browsers understand “setInterval” and global variables, and they process them quickly and efficiently. 
+ <h6 id="global-variables-are-good"></h6>   
+  Coders should mindlessly and robotically make sure their variables are always encapsulated when that is expected by dogmatic bosses and team members. Fortunately, I am my own boss, free to code however I please; and whenever it can lead to no problems, I set my Javascript variables free from limited contexts, exposing them directly to every function that uses them.
   </p>
   <p>
    <strong>
