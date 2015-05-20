@@ -6,7 +6,6 @@ import Control.Exception (finally)
 import Control.Monad (forM_, forever)
 import Control.Concurrent
 import Control.Monad.IO.Class (liftIO)
-import Network.WebSockets.Connection (sendClose)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Network.WebSockets as WS
@@ -55,8 +54,8 @@ gG [a] = getGroup a
 gG _   = "Error Group"
 
 
-allGroups :: ServerState -> Text
-allGroups (x:xs)  | length (x:xs) == 0  = ""
+allGroups :: ServerState -> Text 
+allGroups (x:xs)  | length (x:xs) == 0  = "" 
                   | length (x:xs) == 1  = gG (x:xs)
                   | length (x:xs) > 1   = ((getGroup x) `mappend` "<br>") `mappend` (allGroups xs)
 
@@ -89,9 +88,6 @@ getName (a,_,_,_) = a
 
 getGroup :: Client -> Text
 getGroup (_,_,c,_) = c
-
-getConn :: Client -> WS.Connection
-getConn (_,_,_,d) =d
 
 filterGroup :: Text -> ServerState -> [Text]
 filterGroup group s = [ a `mappend` " _ " `mappend` T.pack (show b)
@@ -144,25 +140,19 @@ addClient client clients = client : clients
 removeClient :: Client -> ServerState -> ServerState
 removeClient client = filter ((/= getName client) . getName)
 
-
-closeClientConn client s = do
-    let s' = removeClient client s
-    sendClose (getConn client)
-    return s'
-
 broadcast :: Text -> ServerState -> IO ()
-broadcast message clients = do
-    T.putStrLn message
+broadcast message clients = do 
+    T.putStrLn message 
     forM_ clients $ \(_ , _, _, conn) -> WS.sendTextData conn message
 
 main :: IO ()
 main = do
     -- por <- getEnv "PORT"
     -- let port = read por
-    state <- newMVar newServerState
+    state <- newMVar newServerState 
     Warp.runSettings Warp.defaultSettings
       { Warp.settingsTimeout = 36000,
-        Warp.settingsPort = 3013
+        Warp.settingsPort = 3000
       } $ WaiWS.websocketsOr WS.defaultConnectionOptions (application state) staticApp
 staticApp :: Network.Wai.Application
 staticApp = Static.staticApp $ Static.embeddedSettings $(embedDir "static")
@@ -192,8 +182,7 @@ application state pending = do
                 prefix     = "CC#$42"
                 client     = (T.drop (T.length prefix) msg, 0, T.pack "private", conn)
                 disconnect = modifyMVar state $ \s ->
-                     let s' = removeClient client s in broadcast "SX#$42,pass,pass,pass" s' >> return (s', s')
-
+                     let s' = removeClient client s in return (s', s') 
 
 
 talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
@@ -210,7 +199,7 @@ talk conn state (user, _, _, _) = forever $ do
 
     let range = get4 msgArray  -- 7 items in msgArray
     let player4 = get4Player msgArray
-    let group4 = get4Group msgArray
+    let group4 = get4Group msgArray 
 
     print "****************************msgArray next: "
     mapM_ print msgArray
@@ -221,7 +210,7 @@ talk conn state (user, _, _, _) = forever $ do
                 st <- readMVar state
                 z <- rText range
                 broadcast ("CA#$42," `mappend` group4 `mappend` ","
-                    `mappend` player4 `mappend` "," `mappend` z) st
+                    `mappend` player4 `mappend` "," `mappend` z) st 
 
     else if "CZ#$42" `T.isPrefixOf` msg
             then do
@@ -256,7 +245,7 @@ talk conn state (user, _, _, _) = forever $ do
             putMVar state new
             broadcast msg new
             broadcast ("CB#$42," `mappend` group `mappend` ","
-                `mappend` sender `mappend` "," `mappend` T.concat (intersperse "<br>" (filterGroup group new))) new
+                `mappend` sender `mappend` "," `mappend` T.concat (intersperse "<br>" (filterGroup group new))) new 
 
     else if "CI#$42" `T.isPrefixOf` msg
         then
@@ -277,7 +266,7 @@ talk conn state (user, _, _, _) = forever $ do
                 broadcast msg new
                 broadcast ("CB#$42," `mappend` group `mappend` ","
                     `mappend` sender `mappend` "," `mappend` T.concat (intersperse "<br>" (filterGroup group new))) new
-
+                    
     else if "CM#$42" `T.isPrefixOf` msg
         then
             mask_ $ do
@@ -298,7 +287,7 @@ talk conn state (user, _, _, _) = forever $ do
                 broadcast msg new
                 broadcast ("CB#$42," `mappend` group `mappend` ","
                     `mappend` sender `mappend` "," `mappend` T.concat (intersperse "<br>" (filterGroup group new))) new
-
+                
     else if "CO#$42" `T.isPrefixOf` msg
         then
             mask_ $ do
@@ -309,20 +298,8 @@ talk conn state (user, _, _, _) = forever $ do
                 broadcast ("CB#$42," `mappend` group `mappend` ","
                     `mappend` sender `mappend` "," `mappend` T.concat (intersperse "<br>" (filterGroup group new))) new
                 broadcast ("CO#$42," `mappend` group `mappend` ","
-                    `mappend` sender `mappend` "," `mappend` extra) new
+                    `mappend` sender `mappend` "," `mappend` extra) new 
                 broadcast ("DB#$42," `mappend` "pass" `mappend` "," `mappend` sender `mappend` "," `mappend` (allGroups new)) new
-
-
-
-    else if "SX#$42" `T.isPrefixOf` msg
-        then
-            do
-                new <- readMVar state
-                broadcast ("CB#$42," `mappend` group `mappend` ","
-                    `mappend` sender `mappend` "," `mappend` T.concat (intersperse "<br>" (filterGroup group new))) new
-                broadcast ("DB#$42," `mappend` "pass" `mappend` "," `mappend` sender `mappend` "," `mappend` (allGroups new)) new
-
-
 
 
     else if "SU#$42" `T.isPrefixOf` msg
