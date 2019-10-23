@@ -1,6 +1,6 @@
 
 # The Game of Score
-_An extension of github.com/jaspervdj/websockets as implemented by yesodweb/wai/wai-websockets_ Running on a $5/month Digital Ocean droplet.[Digital Ocean](www.digitalocean.com/?refcode=1d035c466e8d)
+The front end works in the React frame work. The back end is a modified Haskell Wai WebSockets server, which is an extension of github.com/jaspervdj/websockets. It is up and running at [http://game.schalk.site](http://game.schalk.site) on a $5/month Digital Ocean droplet.[Digital Ocean](www.digitalocean.com/?refcode=1d035c466e8d)
 
 ## Rules of "Score"
 Four dice are rolled. The default die are two six-sided, one twelve-sided, and one twenty-sided die. The goal is to make the number "20" in two or three steps using addition, subtraction, multiplication, division, and/or concatenation.
