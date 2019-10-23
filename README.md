@@ -1,6 +1,6 @@
 
 # The Game of Score
-The front end works in the React frame work. The back end is a modified Haskell Wai WebSockets server, which is an extension of github.com/jaspervdj/websockets. It is up and running at [http://game.schalk.site](http://game.schalk.site) on a $5/month Digital Ocean droplet.[Digital Ocean](www.digitalocean.com/?refcode=1d035c466e8d)
+The front end works in the React frame work. The back end is a modified Haskell Wai WebSockets server, which is an extension of github.com/jaspervdj/websockets. It is up and running at [http://game.schalk.site](http://game.schalk.site) on a [Digital Ocean](www.digitalocean.com/?refcode=1d035c466e8d) droplet.
 
 ## Rules of "Score"
 Four dice are rolled. The default die are two six-sided, one twelve-sided, and one twenty-sided die. The goal is to make the number "20" in two or three steps using addition, subtraction, multiplication, division, and/or concatenation.
@@ -29,6 +29,7 @@ I was curious about how many rolls actually were impossible to solve, so I wrote
 I started with the chat example at github.com/wai/wai-websockets. It is Jasper Van der Jeugt 's websockets adapted to the warp web server. The routine work of the chat server is receiving messages from individual browsers and broadcasting them to all participants. The server also parses sign-in messages to make sure the format is correct and there are no duplicate player names. The server keeps a list of participants in a Haskell programming language container called an 'MVar', and replaces the list with a new, up-to-date list whenever there is a disconnect, score change, group membership change, or a new sign-in.
 
 [https://www.fpcomplete.com/user/dschalk/Websockets%20Game%20of%20Score](https://www.fpcomplete.com/user/dschalk/Websockets%20Game%20of%20Score) Game Details
+
 
 
 
