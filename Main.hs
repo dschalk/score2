@@ -157,17 +157,17 @@ broadcast message clients = do
 
 main :: IO ()
 main = do
-    -- por <- getEnv "PORT"
-    -- let port = read por
+    putStrLn "http://localhost:3055/client.html"
     state <- newMVar newServerState
-    Warp.runSettings Warp.defaultSettings
-      { Warp.settingsTimeout = 36000,
-        Warp.settingsPort = 3000
-      } $ WaiWS.websocketsOr WS.defaultConnectionOptions (application state) staticApp
+    Warp.runSettings
+      (Warp.setPort 3055 Warp.defaultSettings)
+      $ WaiWS.websocketsOr WS.defaultConnectionOptions (application state) staticApp
 staticApp :: Network.Wai.Application
 staticApp = Static.staticApp $ Static.embeddedSettings $(embedDir "static")
+
 application :: MVar ServerState -> WS.ServerApp
 application state pending = do
+    print "Main.hs in score2 is up and running"
     conn <- WS.acceptRequest pending
     msg <- WS.receiveData conn
     clients <- liftIO $ readMVar state

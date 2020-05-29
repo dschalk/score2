@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Fm where
 import           Data.List
-import qualified Data.Text     as T
-import           System.Random
+import qualified Data.Text     as T 
+import           System.Random 
 
 toDouble :: Int -> Double
 toDouble x = (read (show x)) :: Double
